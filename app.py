@@ -1402,10 +1402,20 @@ def create_douessay_interface():
         # Apply grammar corrections
         corrected_essay = essay_text
         corrections = result['corrections']
-        for correction in sorted(corrections, key=lambda x: x['offset'], reverse=True):
-            start = correction['offset']
-            end = correction['offset'] + correction['length']
-            corrected_essay = corrected_essay[:start] + correction['suggestion'] + corrected_essay[end:]
+        for correction in sorted(corrections, key=lambda x: x.get('offset', -1), reverse=True):
+            # Validate correction structure and values
+            offset = correction.get('offset')
+            length = correction.get('length')
+            suggestion = correction.get('suggestion', '')
+            if (
+                isinstance(offset, int) and isinstance(length, int) and
+                offset >= 0 and length >= 0 and
+                offset + length <= len(corrected_essay)
+            ):
+                start = offset
+                end = offset + length
+                corrected_essay = corrected_essay[:start] + suggestion + corrected_essay[end:]
+            # else: skip invalid correction
         
         return (
             assessment_html,
