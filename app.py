@@ -144,6 +144,8 @@ class DouEssay:
         ]
         
         self.sophisticated_vocab = {
+            'very': ['extremely', 'remarkably', 'particularly', 'exceptionally'],
+            'really': ['genuinely', 'truly', 'certainly', 'indeed'],
             'hard': ['challenging', 'demanding', 'rigorous', 'arduous'],
             'important': ['significant', 'crucial', 'vital', 'essential', 'paramount'],
             'good': ['beneficial', 'advantageous', 'valuable', 'productive'],
@@ -152,7 +154,9 @@ class DouEssay:
             'small': ['minimal', 'negligible', 'modest', 'limited'],
             'show': ['demonstrate', 'illustrate', 'exemplify', 'manifest'],
             'think': ['contend', 'maintain', 'assert', 'posit'],
-            'because': ['due to', 'owing to', 'as a consequence of', 'resulting from']
+            'because': ['due to', 'owing to', 'as a consequence of', 'resulting from'],
+            'many': ['numerous', 'various', 'multiple', 'countless'],
+            'some': ['several', 'certain', 'particular', 'specific']
         }
         
         self.analysis_boosters = [
@@ -353,6 +357,7 @@ class DouEssay:
             positive_adj=random.choice(positive_adjs),
             challenge_adj=random.choice(challenge_adjs),
             challenges=random.choice(challenges),
+            difficulties=random.choice(challenges),  # Same as challenges
             positive_aspects=random.choice(positive_aspects),
             topic_focus=topic_focus,
             specific_aspects=specific_aspects,
