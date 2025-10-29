@@ -1077,7 +1077,7 @@ class DouEssay:
             # Check for passive voice
             passive_indicators = [' is ', ' are ', ' was ', ' were ', ' been ', ' being ']
             if any(indicator in f' {sentence_lower} ' for indicator in passive_indicators):
-                if any(word in sentence_lower for word in [' by ', ' done ', ' made ', ' created ']):
+                if any(word in f' {sentence_lower} ' for word in [' by ', ' done ', ' made ', ' created ']):
                     inline_feedback.append({
                         'sentence_index': idx,
                         'sentence': sentence,
