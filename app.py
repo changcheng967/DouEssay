@@ -1046,7 +1046,10 @@ class DouEssay:
             
             # Check for generic words
             generic_words = ['very', 'really', 'a lot', 'many', 'most', 'some', 'things', 'stuff', 'big', 'small']
-            found_generic = [word for word in generic_words if word in sentence_lower]
+            found_generic = [
+                word for word in generic_words
+                if re.search(r'\b' + re.escape(word) + r'\b', sentence_lower)
+            ]
             if found_generic:
                 alternatives = self.get_vocabulary_alternatives(found_generic[0])
                 inline_feedback.append({
