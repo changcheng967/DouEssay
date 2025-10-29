@@ -2,7 +2,9 @@
 
 **Professional Essay Grading and Level 4+ Enhancement Tool**
 
-*Ontario Standards • Intelligent Scoring • Real-time Enhancement • Draft Tracking*
+*Ontario Standards • Intelligent Scoring • Real-time Enhancement • Draft Tracking • Advanced Analytics*
+
+**Version 3.0.0** - Now with Reflection Detection, Semantic Similarity Checking, Achievement Badges, and Context-Aware Enhancements!
 
 Created by [changcheng967](https://github.com/changcheng967) • Supported by Doulet Media
 
