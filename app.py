@@ -9,7 +9,6 @@ import os
 from datetime import datetime, timedelta
 import supabase
 from supabase import create_client
-import json
 
 class LicenseManager:
     def __init__(self):
