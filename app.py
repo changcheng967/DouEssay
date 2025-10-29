@@ -1062,7 +1062,7 @@ class DouEssay:
                 })
             
             # Check for sentence variety - repetitive starts
-            if idx > 0 and len(sentences) > idx:
+            if idx > 0:
                 current_start = sentence.split()[0].lower() if sentence.split() else ''
                 prev_start = sentences[idx-1].split()[0].lower() if sentences[idx-1].split() else ''
                 if current_start == prev_start and current_start in ['the', 'it', 'this', 'they', 'students', 'teachers']:
