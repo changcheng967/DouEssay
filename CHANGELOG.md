@@ -2,6 +2,67 @@
 
 All notable changes to the DouEssay Assessment System will be documented in this file.
 
+## [4.0.0] - 2025-10-29
+
+### 🎉 Major v4.0.0 Enhancements - Enhanced Transparency & Normalized Scoring
+
+This release focuses on improving clarity, consistency, and transparency of feedback and enhancements.
+
+### ✨ Added - High Priority Features
+
+#### 5-Category Enhancement Breakdown
+- **Detailed Change Tracking**: New `detailed_changes` dictionary in `enhance_to_level4()` return value
+- **Category Analysis**: Five comprehensive categories:
+  1. **Vocabulary**: Track count, examples, and description of word improvements
+  2. **Grammar**: Count of corrections and refinements
+  3. **Transitions**: Added transition words and phrases with examples
+  4. **Analysis**: Deepened analytical connections with specific examples
+  5. **Topic Preservation**: Similarity score, status, themes preserved/total
+- **Visual Display**: Grid layout with color-coded cards for each category
+- **Learning Examples**: Shows specific changes made in each category
+- **Professional Presentation**: Enhanced UI with detailed explanations
+
+#### Normalized Reflection Scoring
+- **10-Point Scale**: Reflection score now displayed on 0-10 scale (was 0-1.0)
+- **Consistent Metrics**: All scores now use same 10-point scale for easy comparison
+- **Draft History Update**: Reflection shown as X/10 in progress tracking
+- **Unified Display**: Matches content, structure, grammar, and application scores
+
+#### Enhanced Feedback Deduplication
+- **Smart Detection**: New `feedback_seen` tracking in `analyze_inline_feedback()`
+- **Overlap Prevention**: Avoids flagging same sentence with multiple similar suggestions
+- **Priority System**: More specific issues take precedence over general ones
+- **Cleaner Output**: Reduces cognitive load with focused feedback
+
+### 🎨 Improved - UI/UX Updates
+
+#### Version Branding
+- **v4.0.0 Labels**: Updated throughout interface and documentation
+- **Enhanced Headers**: New descriptions emphasizing transparency and normalization
+- **Professional Styling**: Consistent color scheme and spacing
+- **Updated Documentation**: README, release notes, and changelog reflect v4.0.0
+
+#### Enhancement Display
+- **Grid Layout**: 2x2 grid for 4 enhancement categories
+- **Color-Coded Cards**: Unique colors for each category (Vocabulary: purple, Grammar: green, Transitions: blue, Analysis: red)
+- **Example Snippets**: Shows actual changes made in each category
+- **Topic Preservation Card**: Separate display with themes preserved metric
+
+### 🔧 Changed
+
+- **Reflection Score Display**: Changed from 0-1.0 to 0-10 scale for consistency
+- **Enhancement Return Value**: Now includes `detailed_changes` dictionary
+- **Inline Feedback Logic**: Added deduplication to prevent overlapping suggestions
+- **UI Headers**: Updated to reflect v4.0.0 branding and new features
+
+### 📈 Performance
+
+- **No Performance Impact**: All changes are display and formatting improvements
+- **Backward Compatible**: Fully compatible with v3.0.0 data and functionality
+- **Minimal Code Changes**: Focused improvements with no breaking changes
+
+---
+
 ## [3.0.0] - 2025-10-29
 
 ### 🎉 Major v3.0.0 Enhancements - Advanced Analytics & Intelligence

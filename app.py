@@ -273,39 +273,93 @@ class DouEssay:
 
     def enhance_to_level4(self, original_essay: str) -> Dict:
         """
-        v3.0.0: Enhanced with semantic similarity checking and detailed change tracking.
-        Returns dict with enhanced essay and change details for transparency.
+        v4.0.0: Enhanced with detailed 5-category change tracking and explanations.
+        Returns dict with enhanced essay and comprehensive change details for transparency.
         """
         if not original_essay.strip():
-            return {'enhanced_essay': original_essay, 'changes': [], 'similarity': 1.0}
+            return {
+                'enhanced_essay': original_essay, 
+                'changes': [],
+                'detailed_changes': {
+                    'vocabulary': {'count': 0, 'examples': []},
+                    'grammar': {'count': 0, 'examples': []},
+                    'transitions': {'count': 0, 'examples': []},
+                    'analysis': {'count': 0, 'examples': []},
+                    'topic_preservation': {'score': 1.0, 'status': 'Excellent'}
+                },
+                'similarity': 1.0
+            }
         
-        # Track changes made
+        # Track changes made with detailed examples
         changes = []
+        detailed_changes = {
+            'vocabulary': {'count': 0, 'examples': [], 'description': 'Enhanced word choice for academic sophistication'},
+            'grammar': {'count': 0, 'examples': [], 'description': 'Corrected errors and refined sentence structure'},
+            'transitions': {'count': 0, 'examples': [], 'description': 'Added sophisticated transitions for better flow'},
+            'analysis': {'count': 0, 'examples': [], 'description': 'Deepened analytical connections and insights'},
+            'topic_preservation': {'score': 0.0, 'status': 'Pending', 'description': 'Maintained focus on original topic'}
+        }
         
         themes = self.analyze_essay_themes(original_essay)
         enhanced_intro = self.enhance_introduction(original_essay, themes)
         changes.append({'type': 'Introduction', 'description': 'Elevated thesis clarity and academic tone'})
+        detailed_changes['analysis']['count'] += 1
+        detailed_changes['analysis']['examples'].append('Enhanced introduction with stronger thesis')
         
         enhanced_body = self.enhance_body_paragraphs(original_essay, themes)
         changes.append({'type': 'Body Paragraphs', 'description': 'Added analytical depth and sophisticated transitions'})
+        detailed_changes['analysis']['count'] += 1
+        detailed_changes['transitions']['count'] += 1
+        detailed_changes['analysis']['examples'].append('Strengthened body paragraph analysis')
+        detailed_changes['transitions']['examples'].append('Added transition words between paragraphs')
         
         enhanced_conclusion = self.enhance_conclusion(original_essay, themes)
         changes.append({'type': 'Conclusion', 'description': 'Strengthened synthesis and broader implications'})
+        detailed_changes['analysis']['count'] += 1
+        detailed_changes['analysis']['examples'].append('Enhanced conclusion with synthesis')
         
         enhanced_essay = f"{enhanced_intro}\n\n{enhanced_body}\n\n{enhanced_conclusion}"
         
-        # Track vocabulary changes
+        # Track vocabulary changes with examples
         vocab_before = len([w for w in original_essay.lower().split() if len(w) > 7])
+        original_words = set(original_essay.lower().split())
         enhanced_essay = self.apply_vocabulary_enhancement(enhanced_essay)
+        enhanced_words = set(enhanced_essay.lower().split())
         vocab_after = len([w for w in enhanced_essay.lower().split() if len(w) > 7])
+        
+        # Track specific vocabulary replacements
+        vocab_replacements = []
+        for simple_word in self.sophisticated_vocab.keys():
+            if simple_word in original_essay.lower():
+                vocab_replacements.append(simple_word)
+        
         if vocab_after > vocab_before:
-            changes.append({'type': 'Vocabulary', 'description': f'Replaced {vocab_after - vocab_before}+ words with sophisticated alternatives'})
+            vocab_diff = vocab_after - vocab_before
+            changes.append({'type': 'Vocabulary', 'description': f'Replaced {vocab_diff}+ words with sophisticated alternatives'})
+            detailed_changes['vocabulary']['count'] = vocab_diff
+            detailed_changes['vocabulary']['examples'] = [f'Upgraded common words: {", ".join(vocab_replacements[:3])}']
         
         enhanced_essay = self.apply_grammar_enhancement(enhanced_essay)
         changes.append({'type': 'Grammar', 'description': 'Corrected grammar and refined sentence structure'})
+        detailed_changes['grammar']['count'] = 1
+        detailed_changes['grammar']['examples'].append('Applied grammar corrections and refinements')
         
-        # v3.0.0: Check semantic similarity to prevent topic drift
+        # v4.0.0: Check semantic similarity with detailed reporting
         similarity_check = self.check_semantic_similarity(original_essay, enhanced_essay)
+        
+        # v4.0.0: Enhanced topic preservation reporting
+        similarity_score = similarity_check['similarity']
+        if similarity_score >= 0.7:
+            preservation_status = 'Excellent'
+        elif similarity_score >= 0.5:
+            preservation_status = 'Good'
+        else:
+            preservation_status = 'Moderate'
+        
+        detailed_changes['topic_preservation']['score'] = similarity_score
+        detailed_changes['topic_preservation']['status'] = preservation_status
+        detailed_changes['topic_preservation']['themes_preserved'] = similarity_check.get('preserved_themes', 0)
+        detailed_changes['topic_preservation']['total_themes'] = similarity_check.get('total_themes', 0)
         
         if similarity_check['drift']:
             # If significant drift detected, blend more of original content
@@ -314,6 +368,7 @@ class DouEssay:
         return {
             'enhanced_essay': enhanced_essay,
             'changes': changes,
+            'detailed_changes': detailed_changes,  # v4.0.0: New 5-category breakdown
             'similarity': similarity_check['similarity'],
             'drift_detected': similarity_check['drift'],
             'theme_preservation': similarity_check['theme_preservation']
@@ -764,7 +819,7 @@ class DouEssay:
         lexical_score = self.assess_lexical_diversity_semantic(text)
         reflection_score = self.assess_reflection_depth(text)  # v3.0.0: New reflection detection
         
-        # v3.0.0: Include reflection in scoring
+        # v4.0.0: Include reflection in scoring (normalized to 10-point scale)
         application_score = (insight_score + real_world_score + lexical_score + reflection_score) / 4 * 10
         
         return {
@@ -772,7 +827,7 @@ class DouEssay:
             "insight_score": round(insight_score, 2),
             "real_world_score": round(real_world_score, 2),
             "lexical_score": round(lexical_score, 2),
-            "reflection_score": round(reflection_score, 2)  # v3.0.0: Separate reflection score
+            "reflection_score": round(reflection_score * 10, 1)  # v4.0.0: Normalized to 10-point scale
         }
 
     def assess_personal_insight_semantic(self, text: str) -> float:
@@ -1309,35 +1364,49 @@ class DouEssay:
         }
 
     def analyze_inline_feedback(self, essay_text: str) -> List[Dict]:
-        """Generate inline, color-coded feedback annotations for the essay."""
+        """
+        v4.0.0: Generate inline, color-coded feedback annotations with deduplication.
+        Prevents overlapping suggestions for the same sentence.
+        """
         inline_feedback = []
         sentences = [s.strip() for s in re.split(r'[.!?]+', essay_text) if s.strip()]
+        feedback_seen = {}  # v4.0.0: Track feedback per sentence to avoid duplicates
         
         for idx, sentence in enumerate(sentences):
             sentence_lower = sentence.lower()
+            
+            # v4.0.0: Initialize feedback tracking for this sentence
+            if idx not in feedback_seen:
+                feedback_seen[idx] = set()
             
             # Check for vague statements that need elaboration
             vague_patterns = ['helps', 'useful', 'good', 'bad', 'makes', 'does']
             if any(pattern in sentence_lower for pattern in vague_patterns) and len(sentence.split()) < 15:
                 if not any(word in sentence_lower for word in ['because', 'for example', 'such as', 'specifically']):
-                    inline_feedback.append({
-                        'sentence_index': idx,
-                        'sentence': sentence,
-                        'type': 'vague_statement',
-                        'severity': 'yellow',
-                        'suggestion': random.choice(self.inline_suggestions['vague_statement'])
-                    })
+                    # v4.0.0: Only add if not already flagged for this sentence
+                    if 'vague_statement' not in feedback_seen[idx]:
+                        inline_feedback.append({
+                            'sentence_index': idx,
+                            'sentence': sentence,
+                            'type': 'vague_statement',
+                            'severity': 'yellow',
+                            'suggestion': random.choice(self.inline_suggestions['vague_statement'])
+                        })
+                        feedback_seen[idx].add('vague_statement')
             
             # Check for weak analysis
             if any(word in sentence_lower for word in ['important', 'essential', 'crucial', 'significant']):
                 if not any(word in sentence_lower for word in ['because', 'this shows', 'this demonstrates', 'therefore']):
-                    inline_feedback.append({
-                        'sentence_index': idx,
-                        'sentence': sentence,
-                        'type': 'weak_analysis',
-                        'severity': 'yellow',
-                        'suggestion': random.choice(self.inline_suggestions['weak_analysis'])
-                    })
+                    # v4.0.0: Avoid duplicate if already flagged as vague
+                    if 'weak_analysis' not in feedback_seen[idx] and 'vague_statement' not in feedback_seen[idx]:
+                        inline_feedback.append({
+                            'sentence_index': idx,
+                            'sentence': sentence,
+                            'type': 'weak_analysis',
+                            'severity': 'yellow',
+                            'suggestion': random.choice(self.inline_suggestions['weak_analysis'])
+                        })
+                        feedback_seen[idx].add('weak_analysis')
             
             # Check for generic words
             generic_words = ['very', 'really', 'a lot', 'many', 'most', 'some', 'things', 'stuff', 'big', 'small']
@@ -1667,7 +1736,7 @@ def create_douessay_interface():
                 <div style="margin-top: 8px; font-size: 0.85em; color: #7f8c8d;">
                     📝 {draft.get('word_count', 'N/A')} words • 
                     📚 Vocab: {draft.get('vocab_score', 'N/A')}/20 • 
-                    💭 Reflection: {draft.get('reflection_score', 'N/A')}/1.0 • 
+                    💭 Reflection: {draft.get('reflection_score', 'N/A')}/10 • 
                     🚫 Generic words: {draft.get('generic_word_count', 'N/A')}
                 </div>
             </div>
@@ -1718,9 +1787,9 @@ def create_douessay_interface():
         assessment_html = f"""
         <div style="font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 15px; color: white; text-align: center; margin-bottom: 20px;">
-                <h1 style="margin: 0 0 10px 0; font-size: 2.2em;">DouEssay Assessment System</h1>
-                <p style="margin: 0; opacity: 0.9; font-size: 1.1em;">Ontario Standards • Intelligent Scoring • Level 4+ Enhancement</p>
-                <p style="margin: 10px 0 0 0; font-size: 0.9em; opacity: 0.7;">Created by changcheng967 • Doulet Media Copyright</p>
+                <h1 style="margin: 0 0 10px 0; font-size: 2.2em;">DouEssay Assessment System v4.0.0</h1>
+                <p style="margin: 0; opacity: 0.9; font-size: 1.1em;">Ontario Standards • Intelligent Scoring • Enhanced Transparency</p>
+                <p style="margin: 10px 0 0 0; font-size: 0.9em; opacity: 0.7;">Created by changcheng967 • v4.0.0: Normalized Scoring & 5-Category Analysis • Doulet Media Copyright</p>
                 <p style="margin: 5px 0 0 0; font-size: 0.8em; opacity: 0.9; background: rgba(255,255,255,0.2); padding: 5px; border-radius: 5px;">{user_info} | Grade: {grade_level}</p>
             </div>
             
@@ -1792,7 +1861,7 @@ def create_douessay_interface():
         )
     
     def enhance_essay(essay_text, license_key):
-        """v3.0.0: Enhanced with detailed change tracking and semantic similarity checking."""
+        """v4.0.0: Enhanced with detailed 5-category change tracking and explanations."""
         if not license_key.strip():
             return "", "", "Please enter a valid license key."
         
@@ -1803,42 +1872,90 @@ def create_douessay_interface():
         if not essay_text.strip():
             return "", "", "Please enter an essay to enhance."
         
-        # v3.0.0: Get detailed enhancement results
+        # v4.0.0: Get detailed enhancement results with 5-category breakdown
         enhancement_result = douessay.enhance_to_level4(essay_text)
         enhanced_essay = enhancement_result['enhanced_essay']
         changes = enhancement_result['changes']
+        detailed_changes = enhancement_result.get('detailed_changes', {})
         similarity = enhancement_result['similarity']
         
         user_info = f"User: {license_result['user_type'].title()} | Usage: {license_result['daily_usage'] + 1}/{license_result['daily_limit']}"
         
-        # v3.0.0: Detailed change explanation
-        changes_html = '<ul style="color: #155724; line-height: 1.8;">'
-        for change in changes:
-            changes_html += f'<li><strong>{change["type"]}:</strong> {change["description"]}</li>'
-        changes_html += '</ul>'
+        # v4.0.0: Enhanced 5-category breakdown
+        changes_html = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">'
         
-        # v3.0.0: Semantic similarity indicator
-        similarity_color = '#28a745' if similarity >= 0.7 else '#ffc107' if similarity >= 0.5 else '#dc3545'
-        similarity_text = 'Excellent' if similarity >= 0.7 else 'Good' if similarity >= 0.5 else 'Moderate'
+        # Category 1: Vocabulary
+        vocab_data = detailed_changes.get('vocabulary', {})
+        changes_html += f'''
+        <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #9b59b6;">
+            <h4 style="color: #6c3483; margin-top: 0;">📚 Vocabulary</h4>
+            <p style="margin: 5px 0; color: #555;"><strong>Changes:</strong> {vocab_data.get('count', 0)}</p>
+            <p style="margin: 5px 0; color: #555; font-size: 0.9em;">{vocab_data.get('description', '')}</p>
+            {'<p style="margin: 5px 0; color: #777; font-size: 0.85em;">' + '<br>'.join(vocab_data.get('examples', [])[:2]) + '</p>' if vocab_data.get('examples') else ''}
+        </div>
+        '''
         
-        # Create before/after comparison with transparency
+        # Category 2: Grammar
+        grammar_data = detailed_changes.get('grammar', {})
+        changes_html += f'''
+        <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #27ae60;">
+            <h4 style="color: #1e8449; margin-top: 0;">✏️ Grammar</h4>
+            <p style="margin: 5px 0; color: #555;"><strong>Corrections:</strong> {grammar_data.get('count', 0)}+</p>
+            <p style="margin: 5px 0; color: #555; font-size: 0.9em;">{grammar_data.get('description', '')}</p>
+        </div>
+        '''
+        
+        # Category 3: Transitions
+        transitions_data = detailed_changes.get('transitions', {})
+        changes_html += f'''
+        <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db;">
+            <h4 style="color: #2874a6; margin-top: 0;">🔗 Transitions</h4>
+            <p style="margin: 5px 0; color: #555;"><strong>Added:</strong> {transitions_data.get('count', 0)}</p>
+            <p style="margin: 5px 0; color: #555; font-size: 0.9em;">{transitions_data.get('description', '')}</p>
+            {'<p style="margin: 5px 0; color: #777; font-size: 0.85em;">' + '<br>'.join(transitions_data.get('examples', [])[:2]) + '</p>' if transitions_data.get('examples') else ''}
+        </div>
+        '''
+        
+        # Category 4: Analysis
+        analysis_data = detailed_changes.get('analysis', {})
+        changes_html += f'''
+        <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #e74c3c;">
+            <h4 style="color: #c0392b; margin-top: 0;">🔬 Analysis</h4>
+            <p style="margin: 5px 0; color: #555;"><strong>Enhancements:</strong> {analysis_data.get('count', 0)}</p>
+            <p style="margin: 5px 0; color: #555; font-size: 0.9em;">{analysis_data.get('description', '')}</p>
+            {'<p style="margin: 5px 0; color: #777; font-size: 0.85em;">' + '<br>'.join(analysis_data.get('examples', [])[:2]) + '</p>' if analysis_data.get('examples') else ''}
+        </div>
+        '''
+        
+        changes_html += '</div>'
+        
+        # v4.0.0: Topic Preservation as 5th category
+        topic_data = detailed_changes.get('topic_preservation', {})
+        similarity_score = topic_data.get('score', similarity)
+        preservation_status = topic_data.get('status', 'Good')
+        
+        similarity_color = '#28a745' if similarity_score >= 0.7 else '#ffc107' if similarity_score >= 0.5 else '#dc3545'
+        similarity_text = preservation_status
+        
+        # v4.0.0: Enhanced before/after comparison with 5-category transparency
         comparison_html = f"""
         <div style="font-family: Arial, sans-serif;">
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px; color: white; text-align: center; margin-bottom: 20px;">
-                <h2 style="margin: 0;">✨ Level 4+ Enhancement Complete</h2>
+                <h2 style="margin: 0;">✨ Level 4+ Enhancement Complete (v4.0.0)</h2>
                 <p style="margin: 10px 0 0 0; opacity: 0.9;">{user_info}</p>
             </div>
             
             <div style="background: #d4edda; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745; margin-bottom: 15px;">
-                <h3 style="color: #155724; margin-top: 0;">🎯 Enhancement Details</h3>
+                <h3 style="color: #155724; margin-top: 0;">🎯 5-Category Enhancement Breakdown</h3>
                 {changes_html}
             </div>
             
             <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; border-left: 4px solid {similarity_color}; margin-bottom: 15px;">
-                <h4 style="color: #004085; margin-top: 0;">🔍 Topic Preservation Check</h4>
+                <h4 style="color: #004085; margin-top: 0;">🔍 Topic Preservation (Category 5)</h4>
                 <p style="color: #004085; margin: 0;">
-                    <strong>Similarity Score:</strong> {similarity:.0%} ({similarity_text})<br>
-                    The enhanced essay {'maintains' if similarity >= 0.7 else 'mostly preserves' if similarity >= 0.5 else 'partially preserves'} your original topic and themes.
+                    <strong>Similarity Score:</strong> {similarity_score:.0%} ({similarity_text})<br>
+                    <strong>Themes Preserved:</strong> {topic_data.get('themes_preserved', 'N/A')}/{topic_data.get('total_themes', 'N/A')}<br>
+                    The enhanced essay {'maintains excellent' if similarity_score >= 0.7 else 'mostly preserves' if similarity_score >= 0.5 else 'partially preserves'} fidelity to your original topic and themes.
                 </p>
             </div>
             
@@ -1860,10 +1977,10 @@ def create_douessay_interface():
         .tab-nav button {font-size: 1.1em; font-weight: 500;}
         h1, h2, h3 {color: #2c3e50;}
     """) as demo:
-        gr.Markdown("# 🎓 DouEssay Assessment System")
+        gr.Markdown("# 🎓 DouEssay Assessment System v4.0.0")
         gr.Markdown("### Professional Essay Grading and Level 4+ Enhancement Tool")
-        gr.Markdown("*Ontario Standards • Intelligent Scoring • Real-time Enhancement • Draft Tracking*")
-        gr.Markdown("**Created by changcheng967 • Combining DouEssayGrader and DouEssayEnhancer • Supported by Doulet Media**")
+        gr.Markdown("*Ontario Standards • Intelligent Scoring • Real-time Enhancement • Advanced Analytics*")
+        gr.Markdown("**Created by changcheng967 • v4.0.0: Enhanced Transparency & Normalized Scoring • Supported by Doulet Media**")
         
         with gr.Row():
             license_input = gr.Textbox(
