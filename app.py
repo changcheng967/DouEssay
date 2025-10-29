@@ -1022,7 +1022,7 @@ class DouEssay:
             sentence_lower = sentence.lower()
             
             # Check for vague statements that need elaboration
-            vague_patterns = ['helps', 'important', 'useful', 'good', 'bad', 'makes', 'does']
+            vague_patterns = ['helps', 'useful', 'good', 'bad', 'makes', 'does']
             if any(pattern in sentence_lower for pattern in vague_patterns) and len(sentence.split()) < 15:
                 if not any(word in sentence_lower for word in ['because', 'for example', 'such as', 'specifically']):
                     inline_feedback.append({
