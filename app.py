@@ -341,6 +341,7 @@ class DouEssay:
         positive_adjs = ['essential', 'valuable', 'important', 'crucial']
         challenge_adjs = ['challenging', 'demanding', 'complex', 'multifaceted']
         challenges = ['challenges', 'difficulties', 'obstacles', 'hurdles']
+        difficulties = ['obstacles', 'hardships', 'complications', 'barriers']  # Separate list for semantic variety
         positive_aspects = ['benefits', 'advantages', 'positive aspects', 'merits']
         
         if themes['workload']:
@@ -357,7 +358,7 @@ class DouEssay:
             positive_adj=random.choice(positive_adjs),
             challenge_adj=random.choice(challenge_adjs),
             challenges=random.choice(challenges),
-            difficulties=random.choice(challenges),  # Same as challenges
+            difficulties=random.choice(difficulties),  # Separate list for variety
             positive_aspects=random.choice(positive_aspects),
             topic_focus=topic_focus,
             specific_aspects=specific_aspects,
