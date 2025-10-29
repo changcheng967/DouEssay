@@ -4,7 +4,7 @@
 
 *Ontario Standards • Intelligent Scoring • Real-time Enhancement • Draft Tracking • Advanced Analytics*
 
-**Version 3.0.0** - Now with Reflection Detection, Semantic Similarity Checking, Achievement Badges, and Context-Aware Enhancements!
+**Version 4.0.0** - Now with Enhanced Transparency, Normalized Scoring, 5-Category Analysis, and Improved UI/UX!
 
 Created by [changcheng967](https://github.com/changcheng967) • Supported by Doulet Media
 
