@@ -9,6 +9,7 @@ import os
 from datetime import datetime, timedelta
 import supabase
 from supabase import create_client
+import json
 
 class LicenseManager:
     def __init__(self):
@@ -195,6 +196,36 @@ class DouEssay:
                 "Valid insights; add more profound personal connections"
             ]
         }
+        
+        # Inline feedback templates for specific improvements
+        self.inline_suggestions = {
+            'vague_statement': [
+                "💡 How-to: Explain *how* this happens. Add a specific example or personal experience.",
+                "💡 Deepen: What does this mean in practice? Provide concrete details.",
+                "💡 Connect: How does this support your main argument?"
+            ],
+            'weak_analysis': [
+                "💡 Analysis: Explain *why* this matters. What's the deeper significance?",
+                "💡 Connect: Link this back to your thesis statement.",
+                "💡 Reflection: What real-world experience illustrates this?"
+            ],
+            'generic_word': [
+                "💡 Vocabulary: Consider using a more specific word here.",
+                "💡 Strengthen: This word is generic. Try a more powerful alternative.",
+            ],
+            'repetitive_start': [
+                "💡 Variety: Try starting with a transition word like 'Furthermore,' 'Moreover,' or 'Consequently.'",
+                "💡 Flow: Vary your sentence openings for better rhythm."
+            ],
+            'passive_voice': [
+                "💡 Active Voice: Consider rewording this in active voice for more impact.",
+                "💡 Clarity: Who is performing this action? Make it explicit."
+            ],
+            'needs_transition': [
+                "💡 Transition: Add a connecting word or phrase to link this to the previous idea.",
+                "💡 Flow: Use transitions like 'However,' 'Additionally,' or 'Therefore' for better coherence."
+            ]
+        }
 
     def validate_license_and_increment(self, license_key: str) -> Dict:
         validation_result = self.license_manager.validate_license(license_key)
@@ -220,12 +251,14 @@ class DouEssay:
         rubric_level = self.get_accurate_rubric_level(score)
         feedback = self.generate_ontario_teacher_feedback(score, rubric_level, stats, structure, content, grammar, application, essay_text)
         corrections = self.get_grammar_corrections(essay_text)
+        inline_feedback = self.analyze_inline_feedback(essay_text)
         
         return {
             "score": score,
             "rubric_level": rubric_level,
             "feedback": feedback,
             "corrections": corrections,
+            "inline_feedback": inline_feedback,
             "detailed_analysis": {
                 "statistics": stats,
                 "structure": structure,
@@ -976,172 +1009,595 @@ class DouEssay:
                 "content": {"score": 5},
                 "grammar": {"score": 8},
                 "application": {"score": 5}
-            }
+            },
+            "inline_feedback": []
         }
+
+    def analyze_inline_feedback(self, essay_text: str) -> List[Dict]:
+        """Generate inline, color-coded feedback annotations for the essay."""
+        inline_feedback = []
+        sentences = [s.strip() for s in re.split(r'[.!?]+', essay_text) if s.strip()]
+        
+        for idx, sentence in enumerate(sentences):
+            sentence_lower = sentence.lower()
+            
+            # Check for vague statements that need elaboration
+            vague_patterns = ['helps', 'important', 'useful', 'good', 'bad', 'makes', 'does']
+            if any(pattern in sentence_lower for pattern in vague_patterns) and len(sentence.split()) < 15:
+                if not any(word in sentence_lower for word in ['because', 'for example', 'such as', 'specifically']):
+                    inline_feedback.append({
+                        'sentence_index': idx,
+                        'sentence': sentence,
+                        'type': 'vague_statement',
+                        'severity': 'yellow',
+                        'suggestion': random.choice(self.inline_suggestions['vague_statement'])
+                    })
+            
+            # Check for weak analysis
+            if any(word in sentence_lower for word in ['important', 'essential', 'crucial', 'significant']):
+                if not any(word in sentence_lower for word in ['because', 'this shows', 'this demonstrates', 'therefore']):
+                    inline_feedback.append({
+                        'sentence_index': idx,
+                        'sentence': sentence,
+                        'type': 'weak_analysis',
+                        'severity': 'yellow',
+                        'suggestion': random.choice(self.inline_suggestions['weak_analysis'])
+                    })
+            
+            # Check for generic words
+            generic_words = ['very', 'really', 'a lot', 'many', 'most', 'some', 'things', 'stuff', 'big', 'small']
+            found_generic = [word for word in generic_words if word in sentence_lower]
+            if found_generic:
+                alternatives = self.get_vocabulary_alternatives(found_generic[0])
+                inline_feedback.append({
+                    'sentence_index': idx,
+                    'sentence': sentence,
+                    'type': 'generic_word',
+                    'severity': 'yellow',
+                    'suggestion': f"💡 Vocabulary: Replace '{found_generic[0]}' with: {', '.join(alternatives)}",
+                    'word': found_generic[0],
+                    'alternatives': alternatives
+                })
+            
+            # Check for sentence variety - repetitive starts
+            if idx > 0 and len(sentences) > idx:
+                current_start = sentence.split()[0].lower() if sentence.split() else ''
+                prev_start = sentences[idx-1].split()[0].lower() if sentences[idx-1].split() else ''
+                if current_start == prev_start and current_start in ['the', 'it', 'this', 'they', 'students', 'teachers']:
+                    inline_feedback.append({
+                        'sentence_index': idx,
+                        'sentence': sentence,
+                        'type': 'repetitive_start',
+                        'severity': 'yellow',
+                        'suggestion': random.choice(self.inline_suggestions['repetitive_start'])
+                    })
+            
+            # Check for passive voice
+            passive_indicators = [' is ', ' are ', ' was ', ' were ', ' been ', ' being ']
+            if any(indicator in f' {sentence_lower} ' for indicator in passive_indicators):
+                if any(word in sentence_lower for word in [' by ', ' done ', ' made ', ' created ']):
+                    inline_feedback.append({
+                        'sentence_index': idx,
+                        'sentence': sentence,
+                        'type': 'passive_voice',
+                        'severity': 'yellow',
+                        'suggestion': random.choice(self.inline_suggestions['passive_voice'])
+                    })
+        
+        # Identify strengths to highlight in green
+        for idx, sentence in enumerate(sentences):
+            sentence_lower = sentence.lower()
+            
+            # Strong analytical language
+            if any(phrase in sentence_lower for phrase in ['this demonstrates', 'this shows that', 'this illustrates', 
+                                                           'for example', 'specifically', 'as evidence', 'research shows']):
+                inline_feedback.append({
+                    'sentence_index': idx,
+                    'sentence': sentence,
+                    'type': 'strength',
+                    'severity': 'green',
+                    'suggestion': '✅ Strong analytical connection! This effectively supports your argument.'
+                })
+            
+            # Good personal insight
+            if any(phrase in sentence_lower for phrase in ['in my experience', 'i learned', 'this taught me', 
+                                                           'i realized', 'from my perspective']):
+                inline_feedback.append({
+                    'sentence_index': idx,
+                    'sentence': sentence,
+                    'type': 'strength',
+                    'severity': 'green',
+                    'suggestion': '✅ Excellent personal reflection! This adds depth to your essay.'
+                })
+        
+        return inline_feedback
+
+    def get_vocabulary_alternatives(self, word: str) -> List[str]:
+        """Get sophisticated vocabulary alternatives for common words."""
+        vocab_map = {
+            'very': ['extremely', 'remarkably', 'particularly', 'exceptionally'],
+            'really': ['genuinely', 'truly', 'certainly', 'indeed'],
+            'a lot': ['numerous', 'substantial', 'considerable', 'extensive'],
+            'many': ['numerous', 'various', 'multiple', 'countless'],
+            'most': ['majority of', 'predominant', 'principal', 'primary'],
+            'some': ['several', 'certain', 'particular', 'specific'],
+            'things': ['elements', 'aspects', 'factors', 'components'],
+            'stuff': ['material', 'content', 'subject matter', 'information'],
+            'big': ['substantial', 'significant', 'considerable', 'extensive'],
+            'small': ['minimal', 'modest', 'limited', 'negligible'],
+            'good': ['beneficial', 'advantageous', 'valuable', 'effective'],
+            'bad': ['detrimental', 'problematic', 'ineffective', 'counterproductive']
+        }
+        return vocab_map.get(word.lower(), ['more specific term'])
+
+    def create_annotated_essay_html(self, essay_text: str, inline_feedback: List[Dict]) -> str:
+        """Create HTML version of essay with color-coded inline annotations."""
+        sentences = [s.strip() for s in re.split(r'([.!?]+)', essay_text) if s.strip()]
+        
+        # Create a mapping of sentence index to feedback
+        feedback_map = {}
+        for feedback in inline_feedback:
+            idx = feedback['sentence_index']
+            if idx not in feedback_map:
+                feedback_map[idx] = []
+            feedback_map[idx].append(feedback)
+        
+        html_parts = ['<div style="font-family: Georgia, serif; line-height: 1.8; font-size: 1.1em;">']
+        
+        sentence_idx = 0
+        for i, part in enumerate(sentences):
+            if re.match(r'^[.!?]+$', part):
+                html_parts.append(part)
+            else:
+                # This is a sentence
+                color_class = 'normal'
+                tooltips = []
+                
+                if sentence_idx in feedback_map:
+                    feedbacks = feedback_map[sentence_idx]
+                    # Determine the most important severity
+                    severities = [f['severity'] for f in feedbacks]
+                    if 'red' in severities:
+                        color_class = 'red'
+                    elif 'yellow' in severities:
+                        color_class = 'yellow'
+                    elif 'green' in severities:
+                        color_class = 'green'
+                    
+                    # Collect all suggestions
+                    tooltips = [f['suggestion'] for f in feedbacks]
+                
+                # Apply styling
+                if color_class == 'green':
+                    style = 'background-color: #d4edda; border-left: 3px solid #28a745; padding: 5px; margin: 2px 0; display: inline-block;'
+                elif color_class == 'yellow':
+                    style = 'background-color: #fff3cd; border-left: 3px solid #ffc107; padding: 5px; margin: 2px 0; display: inline-block;'
+                elif color_class == 'red':
+                    style = 'background-color: #f8d7da; border-left: 3px solid #dc3545; padding: 5px; margin: 2px 0; display: inline-block;'
+                else:
+                    style = 'display: inline;'
+                
+                if tooltips:
+                    tooltip_text = '<br>'.join(tooltips)
+                    html_parts.append(
+                        f'<span style="{style}" title="{tooltip_text.replace("<", "&lt;").replace(">", "&gt;")}">{part}</span>'
+                    )
+                else:
+                    html_parts.append(f'<span style="{style}">{part}</span>')
+                
+                sentence_idx += 1
+        
+        html_parts.append('</div>')
+        return ''.join(html_parts)
+
+    def create_vocabulary_suggestions_html(self, inline_feedback: List[Dict]) -> str:
+        """Create HTML for vocabulary enhancement suggestions."""
+        vocab_suggestions = [f for f in inline_feedback if f['type'] == 'generic_word']
+        
+        if not vocab_suggestions:
+            return '<p style="color: #28a745;">✅ Great vocabulary variety! No generic words detected.</p>'
+        
+        html = ['<div style="font-family: Arial, sans-serif;">']
+        html.append('<h3 style="color: #2c3e50; margin-bottom: 15px;">📚 Vocabulary Enhancement Suggestions</h3>')
+        
+        for idx, sugg in enumerate(vocab_suggestions, 1):
+            word = sugg.get('word', 'word')
+            alternatives = sugg.get('alternatives', [])
+            html.append(f'''
+            <div style="background: #f8f9fa; padding: 12px; margin: 8px 0; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <strong style="color: #856404;">Replace "{word}":</strong>
+                <div style="margin-top: 5px;">
+                    {' • '.join([f'<span style="background: #fff; padding: 3px 8px; margin: 2px; border-radius: 4px; display: inline-block;">{alt}</span>' for alt in alternatives])}
+                </div>
+            </div>
+            ''')
+        
+        html.append('</div>')
+        return ''.join(html)
 
 def create_douessay_interface():
     douessay = DouEssay()
     
-    def process_essay(essay_text, action, license_key):
+    # Session state for draft history
+    draft_history = []
+    
+    def create_score_breakdown_html(detailed_analysis: Dict, score: int) -> str:
+        """Create visual dashboard for score breakdown."""
+        content_score = detailed_analysis['content']['score']
+        structure_score = detailed_analysis['structure']['score']
+        grammar_score = detailed_analysis['grammar']['score']
+        application_score = detailed_analysis['application']['score']
+        
+        def create_progress_bar(label, score, max_score=10, color='#3498db'):
+            percentage = (score / max_score) * 100
+            return f'''
+            <div style="margin: 15px 0;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span style="font-weight: bold; color: #2c3e50;">{label}</span>
+                    <span style="color: {color}; font-weight: bold;">{score:.1f}/{max_score}</span>
+                </div>
+                <div style="background: #ecf0f1; border-radius: 10px; height: 25px; overflow: hidden;">
+                    <div style="background: linear-gradient(90deg, {color}, {color}dd); width: {percentage}%; height: 100%; border-radius: 10px; transition: width 0.3s ease;"></div>
+                </div>
+            </div>
+            '''
+        
+        html = '<div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">'
+        html += '<h3 style="color: #2c3e50; margin-top: 0; border-bottom: 2px solid #3498db; padding-bottom: 10px;">📊 Score Breakdown</h3>'
+        html += create_progress_bar('Content & Analysis', content_score, color='#e74c3c')
+        html += create_progress_bar('Structure & Organization', structure_score, color='#f39c12')
+        html += create_progress_bar('Grammar & Mechanics', grammar_score, color='#27ae60')
+        html += create_progress_bar('Application & Insight', application_score, color='#9b59b6')
+        html += f'<div style="margin-top: 20px; text-align: center; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; color: white;">'
+        html += f'<div style="font-size: 2.5em; font-weight: bold;">{score}/100</div>'
+        html += f'<div style="font-size: 1.2em; margin-top: 5px;">Overall Score</div>'
+        html += '</div></div>'
+        return html
+    
+    def save_draft(essay_text, result):
+        """Save draft to history."""
+        draft_entry = {
+            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'essay': essay_text,
+            'score': result['score'],
+            'level': result['rubric_level']['level']
+        }
+        draft_history.append(draft_entry)
+        return draft_history
+    
+    def create_draft_history_html():
+        """Create HTML for draft history display."""
+        if not draft_history:
+            return '<p style="color: #7f8c8d; text-align: center; padding: 20px;">No draft history yet. Submit essays to track your progress!</p>'
+        
+        html = '<div style="font-family: Arial, sans-serif;">'
+        html += '<h3 style="color: #2c3e50; margin-bottom: 15px;">📚 Draft History & Progress</h3>'
+        
+        # Progress line chart representation
+        if len(draft_history) > 1:
+            scores = [d['score'] for d in draft_history]
+            html += '<div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">'
+            html += '<h4 style="color: #2c3e50; margin-top: 0;">Score Evolution</h4>'
+            html += '<div style="display: flex; align-items: flex-end; height: 100px; gap: 5px;">'
+            max_score = max(scores)
+            for i, score in enumerate(scores):
+                height_pct = (score / max_score) * 100 if max_score > 0 else 0
+                color = '#27ae60' if i > 0 and score > scores[i-1] else '#3498db' if i > 0 and score == scores[i-1] else '#e74c3c'
+                html += f'<div style="flex: 1; background: {color}; height: {height_pct}%; min-height: 20px; border-radius: 4px 4px 0 0; position: relative;">'
+                html += f'<span style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 0.8em; font-weight: bold; color: {color};">{score}</span>'
+                html += '</div>'
+            html += '</div></div>'
+        
+        # List of drafts
+        for i, draft in enumerate(reversed(draft_history), 1):
+            idx = len(draft_history) - i
+            score_color = '#27ae60' if draft['score'] >= 80 else '#f39c12' if draft['score'] >= 70 else '#e74c3c'
+            html += f'''
+            <div style="background: #f8f9fa; padding: 12px; margin: 8px 0; border-radius: 8px; border-left: 4px solid {score_color};">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="color: #2c3e50;">Draft #{idx + 1}</strong>
+                        <span style="color: #7f8c8d; margin-left: 10px; font-size: 0.9em;">{draft['timestamp']}</span>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="font-size: 1.5em; font-weight: bold; color: {score_color};">{draft['score']}</span>
+                        <span style="color: #7f8c8d; font-size: 0.9em; margin-left: 5px;">/ 100</span>
+                        <div style="color: #2c3e50; font-size: 0.9em;">{draft['level']}</div>
+                    </div>
+                </div>
+            </div>
+            '''
+        
+        html += '</div>'
+        return html
+    
+    def process_essay(essay_text, license_key, grade_level):
         if not license_key.strip():
-            return "Please enter a valid license key.", "", "", "", ""
+            return "Please enter a valid license key.", "", "", "", "", "", "", ""
         
         license_result = douessay.validate_license_and_increment(license_key)
         if not license_result['valid']:
-            return f"License Error: {license_result['message']}", "", "", "", ""
+            return f"License Error: {license_result['message']}", "", "", "", "", "", "", ""
         
         if not essay_text.strip():
-            return "Please enter an essay to analyze.", "", "", "", ""
+            return "Please enter an essay to analyze.", "", "", "", "", "", "", ""
         
-        if action == "Grade":
-            result = douessay.grade_essay(essay_text)
-            feedback = result['feedback']
-            corrections = result['corrections']
-            corrected_essay = essay_text
+        result = douessay.grade_essay(essay_text)
+        
+        # Save to draft history
+        save_draft(essay_text, result)
+        
+        # Create annotated essay HTML
+        annotated_essay = douessay.create_annotated_essay_html(essay_text, result['inline_feedback'])
+        
+        # Create vocabulary suggestions
+        vocab_html = douessay.create_vocabulary_suggestions_html(result['inline_feedback'])
+        
+        # Create score breakdown
+        score_breakdown = create_score_breakdown_html(result['detailed_analysis'], result['score'])
+        
+        # Create feedback HTML
+        feedback = result['feedback']
+        user_info = f"User: {license_result['user_type'].title()} | Usage: {license_result['daily_usage'] + 1}/{license_result['daily_limit']}"
+        
+        score_color = "#e74c3c"
+        if result['score'] >= 85:
+            score_color = "#27ae60"
+        elif result['score'] >= 80:
+            score_color = "#2ecc71"
+        elif result['score'] >= 70:
+            score_color = "#f39c12"
+        elif result['score'] >= 65:
+            score_color = "#e67e22"
+        
+        assessment_html = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 15px; color: white; text-align: center; margin-bottom: 20px;">
+                <h1 style="margin: 0 0 10px 0; font-size: 2.2em;">DouEssay Assessment System</h1>
+                <p style="margin: 0; opacity: 0.9; font-size: 1.1em;">Ontario Standards • Intelligent Scoring • Level 4+ Enhancement</p>
+                <p style="margin: 10px 0 0 0; font-size: 0.9em; opacity: 0.7;">Created by changcheng967 • Doulet Media Copyright</p>
+                <p style="margin: 5px 0 0 0; font-size: 0.8em; opacity: 0.9; background: rgba(255,255,255,0.2); padding: 5px; border-radius: 5px;">{user_info} | Grade: {grade_level}</p>
+            </div>
             
-            for correction in sorted(corrections, key=lambda x: x['offset'], reverse=True):
-                start = correction['offset']
-                end = correction['offset'] + correction['length']
-                corrected_essay = corrected_essay[:start] + correction['suggestion'] + corrected_essay[end:]
-            
-            score_color = "#e74c3c"
-            if result['score'] >= 85:
-                score_color = "#27ae60"
-            elif result['score'] >= 80:
-                score_color = "#2ecc71"
-            elif result['score'] >= 70:
-                score_color = "#f39c12"
-            elif result['score'] >= 65:
-                score_color = "#e67e22"
-            
-            user_info = f"User: {license_result['user_type'].title()} | Usage: {license_result['daily_usage'] + 1}/{license_result['daily_limit']}"
-            
-            assessment_html = f"""
-            <div style="font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto;">
-                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 15px; color: white; text-align: center; margin-bottom: 20px;">
-                    <h1 style="margin: 0 0 10px 0; font-size: 2.2em;">DouEssay Assessment System</h1>
-                    <p style="margin: 0; opacity: 0.9; font-size: 1.1em;">Ontario Standards • Intelligent Scoring • Level 4+ Enhancement</p>
-                    <p style="margin: 10px 0 0 0; font-size: 0.9em; opacity: 0.7;">Created by changcheng967 • Doulet Media Copyright</p>
-                    <p style="margin: 5px 0 0 0; font-size: 0.8em; opacity: 0.9; background: rgba(255,255,255,0.2); padding: 5px; border-radius: 5px;">{user_info}</p>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px; margin-bottom: 20px;">
-                    <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center;">
-                        <div style="font-size: 3.5em; font-weight: bold; color: {score_color}; margin-bottom: 10px;">
-                            {result['score']}/100
-                        </div>
-                        <div style="font-size: 1.4em; font-weight: bold; color: #2c3e50; margin-bottom: 5px;">
-                            {result['rubric_level']['level']}
-                        </div>
-                        <div style="color: #7f8c8d; font-size: 1em;">
-                            {result['rubric_level']['description']}
-                        </div>
+            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <div style="text-align: center; margin-bottom: 15px;">
+                    <div style="font-size: 3.5em; font-weight: bold; color: {score_color};">
+                        {result['score']}/100
                     </div>
-                    
-                    <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                        <h3 style="margin-top: 0; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">Detailed Feedback</h3>
-                        <div style="max-height: 400px; overflow-y: auto; line-height: 1.6;">
-                            {''.join([f'<p style="margin: 10px 0;">{line}</p>' for line in feedback])}
-                        </div>
+                    <div style="font-size: 1.4em; font-weight: bold; color: #2c3e50; margin: 10px 0;">
+                        {result['rubric_level']['level']}
+                    </div>
+                    <div style="color: #7f8c8d; font-size: 1em;">
+                        {result['rubric_level']['description']}
                     </div>
                 </div>
             </div>
-            """
             
-            return assessment_html, essay_text, corrected_essay, result['score'], result['rubric_level']['level']
-        
-        else:
-            enhanced_essay = douessay.enhance_to_level4(essay_text)
-            user_info = f"User: {license_result['user_type'].title()} | Usage: {license_result['daily_usage'] + 1}/{license_result['daily_limit']}"
-            
-            enhancement_html = f"""
-            <div style="font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto;">
-                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 15px; color: white; text-align: center; margin-bottom: 20px;">
-                    <h1 style="margin: 0 0 10px 0; font-size: 2.2em;">DouEssay Enhancement System</h1>
-                    <p style="margin: 0; opacity: 0.9; font-size: 1.1em;">Level 4+ Standards • Intelligent Enhancement • Professional Quality</p>
-                    <p style="margin: 10px 0 0 0; font-size: 0.9em; opacity: 0.7;">Created by changcheng967 • Doulet Media Copyright</p>
-                    <p style="margin: 5px 0 0 0; font-size: 0.8em; opacity: 0.9; background: rgba(255,255,255,0.2); padding: 5px; border-radius: 5px;">{user_info}</p>
-                </div>
-                
-                <div style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center;">
-                    <div style="font-size: 2.5em; font-weight: bold; color: #27ae60; margin-bottom: 10px;">
-                        ✓ Enhanced to Level 4+
-                    </div>
-                    <div style="font-size: 1.2em; color: #2c3e50; margin-bottom: 20px;">
-                        Your essay has been enhanced to meet Ontario Level 4+ standards
-                    </div>
+            <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                <h3 style="margin-top: 0; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">📝 Detailed Feedback</h3>
+                <div style="line-height: 1.8;">
+                    {''.join([f'<p style="margin: 10px 0;">{line}</p>' for line in feedback])}
                 </div>
             </div>
-            """
-            
-            return enhancement_html, essay_text, enhanced_essay, "N/A", "Level 4+"
+        </div>
+        """
+        
+        # Inline feedback summary
+        inline_summary = f"<div style='padding: 15px; background: #f8f9fa; border-radius: 8px; margin-top: 10px;'>"
+        inline_summary += f"<strong>Inline Annotations:</strong> "
+        
+        green_count = len([f for f in result['inline_feedback'] if f['severity'] == 'green'])
+        yellow_count = len([f for f in result['inline_feedback'] if f['severity'] == 'yellow'])
+        red_count = len([f for f in result['inline_feedback'] if f['severity'] == 'red'])
+        
+        inline_summary += f"<span style='color: #28a745;'>✅ {green_count} Strengths</span> • "
+        inline_summary += f"<span style='color: #ffc107;'>⚠️ {yellow_count} Suggestions</span> • "
+        inline_summary += f"<span style='color: #dc3545;'>❗ {red_count} Critical</span>"
+        inline_summary += "</div>"
+        
+        draft_history_html = create_draft_history_html()
+        
+        # Apply grammar corrections
+        corrected_essay = essay_text
+        corrections = result['corrections']
+        for correction in sorted(corrections, key=lambda x: x['offset'], reverse=True):
+            start = correction['offset']
+            end = correction['offset'] + correction['length']
+            corrected_essay = corrected_essay[:start] + correction['suggestion'] + corrected_essay[end:]
+        
+        return (
+            assessment_html,
+            annotated_essay + inline_summary,
+            score_breakdown,
+            vocab_html,
+            draft_history_html,
+            corrected_essay,
+            result['score'],
+            result['rubric_level']['level']
+        )
     
-    with gr.Blocks(title="DouEssay Assessment System", theme=gr.themes.Soft()) as demo:
+    def enhance_essay(essay_text, license_key):
+        if not license_key.strip():
+            return "", "", "Please enter a valid license key."
+        
+        license_result = douessay.validate_license_and_increment(license_key)
+        if not license_result['valid']:
+            return "", "", f"License Error: {license_result['message']}"
+        
+        if not essay_text.strip():
+            return "", "", "Please enter an essay to enhance."
+        
+        enhanced_essay = douessay.enhance_to_level4(essay_text)
+        
+        user_info = f"User: {license_result['user_type'].title()} | Usage: {license_result['daily_usage'] + 1}/{license_result['daily_limit']}"
+        
+        # Create before/after comparison
+        comparison_html = f"""
+        <div style="font-family: Arial, sans-serif;">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px; color: white; text-align: center; margin-bottom: 20px;">
+                <h2 style="margin: 0;">✨ Level 4+ Enhancement Complete</h2>
+                <p style="margin: 10px 0 0 0; opacity: 0.9;">{user_info}</p>
+            </div>
+            
+            <div style="background: #d4edda; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745; margin-bottom: 15px;">
+                <h3 style="color: #155724; margin-top: 0;">🎯 Enhancement Summary</h3>
+                <ul style="color: #155724; line-height: 1.8;">
+                    <li>✅ Vocabulary elevated to Level 4+ standards</li>
+                    <li>✅ Sentence structure enhanced for sophistication</li>
+                    <li>✅ Analytical depth strengthened with critical connections</li>
+                    <li>✅ Transitions and coherence improved</li>
+                    <li>✅ Personal insights and reflection deepened</li>
+                </ul>
+            </div>
+            
+            <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <h4 style="color: #856404; margin-top: 0;">💡 Learning Opportunity</h4>
+                <p style="color: #856404; margin: 0;">Review the enhanced version to see how Level 4+ essays are structured. Notice the sophisticated vocabulary, complex sentence structures, and deeper analytical connections. Use these techniques in your future writing!</p>
+            </div>
+        </div>
+        """
+        
+        return essay_text, enhanced_essay, comparison_html
+    
+    with gr.Blocks(title="DouEssay Assessment System", theme=gr.themes.Soft(), css="""
+        .gradio-container {max-width: 1400px !important;}
+        .tab-nav button {font-size: 1.1em; font-weight: 500;}
+        h1, h2, h3 {color: #2c3e50;}
+    """) as demo:
         gr.Markdown("# 🎓 DouEssay Assessment System")
         gr.Markdown("### Professional Essay Grading and Level 4+ Enhancement Tool")
-        gr.Markdown("*Ontario Standards • Intelligent Scoring • Real-time Enhancement*")
-        gr.Markdown("**Created by changcheng967 • This is the main DouEssay project combining DouEssayGrader and DouEssayEnhancer, supported by Doulet Media**")
+        gr.Markdown("*Ontario Standards • Intelligent Scoring • Real-time Enhancement • Draft Tracking*")
+        gr.Markdown("**Created by changcheng967 • Combining DouEssayGrader and DouEssayEnhancer • Supported by Doulet Media**")
         
         with gr.Row():
-            with gr.Column(scale=2):
-                license_input = gr.Textbox(
-                    label="License Key",
-                    placeholder="Enter your license key here...",
-                    type="password"
-                )
-                
+            license_input = gr.Textbox(
+                label="🔑 License Key",
+                placeholder="Enter your license key here...",
+                type="password",
+                scale=2
+            )
+            grade_level = gr.Dropdown(
+                label="📚 Grade Level",
+                choices=["Grade 9", "Grade 10", "Grade 11", "Grade 12"],
+                value="Grade 10",
+                scale=1
+            )
+        
+        with gr.Tabs() as tabs:
+            # Tab 1: Essay Input
+            with gr.TabItem("📝 Essay Input", id=0):
+                gr.Markdown("### Enter or paste your essay below")
                 essay_input = gr.Textbox(
-                    label="Enter Your Essay",
-                    placeholder="Paste your essay content here (250-500 words recommended)...",
-                    lines=12
+                    label="Your Essay",
+                    placeholder="Paste your essay content here (250-500 words recommended)...\n\nTips:\n- Clear thesis statement in introduction\n- 3-5 body paragraphs with specific examples\n- Analysis connecting examples to your argument\n- Strong conclusion summarizing key points",
+                    lines=15,
+                    max_lines=20
                 )
                 
                 with gr.Row():
-                    action_radio = gr.Radio(
-                        choices=["Grade", "Enhance to Level 4+"],
-                        label="Select Action",
-                        value="Grade"
-                    )
-                    process_btn = gr.Button("🚀 Process Essay", variant="primary")
-                    clear_btn = gr.Button("Clear All")
+                    grade_btn = gr.Button("📊 Grade Essay", variant="primary", size="lg")
+                    enhance_btn = gr.Button("✨ Enhance to Level 4+", variant="secondary", size="lg")
+                    clear_btn = gr.Button("🗑️ Clear", size="lg")
             
-            with gr.Column(scale=1):
-                output_html = gr.HTML()
-        
-        with gr.Row():
-            with gr.Column():
-                gr.Markdown("### 📝 Original Essay")
-                original_output = gr.Textbox(
-                    lines=6,
+            # Tab 2: Assessment Results
+            with gr.TabItem("📊 Assessment", id=1):
+                gr.Markdown("### Your Essay Assessment")
+                assessment_output = gr.HTML()
+                
+                with gr.Row():
+                    with gr.Column():
+                        score_display = gr.Number(label="Score", interactive=False)
+                    with gr.Column():
+                        level_display = gr.Textbox(label="Ontario Level", interactive=False)
+            
+            # Tab 3: Inline Feedback
+            with gr.TabItem("💡 Inline Feedback", id=2):
+                gr.Markdown("### Color-Coded Essay with Inline Suggestions")
+                gr.Markdown("""
+                **Legend:**
+                - 🟢 **Green** = Strengths (keep these!)
+                - 🟡 **Yellow** = Suggestions for improvement
+                - 🔴 **Red** = Critical issues to address
+                
+                *Hover over highlighted sections for detailed suggestions.*
+                """)
+                annotated_output = gr.HTML()
+            
+            # Tab 4: Score Breakdown
+            with gr.TabItem("📈 Score Breakdown", id=3):
+                gr.Markdown("### Detailed Score Analysis")
+                score_breakdown_output = gr.HTML()
+            
+            # Tab 5: Vocabulary & Style
+            with gr.TabItem("📚 Vocabulary & Style", id=4):
+                gr.Markdown("### Vocabulary Enhancement Suggestions")
+                vocab_output = gr.HTML()
+            
+            # Tab 6: Draft History
+            with gr.TabItem("📜 Draft History", id=5):
+                gr.Markdown("### Track Your Progress Across Drafts")
+                draft_history_output = gr.HTML()
+            
+            # Tab 7: Level 4+ Enhancer
+            with gr.TabItem("✨ Level 4+ Enhancer", id=6):
+                gr.Markdown("### Before & After Comparison")
+                enhancement_info = gr.HTML()
+                
+                with gr.Row():
+                    with gr.Column():
+                        gr.Markdown("#### 📄 Original Essay")
+                        original_essay_display = gr.Textbox(lines=12, interactive=False, show_copy_button=True)
+                    
+                    with gr.Column():
+                        gr.Markdown("#### ⭐ Enhanced Essay")
+                        enhanced_essay_display = gr.Textbox(lines=12, interactive=False, show_copy_button=True)
+            
+            # Tab 8: Grammar Corrections
+            with gr.TabItem("✏️ Grammar Check", id=7):
+                gr.Markdown("### Grammar and Spelling Corrections")
+                corrected_output = gr.Textbox(
+                    label="Corrected Essay",
+                    lines=12,
                     interactive=False,
                     show_copy_button=True
                 )
-            
-            with gr.Column():
-                gr.Markdown("### 💫 Processed Result")
-                processed_output = gr.Textbox(
-                    lines=6,
-                    interactive=True,
-                    show_copy_button=True
-                )
         
-        with gr.Row():
-            with gr.Column():
-                gr.Markdown("### 📊 Assessment Results")
-                score_output = gr.Number(label="Score", interactive=False)
-                level_output = gr.Textbox(label="Level", interactive=False)
+        # Button actions
+        grade_btn.click(
+            process_essay,
+            inputs=[essay_input, license_input, grade_level],
+            outputs=[
+                assessment_output,
+                annotated_output,
+                score_breakdown_output,
+                vocab_output,
+                draft_history_output,
+                corrected_output,
+                score_display,
+                level_display
+            ]
+        )
         
-        process_btn.click(
-            process_essay, 
-            inputs=[essay_input, action_radio, license_input], 
-            outputs=[output_html, original_output, processed_output, score_output, level_output]
+        enhance_btn.click(
+            enhance_essay,
+            inputs=[essay_input, license_input],
+            outputs=[original_essay_display, enhanced_essay_display, enhancement_info]
         )
         
         clear_btn.click(
-            lambda: ("", "", "", 0, ""), 
-            outputs=[output_html, original_output, processed_output, score_output, level_output]
+            lambda: ("", "", "", "", "", "", "", 0, ""),
+            outputs=[
+                assessment_output,
+                annotated_output,
+                score_breakdown_output,
+                vocab_output,
+                enhancement_info,
+                corrected_output,
+                score_display,
+                level_display
+            ]
         )
-        
+    
     return demo
 
 if __name__ == "__main__":
