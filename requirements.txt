@@ -1,0 +1,11 @@
+gradio
+supabase
+transformers
+torch
+numpy
+nltk
+language-tool-python
+accelerate
+python-dotenv
+tiktoken
+sentencepiece
