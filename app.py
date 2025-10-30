@@ -16,6 +16,66 @@ class LicenseManager:
         self.supabase_key = os.environ.get('SUPABASE_KEY')
         self.client = create_client(self.supabase_url, self.supabase_key)
         
+        # v6.0.0: Feature access matrix for different tiers
+        self.feature_access = {
+            'free': {
+                'daily_limit': 5,
+                'basic_grading': True,
+                'inline_feedback': False,
+                'draft_history': False,
+                'vocabulary_suggestions': False,
+                'score_breakdown': True,
+                'reflection_prompts': False,
+                'grammar_check': False,
+                'pdf_export': False,
+                'analytics': False,
+                'api_access': False,
+                'priority_support': False
+            },
+            'plus': {
+                'daily_limit': 100,
+                'basic_grading': True,
+                'inline_feedback': True,
+                'draft_history': True,
+                'vocabulary_suggestions': True,
+                'score_breakdown': True,
+                'reflection_prompts': True,
+                'grammar_check': True,
+                'pdf_export': False,
+                'analytics': False,
+                'api_access': False,
+                'priority_support': False
+            },
+            'premium': {
+                'daily_limit': 1000,
+                'basic_grading': True,
+                'inline_feedback': True,
+                'draft_history': True,
+                'vocabulary_suggestions': True,
+                'score_breakdown': True,
+                'reflection_prompts': True,
+                'grammar_check': True,
+                'pdf_export': True,
+                'analytics': True,
+                'api_access': False,
+                'priority_support': True
+            },
+            'unlimited': {
+                'daily_limit': float('inf'),
+                'basic_grading': True,
+                'inline_feedback': True,
+                'draft_history': True,
+                'vocabulary_suggestions': True,
+                'score_breakdown': True,
+                'reflection_prompts': True,
+                'grammar_check': True,
+                'pdf_export': True,
+                'analytics': True,
+                'api_access': True,
+                'priority_support': True
+            }
+        }
+        
     def validate_license(self, license_key: str) -> Dict:
         try:
             response = self.client.table('licenses').select('*').eq('license_key', license_key).execute()
@@ -47,15 +107,40 @@ class LicenseManager:
             if daily_usage >= limits[user_type]:
                 return {'valid': False, 'message': f'Daily usage limit reached for {user_type} user'}
             
+            # v6.0.0: Include feature access in validation response
             return {
                 'valid': True,
                 'user_type': user_type,
                 'daily_usage': daily_usage,
-                'daily_limit': limits[user_type]
+                'daily_limit': limits[user_type],
+                'features': self.feature_access.get(user_type, self.feature_access['free'])
             }
             
         except Exception as e:
             return {'valid': False, 'message': f'License validation error: {str(e)}'}
+    
+    def has_feature_access(self, user_type: str, feature: str) -> bool:
+        """
+        v6.0.0: Check if a user tier has access to a specific feature.
+        """
+        return self.feature_access.get(user_type, {}).get(feature, False)
+    
+    def get_upgrade_message(self, feature: str, current_tier: str) -> str:
+        """
+        v6.0.0: Generate upgrade message for locked features.
+        """
+        upgrade_messages = {
+            'inline_feedback': 'Upgrade to Plus or higher to unlock inline feedback with color-coded suggestions!',
+            'draft_history': 'Upgrade to Plus or higher to track your progress across multiple drafts!',
+            'vocabulary_suggestions': 'Upgrade to Plus or higher to get advanced vocabulary enhancement suggestions!',
+            'reflection_prompts': 'Upgrade to Plus or higher to access personalized reflection prompts!',
+            'grammar_check': 'Upgrade to Plus or higher to get detailed grammar corrections!',
+            'pdf_export': 'Upgrade to Premium or higher to export your essays with annotations as PDF!',
+            'analytics': 'Upgrade to Premium or higher to access historical analytics and progress tracking!',
+            'api_access': 'Upgrade to Unlimited to get API access for school integration!',
+            'priority_support': 'Upgrade to Premium or higher to get priority support!'
+        }
+        return upgrade_messages.get(feature, f'Upgrade to access {feature}!')
     
     def increment_usage(self, license_key: str) -> bool:
         try:
@@ -1797,16 +1882,38 @@ def create_douessay_interface():
         # v6.0.0: Pass grade_level to grading function
         result = douessay.grade_essay(essay_text, grade_level)
         
-        # Save to draft history
-        save_draft(essay_text, result)
+        # v6.0.0: Get feature access for current user
+        user_type = license_result['user_type']
+        features = license_result.get('features', {})
         
-        # Create annotated essay HTML
-        annotated_essay = douessay.create_annotated_essay_html(essay_text, result['inline_feedback'])
+        # Save to draft history (only if user has access)
+        if features.get('draft_history', False):
+            save_draft(essay_text, result)
         
-        # Create vocabulary suggestions
-        vocab_html = douessay.create_vocabulary_suggestions_html(result['inline_feedback'])
+        # v6.0.0: Apply feature gating
+        # Create annotated essay HTML (only if user has access)
+        if features.get('inline_feedback', False):
+            annotated_essay = douessay.create_annotated_essay_html(essay_text, result['inline_feedback'])
+        else:
+            annotated_essay = f"""
+            <div style="padding: 20px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <h3 style="color: #856404; margin-top: 0;">🔒 Inline Feedback Locked</h3>
+                <p>{douessay.license_manager.get_upgrade_message('inline_feedback', user_type)}</p>
+            </div>
+            """
         
-        # Create score breakdown
+        # Create vocabulary suggestions (only if user has access)
+        if features.get('vocabulary_suggestions', False):
+            vocab_html = douessay.create_vocabulary_suggestions_html(result['inline_feedback'])
+        else:
+            vocab_html = f"""
+            <div style="padding: 20px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <h3 style="color: #856404; margin-top: 0;">🔒 Vocabulary Suggestions Locked</h3>
+                <p>{douessay.license_manager.get_upgrade_message('vocabulary_suggestions', user_type)}</p>
+            </div>
+            """
+        
+        # Create score breakdown (always available)
         score_breakdown = create_score_breakdown_html(result['detailed_analysis'], result['score'])
         
         # Create feedback HTML
@@ -1868,25 +1975,37 @@ def create_douessay_interface():
         inline_summary += f"<span style='color: #dc3545;'>❗ {red_count} Critical</span>"
         inline_summary += "</div>"
         
-        draft_history_html = create_draft_history_html()
+        # v6.0.0: Draft history (only if user has access)
+        if features.get('draft_history', False):
+            draft_history_html = create_draft_history_html()
+        else:
+            draft_history_html = f"""
+            <div style="padding: 20px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <h3 style="color: #856404; margin-top: 0;">🔒 Draft History Locked</h3>
+                <p>{douessay.license_manager.get_upgrade_message('draft_history', user_type)}</p>
+            </div>
+            """
         
-        # Apply grammar corrections
-        corrected_essay = essay_text
-        corrections = result['corrections']
-        for correction in sorted(corrections, key=lambda x: x.get('offset', -1), reverse=True):
-            # Validate correction structure and values
-            offset = correction.get('offset')
-            length = correction.get('length')
-            suggestion = correction.get('suggestion', '')
-            if (
-                isinstance(offset, int) and isinstance(length, int) and
-                offset >= 0 and length >= 0 and
-                offset + length <= len(corrected_essay)
-            ):
-                start = offset
-                end = offset + length
-                corrected_essay = corrected_essay[:start] + suggestion + corrected_essay[end:]
-            # else: skip invalid correction
+        # v6.0.0: Apply grammar corrections (only if user has access)
+        if features.get('grammar_check', False):
+            corrected_essay = essay_text
+            corrections = result['corrections']
+            for correction in sorted(corrections, key=lambda x: x.get('offset', -1), reverse=True):
+                # Validate correction structure and values
+                offset = correction.get('offset')
+                length = correction.get('length')
+                suggestion = correction.get('suggestion', '')
+                if (
+                    isinstance(offset, int) and isinstance(length, int) and
+                    offset >= 0 and length >= 0 and
+                    offset + length <= len(corrected_essay)
+                ):
+                    start = offset
+                    end = offset + length
+                    corrected_essay = corrected_essay[:start] + suggestion + corrected_essay[end:]
+                # else: skip invalid correction
+        else:
+            corrected_essay = f"🔒 Grammar Check Locked\n\n{douessay.license_manager.get_upgrade_message('grammar_check', user_type)}"
         
         return (
             assessment_html,
@@ -1987,6 +2106,97 @@ def create_douessay_interface():
                     interactive=False,
                     show_copy_button=True
                 )
+            
+            # v6.0.0: Tab 8: Pricing & Features
+            with gr.TabItem("💰 Pricing & Features", id=7):
+                gr.Markdown("### DouEssay v6.0.0 Subscription Tiers")
+                gr.HTML("""
+                <div style="font-family: Arial, sans-serif;">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; color: white; margin-bottom: 20px;">
+                        <h2 style="margin: 0 0 10px 0;">Choose Your Plan</h2>
+                        <p style="margin: 0; opacity: 0.9;">Unlock the full power of DouEssay with features designed for every level of writer</p>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0;">
+                        <!-- Free Tier -->
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; border: 2px solid #e9ecef;">
+                            <h3 style="color: #6c757d; margin-top: 0;">Free</h3>
+                            <div style="font-size: 2em; font-weight: bold; color: #6c757d; margin: 10px 0;">$0</div>
+                            <p style="color: #6c757d; margin: 5px 0;">Try DouEssay</p>
+                            <hr style="border: 1px solid #dee2e6; margin: 15px 0;">
+                            <ul style="list-style: none; padding: 0;">
+                                <li style="margin: 8px 0;">✅ 5 essays/day</li>
+                                <li style="margin: 8px 0;">✅ Basic grading</li>
+                                <li style="margin: 8px 0;">✅ Score breakdown</li>
+                                <li style="margin: 8px 0; color: #adb5bd;">❌ Inline feedback</li>
+                                <li style="margin: 8px 0; color: #adb5bd;">❌ Draft history</li>
+                                <li style="margin: 8px 0; color: #adb5bd;">❌ Vocabulary suggestions</li>
+                                <li style="margin: 8px 0; color: #adb5bd;">❌ Grammar check</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Plus Tier -->
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; color: white; transform: scale(1.05); box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+                            <div style="background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 5px; display: inline-block; font-size: 0.8em; margin-bottom: 10px;">⭐ POPULAR</div>
+                            <h3 style="margin-top: 0;">Plus</h3>
+                            <div style="font-size: 2em; font-weight: bold; margin: 10px 0;">$10<span style="font-size: 0.5em;">/month</span></div>
+                            <p style="margin: 5px 0; opacity: 0.9;">or $90/year (save 25%)</p>
+                            <hr style="border: 1px solid rgba(255,255,255,0.3); margin: 15px 0;">
+                            <ul style="list-style: none; padding: 0;">
+                                <li style="margin: 8px 0;">✅ 100 essays/day</li>
+                                <li style="margin: 8px 0;">✅ All Free features</li>
+                                <li style="margin: 8px 0;">✅ Inline feedback</li>
+                                <li style="margin: 8px 0;">✅ Draft history</li>
+                                <li style="margin: 8px 0;">✅ Vocabulary suggestions</li>
+                                <li style="margin: 8px 0;">✅ Grammar check</li>
+                                <li style="margin: 8px 0;">✅ Reflection prompts</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Premium Tier -->
+                        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 20px; border-radius: 10px; color: white;">
+                            <h3 style="margin-top: 0;">Premium</h3>
+                            <div style="font-size: 2em; font-weight: bold; margin: 10px 0;">$35<span style="font-size: 0.5em;">/month</span></div>
+                            <p style="margin: 5px 0; opacity: 0.9;">or $320/year (save 24%)</p>
+                            <hr style="border: 1px solid rgba(255,255,255,0.3); margin: 15px 0;">
+                            <ul style="list-style: none; padding: 0;">
+                                <li style="margin: 8px 0;">✅ 1,000 essays/day</li>
+                                <li style="margin: 8px 0;">✅ All Plus features</li>
+                                <li style="margin: 8px 0;">✅ PDF export</li>
+                                <li style="margin: 8px 0;">✅ Historical analytics</li>
+                                <li style="margin: 8px 0;">✅ Progress tracking</li>
+                                <li style="margin: 8px 0;">✅ Priority support</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Unlimited Tier -->
+                        <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); padding: 20px; border-radius: 10px; color: #333;">
+                            <h3 style="margin-top: 0;">Unlimited</h3>
+                            <div style="font-size: 2em; font-weight: bold; margin: 10px 0;">$90<span style="font-size: 0.5em;">/month</span></div>
+                            <p style="margin: 5px 0;">or $800/year (save 26%)</p>
+                            <hr style="border: 1px solid rgba(0,0,0,0.2); margin: 15px 0;">
+                            <ul style="list-style: none; padding: 0;">
+                                <li style="margin: 8px 0;">✅ Unlimited essays</li>
+                                <li style="margin: 8px 0;">✅ All Premium features</li>
+                                <li style="margin: 8px 0;">✅ API access</li>
+                                <li style="margin: 8px 0;">✅ School integration</li>
+                                <li style="margin: 8px 0;">✅ Teacher dashboard</li>
+                                <li style="margin: 8px 0;">✅ Custom features</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #d4edda; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745; margin: 20px 0;">
+                        <h4 style="color: #155724; margin-top: 0;">💰 Value Guarantee</h4>
+                        <p style="color: #155724; margin: 0;">All plans offer <strong>10x more value than the cost</strong>. Save hours of revision time, improve grades, and build better writing skills!</p>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                        <h4 style="color: #2c3e50; margin-top: 0;">📞 Need Help Choosing?</h4>
+                        <p style="color: #2c3e50; margin: 0;">Contact us at <strong>support@douessay.com</strong> for personalized recommendations or school/class licensing options.</p>
+                    </div>
+                </div>
+                """)
         
         # Button actions
         grade_btn.click(
