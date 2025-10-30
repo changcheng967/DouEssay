@@ -525,12 +525,12 @@ class DouEssay:
         if themes['boring']:
             paragraphs.append(self.create_enhanced_paragraph('boring'))
         
+        # v4.0.1: Track used examples to avoid duplication
         if not paragraphs:
-            paragraphs.extend([
-                self.create_generic_enhanced_paragraph("academic challenges"),
-                self.create_generic_enhanced_paragraph("learning experiences"),
-                self.create_generic_enhanced_paragraph("personal growth")
-            ])
+            used_examples = set()
+            for topic in ["academic challenges", "learning experiences", "personal growth"]:
+                para = self.create_generic_enhanced_paragraph(topic, used_examples)
+                paragraphs.append(para)
         
         # v4.0.1: Expanded transitions to avoid repetition and mechanical feel
         enhanced_body = ""
@@ -600,11 +600,14 @@ class DouEssay:
             deeper_understanding=personal
         )
 
-    def create_generic_enhanced_paragraph(self, topic: str) -> str:
+    def create_generic_enhanced_paragraph(self, topic: str, used_examples: set = None) -> str:
         """
         v4.0.1: Improved to avoid repetitive structures and "on one hand" overuse.
-        Creates varied paragraph structures based on topic.
+        Creates varied paragraph structures based on topic, tracking used examples to avoid duplication.
         """
+        if used_examples is None:
+            used_examples = set()
+        
         # v4.0.1: Use different opening structures to avoid repetition
         opening_structures = [
             f"When examining {topic}, it becomes evident that they present both obstacles and opportunities.",
@@ -623,11 +626,22 @@ class DouEssay:
         
         analysis = random.choice(analysis_statements)
         
-        example = random.choice([
+        # v4.0.1: Ensure examples are unique across paragraphs
+        all_examples = [
             "For example, struggling with a difficult concept initially can lead to a more profound understanding once mastered.",
             "Consider how overcoming academic obstacles builds resilience and problem-solving abilities.",
-            "Research shows that moderate challenge is essential for cognitive growth and skill development."
-        ])
+            "Research shows that moderate challenge is essential for cognitive growth and skill development.",
+            "Studies demonstrate that perseverance through difficulty strengthens problem-solving capabilities.",
+            "Evidence indicates that embracing challenges fosters intellectual maturity and adaptability."
+        ]
+        
+        # Select an unused example
+        available_examples = [ex for ex in all_examples if ex not in used_examples]
+        if not available_examples:
+            available_examples = all_examples  # Reset if all used
+        
+        example = random.choice(available_examples)
+        used_examples.add(example)
         
         insight = random.choice(self.personal_insight_boosters) + " " + random.choice([
             "the most meaningful learning often occurs outside our comfort zones.",
