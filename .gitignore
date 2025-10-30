@@ -48,3 +48,7 @@ htmlcov/
 
 # Logs
 *.log
+
+# License Generator outputs
+generated_licenses.json
+*.encrypted
