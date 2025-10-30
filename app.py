@@ -525,11 +525,11 @@ class DouEssay:
         if themes['boring']:
             paragraphs.append(self.create_enhanced_paragraph('boring'))
         
-        # v4.0.1: Track used examples to avoid duplication
+        # v4.0.1: Track used content (examples and insights) to avoid duplication
         if not paragraphs:
-            used_examples = set()
+            used_content = {'examples': set(), 'insights': set()}
             for topic in ["academic challenges", "learning experiences", "personal growth"]:
-                para = self.create_generic_enhanced_paragraph(topic, used_examples)
+                para = self.create_generic_enhanced_paragraph(topic, used_content)
                 paragraphs.append(para)
         
         # v4.0.1: Expanded transitions to avoid repetition and mechanical feel
@@ -600,13 +600,21 @@ class DouEssay:
             deeper_understanding=personal
         )
 
-    def create_generic_enhanced_paragraph(self, topic: str, used_examples: set = None) -> str:
+    def create_generic_enhanced_paragraph(self, topic: str, used_content: dict = None) -> str:
         """
         v4.0.1: Improved to avoid repetitive structures and "on one hand" overuse.
-        Creates varied paragraph structures based on topic, tracking used examples to avoid duplication.
+        Creates varied paragraph structures based on topic, tracking used content to avoid duplication.
+        
+        Args:
+            topic: The topic for the paragraph
+            used_content: Dict with 'examples' and 'insights' sets to track used content
         """
-        if used_examples is None:
-            used_examples = set()
+        if used_content is None:
+            used_content = {'examples': set(), 'insights': set()}
+        if 'examples' not in used_content:
+            used_content['examples'] = set()
+        if 'insights' not in used_content:
+            used_content['insights'] = set()
         
         # v4.0.1: Use different opening structures to avoid repetition
         opening_structures = [
@@ -636,14 +644,14 @@ class DouEssay:
         ]
         
         # Select an unused example
-        available_examples = [ex for ex in all_examples if ex not in used_examples]
+        available_examples = [ex for ex in all_examples if ex not in used_content['examples']]
         if not available_examples:
             available_examples = all_examples  # Reset if all used
         
         example = random.choice(available_examples)
-        used_examples.add(example)
+        used_content['examples'].add(example)
         
-        # v4.0.1: Also track used insights to avoid repetition
+        # v4.0.1: Also track used insights to avoid repetition (separate from examples)
         all_insights = [
             "the most meaningful learning often occurs outside our comfort zones.",
             "education is as much about developing character as it is about acquiring knowledge.",
@@ -654,13 +662,13 @@ class DouEssay:
         
         insight_prefix = random.choice(self.personal_insight_boosters)
         
-        # Select unused insight
-        available_insights = [ins for ins in all_insights if ins not in used_examples]
+        # Select unused insight (tracked separately from examples)
+        available_insights = [ins for ins in all_insights if ins not in used_content['insights']]
         if not available_insights:
             available_insights = all_insights  # Reset if all used
         
         insight_text = random.choice(available_insights)
-        used_examples.add(insight_text)
+        used_content['insights'].add(insight_text)
         
         insight = f"{insight_prefix} {insight_text}"
         
