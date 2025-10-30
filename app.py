@@ -818,7 +818,7 @@ class DouEssay:
         
         # Technology-specific prompts
         if any(word in essay_lower for word in ['technology', 'computer', 'digital', 'internet']):
-            if content['analysis_quality'] < 0.7:
+            if content.get('analysis_quality', 0) < 0.7:
                 prompts.append("How has technology personally changed the way you learn? Can you describe a specific instance?")
             else:
                 prompts.append("What aspect of technology in education do you find most transformative, and why?")
@@ -840,7 +840,7 @@ class DouEssay:
             specific_prompts_added = True
         
         # v4.0.1: Content-based prompts with more specificity
-        if content['analysis_quality'] < 0.7:
+        if content.get('analysis_quality', 0) < 0.7:
             if not specific_prompts_added:
                 prompts.append("Which example in your essay could be developed further with real-world connections? What details would you add?")
         
