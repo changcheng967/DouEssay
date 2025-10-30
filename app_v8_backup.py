@@ -11,103 +11,17 @@ import supabase
 from supabase import create_client
 import json
 
-# Version Information
-VERSION = "9.0.0"
-VERSION_NAME = "Project Horizon"
-
 class LicenseManager:
     def __init__(self):
         self.supabase_url = os.environ.get('SUPABASE_URL')
         self.supabase_key = os.environ.get('SUPABASE_KEY')
         self.client = create_client(self.supabase_url, self.supabase_key)
         
-        # v9.0.0: Feature access matrix for different tiers (Project Horizon)
+        # v6.0.0: Feature access matrix for different tiers
         self.feature_access = {
-            'free_trial': {
-                'daily_limit': 35,  # 5 essays/week ≈ 5 per day (7-day trial)
-                'basic_grading': True,
-                'neural_rubric': True,  # v9.0.0: Logic 4.0
-                'inline_feedback': False,
-                'draft_history': False,
-                'vocabulary_suggestions': False,
-                'score_breakdown': True,
-                'reflection_prompts': False,
-                'grammar_check': False,
-                'pdf_export': False,
-                'analytics': False,
-                'realtime_mentor': False,  # v9.0.0
-                'smartprofile': False,  # v9.0.0
-                'visual_analytics_2': False,  # v9.0.0
-                'emotionflow': False,  # v9.0.0
-                'api_access': False,
-                'priority_support': False,
-                'batch_grading': False  # v9.0.0
-            },
-            'student_basic': {
-                'daily_limit': 25,
-                'basic_grading': True,
-                'neural_rubric': True,  # v9.0.0: Logic 4.0
-                'inline_feedback': True,
-                'draft_history': True,
-                'vocabulary_suggestions': True,
-                'score_breakdown': True,
-                'reflection_prompts': True,
-                'grammar_check': True,
-                'pdf_export': False,
-                'analytics': False,
-                'realtime_mentor': True,  # v9.0.0
-                'smartprofile': True,  # v9.0.0
-                'visual_analytics_2': False,  # v9.0.0
-                'emotionflow': True,  # v9.0.0
-                'api_access': False,
-                'priority_support': False,
-                'batch_grading': False
-            },
-            'student_premium': {
-                'daily_limit': 100,
-                'basic_grading': True,
-                'neural_rubric': True,  # v9.0.0: Logic 4.0
-                'inline_feedback': True,
-                'draft_history': True,
-                'vocabulary_suggestions': True,
-                'score_breakdown': True,
-                'reflection_prompts': True,
-                'grammar_check': True,
-                'pdf_export': True,
-                'analytics': True,
-                'realtime_mentor': True,  # v9.0.0
-                'smartprofile': True,  # v9.0.0
-                'visual_analytics_2': True,  # v9.0.0
-                'emotionflow': True,  # v9.0.0
-                'api_access': False,
-                'priority_support': True,
-                'batch_grading': False
-            },
-            'teacher_suite': {
-                'daily_limit': float('inf'),
-                'basic_grading': True,
-                'neural_rubric': True,  # v9.0.0: Logic 4.0
-                'inline_feedback': True,
-                'draft_history': True,
-                'vocabulary_suggestions': True,
-                'score_breakdown': True,
-                'reflection_prompts': True,
-                'grammar_check': True,
-                'pdf_export': True,
-                'analytics': True,
-                'realtime_mentor': True,  # v9.0.0
-                'smartprofile': True,  # v9.0.0
-                'visual_analytics_2': True,  # v9.0.0
-                'emotionflow': True,  # v9.0.0
-                'api_access': True,
-                'priority_support': True,
-                'batch_grading': True  # v9.0.0
-            },
-            # Legacy support for old tier names
             'free': {
-                'daily_limit': 35,
+                'daily_limit': 5,
                 'basic_grading': True,
-                'neural_rubric': True,
                 'inline_feedback': False,
                 'draft_history': False,
                 'vocabulary_suggestions': False,
@@ -116,18 +30,12 @@ class LicenseManager:
                 'grammar_check': False,
                 'pdf_export': False,
                 'analytics': False,
-                'realtime_mentor': False,
-                'smartprofile': False,
-                'visual_analytics_2': False,
-                'emotionflow': False,
                 'api_access': False,
-                'priority_support': False,
-                'batch_grading': False
+                'priority_support': False
             },
             'plus': {
-                'daily_limit': 25,
+                'daily_limit': 100,
                 'basic_grading': True,
-                'neural_rubric': True,
                 'inline_feedback': True,
                 'draft_history': True,
                 'vocabulary_suggestions': True,
@@ -136,18 +44,12 @@ class LicenseManager:
                 'grammar_check': True,
                 'pdf_export': False,
                 'analytics': False,
-                'realtime_mentor': True,
-                'smartprofile': True,
-                'visual_analytics_2': False,
-                'emotionflow': True,
                 'api_access': False,
-                'priority_support': False,
-                'batch_grading': False
+                'priority_support': False
             },
             'premium': {
-                'daily_limit': 100,
+                'daily_limit': 1000,
                 'basic_grading': True,
-                'neural_rubric': True,
                 'inline_feedback': True,
                 'draft_history': True,
                 'vocabulary_suggestions': True,
@@ -156,18 +58,12 @@ class LicenseManager:
                 'grammar_check': True,
                 'pdf_export': True,
                 'analytics': True,
-                'realtime_mentor': True,
-                'smartprofile': True,
-                'visual_analytics_2': True,
-                'emotionflow': True,
                 'api_access': False,
-                'priority_support': True,
-                'batch_grading': False
+                'priority_support': True
             },
             'unlimited': {
                 'daily_limit': float('inf'),
                 'basic_grading': True,
-                'neural_rubric': True,
                 'inline_feedback': True,
                 'draft_history': True,
                 'vocabulary_suggestions': True,
@@ -176,13 +72,8 @@ class LicenseManager:
                 'grammar_check': True,
                 'pdf_export': True,
                 'analytics': True,
-                'realtime_mentor': True,
-                'smartprofile': True,
-                'visual_analytics_2': True,
-                'emotionflow': True,
                 'api_access': True,
-                'priority_support': True,
-                'batch_grading': True
+                'priority_support': True
             }
         }
         
@@ -206,16 +97,10 @@ class LicenseManager:
             if usage_response.data:
                 daily_usage = usage_response.data[0]['usage_count']
             
-            # v9.0.0: Updated limits for Project Horizon pricing tiers
             limits = {
-                'free_trial': 35,  # 5 essays per week over 7 days
-                'student_basic': 25,
-                'student_premium': 100,
-                'teacher_suite': float('inf'),
-                # Legacy tier support
-                'free': 35,
-                'plus': 25,
-                'premium': 100,
+                'free': 5,
+                'plus': 100,
+                'premium': 1000,
                 'unlimited': float('inf')
             }
             
@@ -451,97 +336,6 @@ class DouEssay:
             'update_interval': 3,  # Analyze every 3 words typed
             'quick_check_items': ['spelling', 'basic_grammar', 'sentence_length']
         }
-        
-        # v9.0.0: Initialize Project Horizon features
-        self.setup_v9_enhancements()
-    
-    def setup_v9_enhancements(self):
-        """
-        v9.0.0: Project Horizon - Initialize Neural Rubric Engine, SmartProfile 2.0,
-        Real-Time Mentor 2.0, EmotionFlow Engine, and Visual Analytics 2.0.
-        """
-        # v9.0.0: Neural Rubric Engine (Logic 4.0) - Four category weights
-        self.neural_rubric_categories = {
-            'knowledge': {
-                'weight': 0.30,
-                'indicators': ['fact', 'evidence', 'research', 'study', 'data', 'statistics',
-                              'according to', 'experts', 'scholars', 'theory', 'concept',
-                              'understanding', 'comprehension', 'accurate', 'precise'],
-                'description': 'Knowledge & Understanding - Demonstrates factual accuracy and comprehension'
-            },
-            'thinking': {
-                'weight': 0.25,
-                'indicators': ['analyze', 'evaluate', 'compare', 'contrast', 'interpret',
-                              'synthesize', 'infer', 'deduce', 'critical', 'logical',
-                              'reasoning', 'perspective', 'complex', 'nuanced', 'depth'],
-                'description': 'Thinking & Inquiry - Shows critical thinking and analytical depth'
-            },
-            'communication': {
-                'weight': 0.25,
-                'indicators': ['clear', 'coherent', 'organized', 'structured', 'transition',
-                              'flow', 'paragraph', 'thesis', 'topic sentence', 'conclusion',
-                              'effectively', 'articulate', 'express', 'convey', 'persuasive'],
-                'description': 'Communication - Expresses ideas clearly and effectively'
-            },
-            'application': {
-                'weight': 0.20,
-                'indicators': ['real-world', 'experience', 'example', 'relevant', 'connect',
-                              'apply', 'practical', 'personal', 'meaningful', 'impact',
-                              'significance', 'implications', 'contemporary', 'current'],
-                'description': 'Application - Applies knowledge to real-world contexts'
-            }
-        }
-        
-        # v9.0.0: SmartProfile 2.0 - 20+ tracking dimensions
-        self.smartprofile_dimensions = [
-            'clarity', 'argument_depth', 'tone_control', 'logic_strength', 'creativity',
-            'evidence_quality', 'vocabulary_sophistication', 'grammar_accuracy',
-            'structure_coherence', 'thesis_strength', 'analysis_depth', 'engagement_level',
-            'originality', 'critical_thinking', 'rhetorical_effectiveness', 'research_integration',
-            'counter_argument_handling', 'conclusion_strength', 'transition_quality', 'emotional_resonance'
-        ]
-        
-        # v9.0.0: EmotionFlow categories for sentiment mapping
-        self.emotionflow_categories = {
-            'engagement_level': {'min': 0, 'max': 100},
-            'emotional_tone': ['Positive', 'Neutral', 'Reflective', 'Assertive', 'Empathetic', 'Analytical'],
-            'motivation_impact': ['Low', 'Moderate', 'High', 'Very High']
-        }
-        
-        # v9.0.0: Multilingual expansion - Spanish and Chinese foundations
-        self.supported_languages['es'] = {
-            'name': 'Español',
-            'thesis_keywords': ['importante', 'esencial', 'crucial', 'significativo',
-                              'fundamental', 'necesario', 'vital', 'clave'],
-            'example_indicators': ['por ejemplo', 'como', 'tal como', 'específicamente',
-                                  'ilustrado por', 'demostrado por', 'según']
-        }
-        
-        self.supported_languages['zh'] = {
-            'name': '中文简体',
-            'thesis_keywords': ['重要', '关键', '必要', '基本', '核心', '主要'],
-            'example_indicators': ['例如', '比如', '举例来说', '具体来说', '根据']
-        }
-        
-        # v9.0.0: Real-Time Mentor 2.0 - Enhanced live feedback settings
-        self.realtime_mentor_config = {
-            'target_latency': 1.0,  # Target <1s response time
-            'check_interval': 2,  # Check every 2-3 sentences
-            'highlight_categories': ['clarity', 'logic', 'tone', 'coherence'],
-            'suggestion_types': ['grammar', 'structure', 'vocabulary', 'flow']
-        }
-        
-        # v9.0.0: Achievement badges system
-        self.achievement_badges = {
-            'first_essay': '🎓 First Steps',
-            'level_4_achieved': '⭐ Level 4 Master',
-            'five_essays': '📚 Dedicated Writer',
-            'ten_essays': '🏆 Essay Champion',
-            'perfect_grammar': '✍️ Grammar Guru',
-            'strong_argument': '🎯 Logic Master',
-            'creative_thinker': '💡 Creative Mind',
-            'consistent_improver': '📈 Growth Mindset'
-        }
 
 
 
@@ -614,375 +408,24 @@ class DouEssay:
             return validation_result
         else:
             return {'valid': False, 'message': 'Failed to update usage count'}
-    
-    def assess_with_neural_rubric(self, text: str) -> Dict:
-        """
-        v9.0.0: Logic 4.0 Neural Rubric Engine
-        AI dynamically matches text features to teacher rubrics in 4 categories:
-        - Knowledge & Understanding
-        - Thinking & Inquiry
-        - Communication
-        - Application
-        
-        Returns rubric scores, overall score, rationale, and teacher alignment metrics.
-        Trained on 25,000+ Ontario and IB-marked essays with >99.7% teacher alignment.
-        """
-        text_lower = text.lower()
-        words = text_lower.split()
-        sentences = [s.strip() for s in re.split(r'[.!?]+', text) if s.strip()]
-        word_count = len(words)
-        
-        rubric_scores = {}
-        rubric_rationales = {}
-        
-        # Assess each rubric category
-        for category, config in self.neural_rubric_categories.items():
-            # Count indicators for this category
-            indicator_matches = sum(1 for indicator in config['indicators'] 
-                                   if indicator in text_lower)
-            
-            # Calculate base score (0-4 scale, Ontario levels)
-            indicator_density = indicator_matches / max(1, word_count / 100)
-            
-            # Adjust based on text features
-            if category == 'knowledge':
-                # Factual accuracy and comprehension
-                base_score = self.detect_concept_accuracy(text, indicator_density)
-            elif category == 'thinking':
-                # Analytical depth and critical thinking
-                base_score = self.evaluate_depth(text, indicator_density)
-            elif category == 'communication':
-                # Clarity, organization, style
-                base_score = self.measure_clarity_and_style(text, indicator_density)
-            elif category == 'application':
-                # Real-world relevance and context
-                base_score = self.check_contextual_relevance(text, indicator_density)
-            else:
-                base_score = min(4.0, indicator_density * 2.0)
-            
-            # Store scores (Ontario Level 1-4+ scale)
-            rubric_scores[category] = round(min(4.5, max(1.0, base_score)), 2)
-            
-            # Generate rationale
-            rubric_rationales[category] = self.generate_rubric_rationale(
-                category, rubric_scores[category], indicator_matches
-            )
-        
-        # Calculate weighted overall score
-        overall_score = sum(
-            rubric_scores[cat] * self.neural_rubric_categories[cat]['weight']
-            for cat in rubric_scores
-        )
-        
-        # Map to percentage (1-4 scale to 50-100%)
-        overall_percentage = 50 + (overall_score - 1) * (50 / 3.5)
-        
-        return {
-            'rubric_scores': rubric_scores,
-            'rubric_rationales': rubric_rationales,
-            'overall_score': round(overall_score, 2),
-            'overall_percentage': round(overall_percentage, 1),
-            'teacher_alignment': '>99.7%',
-            'ontario_level': self.get_ontario_level_from_rubric(overall_score),
-            'category_descriptions': {
-                cat: config['description'] 
-                for cat, config in self.neural_rubric_categories.items()
-            }
-        }
-    
-    def detect_concept_accuracy(self, text: str, indicator_density: float) -> float:
-        """v9.0.0: Evaluates factual accuracy and comprehension for Knowledge rubric."""
-        text_lower = text.lower()
-        
-        # Check for evidence-based claims
-        evidence_phrases = ['research shows', 'studies indicate', 'according to', 
-                          'data reveals', 'experts', 'scholars']
-        evidence_count = sum(1 for phrase in evidence_phrases if phrase in text_lower)
-        
-        # Factual language indicators
-        factual_words = ['fact', 'evidence', 'prove', 'demonstrate', 'show', 'indicate']
-        factual_count = sum(1 for word in factual_words if word in text_lower)
-        
-        # Calculate score (1-4 scale)
-        base_score = 1.5 + (indicator_density * 1.0) + (evidence_count * 0.3) + (factual_count * 0.1)
-        return min(4.5, base_score)
-    
-    def evaluate_depth(self, text: str, indicator_density: float) -> float:
-        """v9.0.0: Evaluates analytical depth and critical thinking for Thinking rubric."""
-        text_lower = text.lower()
-        
-        # Check for analytical language
-        analytical_phrases = ['analyze', 'evaluate', 'compare', 'contrast', 'interpret',
-                            'critical', 'complex', 'nuanced', 'perspective']
-        analytical_count = sum(1 for phrase in analytical_phrases if phrase in text_lower)
-        
-        # Check for depth indicators from v8.0.0 claim depth
-        deep_thinking = sum(1 for word in self.claim_depth_indicators['deep'] 
-                          if word in text_lower)
-        
-        # Calculate score
-        base_score = 1.5 + (indicator_density * 0.8) + (analytical_count * 0.2) + (deep_thinking * 0.15)
-        return min(4.5, base_score)
-    
-    def measure_clarity_and_style(self, text: str, indicator_density: float) -> float:
-        """v9.0.0: Evaluates clarity, organization, and style for Communication rubric."""
-        # Check for organizational elements
-        has_thesis = any(keyword in text.lower() for keyword in self.thesis_keywords[:10])
-        has_transitions = any(indicator in text.lower() for indicator in 
-                            ['furthermore', 'moreover', 'however', 'therefore', 'thus'])
-        has_conclusion = any(phrase in text.lower() for phrase in 
-                           ['in conclusion', 'to conclude', 'ultimately', 'in summary'])
-        
-        # Sentence variety and structure
-        sentences = [s.strip() for s in re.split(r'[.!?]+', text) if s.strip()]
-        avg_sentence_length = len(text.split()) / max(1, len(sentences))
-        variety_score = 1.0 if 15 <= avg_sentence_length <= 25 else 0.5
-        
-        # Calculate score
-        structure_bonus = (int(has_thesis) + int(has_transitions) + int(has_conclusion)) * 0.3
-        base_score = 1.5 + (indicator_density * 0.8) + structure_bonus + variety_score
-        return min(4.5, base_score)
-    
-    def check_contextual_relevance(self, text: str, indicator_density: float) -> float:
-        """v9.0.0: Evaluates real-world application and relevance for Application rubric."""
-        text_lower = text.lower()
-        
-        # Check for personal connection and examples
-        personal_indicators = sum(1 for phrase in self.insight_indicators if phrase in text_lower)
-        example_indicators = sum(1 for phrase in self.example_indicators if phrase in text_lower)
-        
-        # Check for real-world context
-        real_world_phrases = ['real-world', 'in practice', 'current', 'today', 
-                             'contemporary', 'modern', 'society']
-        real_world_count = sum(1 for phrase in real_world_phrases if phrase in text_lower)
-        
-        # Calculate score
-        base_score = 1.5 + (indicator_density * 0.7) + (personal_indicators * 0.15) + \
-                    (example_indicators * 0.1) + (real_world_count * 0.1)
-        return min(4.5, base_score)
-    
-    def generate_rubric_rationale(self, category: str, score: float, 
-                                 indicator_count: int) -> str:
-        """v9.0.0: Generates teacher-aligned rationale for rubric scores."""
-        level = self.get_ontario_level_from_rubric(score)
-        
-        rationales = {
-            'knowledge': {
-                'Level 4+': f'Exceptional demonstration of factual knowledge with {indicator_count} strong evidence markers. Shows deep comprehension and accurate understanding.',
-                'Level 4': f'Strong factual foundation with {indicator_count} evidence markers. Demonstrates solid comprehension of concepts.',
-                'Level 3': f'Adequate knowledge shown with {indicator_count} evidence markers. Understanding is present but could be deeper.',
-                'Level 2': f'Basic knowledge evident but limited depth. Only {indicator_count} evidence markers found.',
-                'Level 1': 'Minimal factual support. Needs more evidence-based claims and clearer comprehension.'
-            },
-            'thinking': {
-                'Level 4+': f'Sophisticated critical thinking with {indicator_count} analytical markers. Shows nuanced understanding and complex reasoning.',
-                'Level 4': f'Strong analytical depth with {indicator_count} thinking markers. Good critical evaluation present.',
-                'Level 3': f'Adequate analysis with {indicator_count} thinking markers. Some critical thinking evident.',
-                'Level 2': f'Limited analytical depth. Only {indicator_count} thinking markers present.',
-                'Level 1': 'Minimal critical thinking. Needs more analysis and evaluation.'
-            },
-            'communication': {
-                'Level 4+': f'Exceptional clarity and organization with {indicator_count} communication markers. Writing is highly effective and engaging.',
-                'Level 4': f'Clear and well-organized with {indicator_count} communication markers. Ideas flow smoothly.',
-                'Level 3': f'Generally clear with {indicator_count} communication markers. Organization is adequate.',
-                'Level 2': f'Some clarity issues. Limited organization with {indicator_count} markers.',
-                'Level 1': 'Needs improvement in clarity and structure. Ideas are hard to follow.'
-            },
-            'application': {
-                'Level 4+': f'Excellent real-world connections with {indicator_count} application markers. Highly relevant and meaningful examples.',
-                'Level 4': f'Strong practical application with {indicator_count} markers. Good real-world relevance.',
-                'Level 3': f'Adequate application with {indicator_count} markers. Some real-world connection present.',
-                'Level 2': f'Limited application. Only {indicator_count} relevance markers found.',
-                'Level 1': 'Minimal real-world connection. Needs more practical examples and relevance.'
-            }
-        }
-        
-        return rationales.get(category, {}).get(level, 'Assessment in progress.')
-    
-    def get_ontario_level_from_rubric(self, score: float) -> str:
-        """v9.0.0: Maps numerical rubric score to Ontario achievement level."""
-        if score >= 4.2:
-            return 'Level 4+'
-        elif score >= 3.5:
-            return 'Level 4'
-        elif score >= 2.5:
-            return 'Level 3'
-        elif score >= 1.5:
-            return 'Level 2'
-        else:
-            return 'Level 1'
-    
-    def analyze_emotionflow(self, text: str) -> Dict:
-        """
-        v9.0.0: EmotionFlow Engine - Human-Like Engagement Scoring
-        Analyzes tone, empathy, and engagement through semantic and syntactic sentiment mapping.
-        Outputs:
-        - Engagement Level (0-100)
-        - Emotional Tone (Positive / Neutral / Reflective / Assertive / Empathetic / Analytical)
-        - Motivation Impact (Low / Moderate / High / Very High)
-        - Teacher-Readable Comments
-        """
-        text_lower = text.lower()
-        words = text_lower.split()
-        word_count = len(words)
-        
-        # Analyze engagement through emotional word detection
-        engagement_words = 0
-        tone_indicators = {
-            'positive': 0,
-            'neutral': 0,
-            'reflective': 0,
-            'assertive': 0,
-            'empathetic': 0,
-            'analytical': 0
-        }
-        
-        # Positive tone indicators
-        positive_words = ['hopeful', 'inspiring', 'encouraging', 'optimistic', 'uplifting',
-                         'passionate', 'enthusiastic', 'excited', 'proud', 'grateful', 'joyful']
-        tone_indicators['positive'] = sum(1 for word in positive_words if word in text_lower)
-        
-        # Reflective tone indicators
-        reflective_words = ['reflect', 'consider', 'ponder', 'contemplate', 'realize',
-                           'understand', 'learn', 'discover', 'insight', 'perspective']
-        tone_indicators['reflective'] = sum(1 for word in reflective_words if word in text_lower)
-        
-        # Assertive tone indicators
-        assertive_words = ['must', 'should', 'need to', 'argue', 'assert', 'maintain',
-                          'claim', 'insist', 'demand', 'require', 'essential', 'crucial']
-        tone_indicators['assertive'] = sum(1 for word in assertive_words if word in text_lower)
-        
-        # Empathetic tone indicators
-        empathetic_words = ['understand', 'relate', 'appreciate', 'recognize', 'acknowledge',
-                           'compassion', 'empathy', 'care', 'concern', 'sensitive']
-        tone_indicators['empathetic'] = sum(1 for word in empathetic_words if word in text_lower)
-        
-        # Analytical tone indicators
-        analytical_words = ['analyze', 'examine', 'evaluate', 'assess', 'investigate',
-                           'study', 'research', 'evidence', 'data', 'logical', 'rational']
-        tone_indicators['analytical'] = sum(1 for word in analytical_words if word in text_lower)
-        
-        # Neutral (factual) tone - lack of emotional words
-        total_toned_words = sum(tone_indicators.values())
-        if total_toned_words < word_count * 0.05:  # Less than 5% toned words
-            tone_indicators['neutral'] = word_count // 20
-        
-        # Calculate total engagement
-        engagement_words = total_toned_words
-        engagement_level = min(100, int((engagement_words / max(1, word_count / 50)) * 100))
-        
-        # Determine dominant emotional tone
-        dominant_tone = max(tone_indicators, key=tone_indicators.get)
-        if tone_indicators[dominant_tone] == 0:
-            dominant_tone = 'Neutral'
-        else:
-            dominant_tone = dominant_tone.capitalize()
-        
-        # Assess motivation impact
-        persuasive_elements = sum(1 for phrase in ['must', 'should', 'need to', 'important',
-                                                   'crucial', 'essential', 'vital'] 
-                                 if phrase in text_lower)
-        emotional_intensity = sum(1 for phrase in ['deeply', 'profoundly', 'tremendously',
-                                                   'significantly', 'remarkably'] 
-                                 if phrase in text_lower)
-        
-        motivation_score = persuasive_elements + emotional_intensity + (engagement_words // 5)
-        
-        if motivation_score >= 8:
-            motivation_impact = 'Very High'
-        elif motivation_score >= 5:
-            motivation_impact = 'High'
-        elif motivation_score >= 3:
-            motivation_impact = 'Moderate'
-        else:
-            motivation_impact = 'Low'
-        
-        # Generate teacher-readable comment
-        comment = self.generate_emotionflow_comment(
-            dominant_tone, engagement_level, motivation_impact, tone_indicators
-        )
-        
-        return {
-            'engagement_level': engagement_level,
-            'emotional_tone': dominant_tone,
-            'motivation_impact': motivation_impact,
-            'tone_distribution': tone_indicators,
-            'teacher_comment': comment,
-            'engagement_words_count': engagement_words
-        }
-    
-    def generate_emotionflow_comment(self, tone: str, engagement: int, 
-                                    motivation: str, tone_dist: Dict) -> str:
-        """v9.0.0: Generates teacher-readable EmotionFlow feedback."""
-        
-        # Base comment on dominant tone
-        tone_comments = {
-            'Positive': "The essay maintains an optimistic and encouraging tone throughout.",
-            'Reflective': "The tone is thoughtful and introspective, showing deep consideration.",
-            'Assertive': "The writing demonstrates strong conviction and clear argumentation.",
-            'Empathetic': "The essay shows understanding and compassion for different perspectives.",
-            'Analytical': "The tone is objective and evidence-based, with logical reasoning.",
-            'Neutral': "The tone is balanced and factual, maintaining objectivity."
-        }
-        
-        base_comment = tone_comments.get(tone, "The essay presents its ideas clearly.")
-        
-        # Add engagement feedback
-        if engagement >= 70:
-            engagement_comment = " The writing is highly engaging and emotionally resonant."
-        elif engagement >= 40:
-            engagement_comment = " The engagement level is adequate with moderate emotional connection."
-        else:
-            engagement_comment = " Consider adding more emotional variety to increase reader engagement."
-        
-        # Add motivation feedback
-        if motivation == 'Very High':
-            motivation_comment = " The essay is highly persuasive and motivationally impactful."
-        elif motivation == 'High':
-            motivation_comment = " Good motivational impact with persuasive elements."
-        elif motivation == 'Moderate':
-            motivation_comment = " Moderate persuasive power - try strengthening emotional appeals."
-        else:
-            motivation_comment = " To increase impact, try mixing assertive and emotionally resonant language."
-        
-        # Suggestions based on tone distribution
-        tone_variety = len([count for count in tone_dist.values() if count > 0])
-        if tone_variety <= 2:
-            variety_comment = " Try incorporating more tonal variety for a richer reading experience."
-        else:
-            variety_comment = " Good tonal variety enhances the essay's depth."
-        
-        return base_comment + engagement_comment + motivation_comment + variety_comment
 
     def grade_essay(self, essay_text: str, grade_level: str = "Grade 10") -> Dict:
         """
-        v9.0.0: Enhanced with Neural Rubric Engine (Logic 4.0) and EmotionFlow analysis.
-        Maintains backwards compatibility with v8.0.0 analysis methods.
+        v6.0.0: Enhanced with grade level support and comprehensive analysis.
         """
         if not essay_text or len(essay_text.strip()) < 100:
             return self.handle_short_essay(essay_text)
         
-        # v9.0.0: Neural Rubric Engine (Logic 4.0) assessment
-        neural_rubric_result = self.assess_with_neural_rubric(essay_text)
-        
-        # v9.0.0: EmotionFlow Engine analysis
-        emotionflow_result = self.analyze_emotionflow(essay_text)
-        
-        # Existing v8.0.0 analysis (maintained for comprehensive feedback)
         stats = self.analyze_basic_stats(essay_text)
         structure = self.analyze_essay_structure_semantic(essay_text)
         content = self.analyze_essay_content_semantic(essay_text)
         grammar = self.check_grammar_errors(essay_text)
         application = self.analyze_personal_application_semantic(essay_text)
         
-        # v9.0.0: Use Neural Rubric score as primary, with v8 score as backup
-        score = neural_rubric_result['overall_percentage']
-        rubric_level = neural_rubric_result['ontario_level']
-        
-        # Generate comprehensive feedback incorporating all analyses
-        feedback = self.generate_ontario_teacher_feedback(
-            score, rubric_level, stats, structure, content, grammar, application, essay_text
-        )
+        # v6.0.0: Pass grade_level to scoring calculation
+        score = self.calculate_calibrated_ontario_score(stats, structure, content, grammar, application, grade_level)
+        rubric_level = self.get_accurate_rubric_level(score)
+        feedback = self.generate_ontario_teacher_feedback(score, rubric_level, stats, structure, content, grammar, application, essay_text)
         corrections = self.get_grammar_corrections(essay_text)
         inline_feedback = self.analyze_inline_feedback(essay_text)
         
@@ -992,8 +435,6 @@ class DouEssay:
             "feedback": feedback,
             "corrections": corrections,
             "inline_feedback": inline_feedback,
-            "neural_rubric": neural_rubric_result,  # v9.0.0
-            "emotionflow": emotionflow_result,  # v9.0.0
             "detailed_analysis": {
                 "statistics": stats,
                 "structure": structure,
