@@ -375,57 +375,143 @@ class DouEssay:
         }
 
     def analyze_essay_themes(self, essay: str) -> Dict:
+        """
+        v4.0.1: Enhanced to detect specific topics (e.g., technology, sports, arts)
+        in addition to generic education themes to preserve topic focus.
+        """
         text_lower = essay.lower()
+        
+        # v4.0.1: Detect specific topics to maintain focus
+        specific_topics = {
+            'technology': any(word in text_lower for word in ['technology', 'computer', 'digital', 'internet', 'software', 'app', 'device', 'tablet', 'smartphone']),
+            'sports': any(word in text_lower for word in ['sport', 'athlete', 'team', 'game', 'play', 'physical', 'exercise']),
+            'arts': any(word in text_lower for word in ['art', 'music', 'paint', 'creative', 'artist', 'cultural']),
+            'friendship': any(word in text_lower for word in ['friend', 'friendship', 'social', 'companion', 'peer']),
+            'environment': any(word in text_lower for word in ['environment', 'climate', 'nature', 'pollution', 'sustainability']),
+            'reading': any(word in text_lower for word in ['read', 'book', 'literature', 'novel', 'story'])
+        }
+        
+        # Original generic themes
         themes = {
             'workload': any(word in text_lower for word in ['work', 'homework', 'assignment', 'busy']),
             'tests': any(word in text_lower for word in ['test', 'exam', 'stress', 'nervous']),
             'boring': any(word in text_lower for word in ['boring', 'not interesting', 'pay attention']),
             'difficult': any(word in text_lower for word in ['hard', 'difficult', 'challenging']),
-            'school_negative': any(word in text_lower for word in ['not fun', 'don\'t like', 'hate', 'dislike'])
+            'school_negative': any(word in text_lower for word in ['not fun', 'don\'t like', 'hate', 'dislike']),
+            # v4.0.1: Add detected specific topics
+            'specific_topic': next((topic for topic, detected in specific_topics.items() if detected), None),
+            'has_specific_topic': any(specific_topics.values())
         }
         return themes
 
     def enhance_introduction(self, original_essay: str, themes: Dict) -> str:
+        """
+        v4.0.1: Enhanced to preserve specific topics (e.g., technology, sports)
+        instead of defaulting to generic education themes.
+        """
         introduction_templates = [
-            "While education is universally recognized as {positive_adj}, many students find the academic journey to be {challenge_adj}. This essay will explore {topic_focus} and examine {specific_aspects}.",
-            "The educational experience, though {positive_adj}, presents significant {challenges} for students. This analysis will delve into {key_issues} and consider {broader_implications}.",
-            "Despite the {positive_aspects} of formal education, many learners encounter substantial {difficulties}. This discussion will address {main_points} and reflect on {personal_significance}."
+            "While {subject} is universally recognized as {positive_adj}, {context} This essay will explore {topic_focus} and examine {specific_aspects}.",
+            "The {domain}, though {positive_adj}, presents {challenges} for {audience}. This analysis will delve into {key_issues} and consider {broader_implications}.",
+            "Despite the {positive_aspects} of {subject}, {context_challenge} This discussion will address {main_points} and reflect on {personal_significance}."
         ]
         
         template = random.choice(introduction_templates)
         positive_adjs = ['essential', 'valuable', 'important', 'crucial']
         challenge_adjs = ['challenging', 'demanding', 'complex', 'multifaceted']
-        challenges = ['challenges', 'difficulties', 'obstacles', 'hurdles']
-        difficulties = ['obstacles', 'hardships', 'complications', 'barriers']  # Separate list for semantic variety
+        challenges = ['significant challenges', 'various difficulties', 'notable obstacles', 'particular hurdles']
         positive_aspects = ['benefits', 'advantages', 'positive aspects', 'merits']
         
-        if themes['workload']:
+        # v4.0.1: Preserve specific topics when detected
+        if themes.get('has_specific_topic') and themes.get('specific_topic'):
+            topic = themes['specific_topic']
+            if topic == 'technology':
+                subject = "technology in education"
+                domain = "integration of technology in learning"
+                context = "the way students learn has been transformed by digital tools."
+                context_challenge = "technology also presents challenges that must be addressed."
+                topic_focus = "how technology impacts the learning experience"
+                specific_aspects = "both the benefits and challenges of educational technology"
+                audience = "students and educators"
+            elif topic == 'sports':
+                subject = "athletic participation"
+                domain = "world of sports"
+                context = "physical activity plays a vital role in student development."
+                context_challenge = "competitive sports also bring unique challenges."
+                topic_focus = "the role of sports in education"
+                specific_aspects = "how athletic pursuits shape personal growth"
+                audience = "student athletes"
+            elif topic == 'arts':
+                subject = "artistic education"
+                domain = "realm of creative arts"
+                context = "creativity and artistic expression enrich the learning experience."
+                context_challenge = "pursuing the arts requires dedication and perseverance."
+                topic_focus = "the significance of arts in education"
+                specific_aspects = "how creative pursuits foster personal development"
+                audience = "students and artists"
+            elif topic == 'reading':
+                subject = "reading and literacy"
+                domain = "practice of reading"
+                context = "reading remains fundamental to academic success."
+                context_challenge = "developing strong reading habits requires consistent effort."
+                topic_focus = "the importance of reading in education"
+                specific_aspects = "how reading shapes critical thinking and knowledge"
+                audience = "students and readers"
+            else:
+                # Default for other specific topics
+                subject = f"{topic} in education"
+                domain = f"field of {topic}"
+                context = f"the impact of {topic} on learning is significant."
+                context_challenge = f"{topic} presents both opportunities and challenges."
+                topic_focus = f"the role of {topic} in education"
+                specific_aspects = f"how {topic} affects student development"
+                audience = "students"
+        elif themes['workload']:
+            subject = "education"
+            domain = "educational experience"
+            context = "many students find the academic journey to be demanding."
+            context_challenge = "many learners encounter substantial obstacles."
             topic_focus = "the challenges of academic workload management"
             specific_aspects = "strategies for balancing academic demands"
+            audience = "students"
         elif themes['tests']:
+            subject = "education"
+            domain = "educational experience"
+            context = "assessment methods significantly impact student learning."
+            context_challenge = "evaluation systems can create considerable pressure."
             topic_focus = "the psychological impact of assessment methods"
             specific_aspects = "alternative approaches to student evaluation"
+            audience = "students"
         else:
+            subject = "education"
+            domain = "educational experience"
+            context = "many students find the academic journey to be complex."
+            context_challenge = "many learners encounter various difficulties."
             topic_focus = "the complex nature of the educational experience"
             specific_aspects = "both the challenges and rewards of learning"
+            audience = "students"
         
         enhanced_intro = template.format(
+            subject=subject,
+            domain=domain,
+            context=context,
+            context_challenge=context_challenge,
             positive_adj=random.choice(positive_adjs),
             challenge_adj=random.choice(challenge_adjs),
             challenges=random.choice(challenges),
-            difficulties=random.choice(difficulties),  # Separate list for variety
             positive_aspects=random.choice(positive_aspects),
             topic_focus=topic_focus,
             specific_aspects=specific_aspects,
             key_issues=topic_focus,
             broader_implications=specific_aspects,
             main_points=topic_focus,
-            personal_significance=specific_aspects
+            personal_significance=specific_aspects,
+            audience=audience
         )
         
-        if random.random() > 0.5:
-            transition = random.choice(self.level4_transitions)
-            enhanced_intro = f"{transition.capitalize()}, {enhanced_intro.lower()}"
+        # v4.0.1: Reduce frequency of transition words at start (can sound awkward)
+        if random.random() > 0.7:
+            transition = random.choice(['Furthermore', 'Moreover', 'Additionally'])
+            enhanced_intro = f"{transition}, {enhanced_intro[0].lower()}{enhanced_intro[1:]}"
         
         return enhanced_intro
 
@@ -439,17 +525,28 @@ class DouEssay:
         if themes['boring']:
             paragraphs.append(self.create_enhanced_paragraph('boring'))
         
+        # v4.0.1: Track used content (examples and insights) to avoid duplication
         if not paragraphs:
-            paragraphs.extend([
-                self.create_generic_enhanced_paragraph("academic challenges"),
-                self.create_generic_enhanced_paragraph("learning experiences"),
-                self.create_generic_enhanced_paragraph("personal growth")
-            ])
+            used_content = {'examples': set(), 'insights': set()}
+            for topic in ["academic challenges", "learning experiences", "personal growth"]:
+                para = self.create_generic_enhanced_paragraph(topic, used_content)
+                paragraphs.append(para)
         
+        # v4.0.1: Expanded transitions to avoid repetition and mechanical feel
         enhanced_body = ""
+        varied_transitions = [
+            'Furthermore,', 'Additionally,', 'Moreover,', 
+            'In addition,', 'Another consideration is that',
+            'Equally important,', 'Beyond this,', 'Similarly,'
+        ]
+        
         for i, paragraph in enumerate(paragraphs):
             if i > 0:
-                transition = random.choice(['Furthermore,', 'Additionally,', 'Moreover,'])
+                # v4.0.1: Ensure transitions are not repeated
+                if i < len(varied_transitions):
+                    transition = varied_transitions[i]
+                else:
+                    transition = random.choice(['Furthermore,', 'Additionally,', 'Moreover,'])
                 paragraph = f"{transition} {paragraph[0].lower()}{paragraph[1:]}"
             enhanced_body += paragraph + "\n\n"
         
@@ -503,36 +600,87 @@ class DouEssay:
             deeper_understanding=personal
         )
 
-    def create_generic_enhanced_paragraph(self, topic: str) -> str:
-        perspectives = [
-            f"On one hand, {topic} present obvious difficulties that can discourage students.",
-            f"However, a deeper examination reveals that these very challenges often provide the most valuable learning opportunities.",
-            f"This duality underscores the complex nature of education as both demanding and rewarding."
+    def create_generic_enhanced_paragraph(self, topic: str, used_content: dict = None) -> str:
+        """
+        v4.0.1: Improved to avoid repetitive structures and "on one hand" overuse.
+        Creates varied paragraph structures based on topic, tracking used content to avoid duplication.
+        
+        Args:
+            topic: The topic for the paragraph
+            used_content: Dict with 'examples' and 'insights' sets to track used content
+        """
+        if used_content is None:
+            used_content = {'examples': set(), 'insights': set()}
+        
+        # v4.0.1: Use different opening structures to avoid repetition
+        opening_structures = [
+            f"When examining {topic}, it becomes evident that they present both obstacles and opportunities.",
+            f"The experience of {topic} reveals a complex dynamic worth exploring.",
+            f"Considering the nature of {topic}, we find both significant challenges and valuable lessons."
         ]
         
-        example = random.choice([
+        opening = random.choice(opening_structures)
+        
+        # v4.0.1: Varied analytical statements
+        analysis_statements = [
+            f"While {topic} may initially seem discouraging, they often foster the most significant growth.",
+            f"Though {topic} can be demanding, they frequently lead to profound learning experiences.",
+            f"Despite the difficulty {topic} may present, they typically yield important developmental benefits."
+        ]
+        
+        analysis = random.choice(analysis_statements)
+        
+        # v4.0.1: Ensure examples are unique across paragraphs
+        all_examples = [
             "For example, struggling with a difficult concept initially can lead to a more profound understanding once mastered.",
             "Consider how overcoming academic obstacles builds resilience and problem-solving abilities.",
-            "Research shows that moderate challenge is essential for cognitive growth and skill development."
-        ])
+            "Research shows that moderate challenge is essential for cognitive growth and skill development.",
+            "Studies demonstrate that perseverance through difficulty strengthens problem-solving capabilities.",
+            "Evidence indicates that embracing challenges fosters intellectual maturity and adaptability."
+        ]
         
-        insight = random.choice(self.personal_insight_boosters) + " " + random.choice([
+        # Select an unused example
+        available_examples = [ex for ex in all_examples if ex not in used_content['examples']]
+        if not available_examples:
+            available_examples = all_examples  # Reset if all used
+        
+        example = random.choice(available_examples)
+        used_content['examples'].add(example)
+        
+        # v4.0.1: Also track used insights to avoid repetition (separate from examples)
+        all_insights = [
             "the most meaningful learning often occurs outside our comfort zones.",
             "education is as much about developing character as it is about acquiring knowledge.",
-            "true understanding comes from engaging deeply with challenging material."
-        ])
+            "true understanding comes from engaging deeply with challenging material.",
+            "challenges shape us into more capable and resilient individuals.",
+            "growth emerges from embracing difficulty rather than avoiding it."
+        ]
         
-        return f"{perspectives[0]} {perspectives[1]} {example} {perspectives[2]} {insight}"
+        insight_prefix = random.choice(self.personal_insight_boosters)
+        
+        # Select unused insight (tracked separately from examples)
+        available_insights = [ins for ins in all_insights if ins not in used_content['insights']]
+        if not available_insights:
+            available_insights = all_insights  # Reset if all used
+        
+        insight_text = random.choice(available_insights)
+        used_content['insights'].add(insight_text)
+        
+        insight = f"{insight_prefix} {insight_text}"
+        
+        return f"{opening} {analysis} {example} {insight}"
 
     def enhance_conclusion(self, original_essay: str, themes: Dict) -> str:
+        # v4.0.1: Fixed grammar in template - "challenges...are balanced" -> "challenges...is balanced"
         conclusion_templates = [
             "In conclusion, while {acknowledge_challenges}, the {value} of education cannot be overstated. The {lessons} learned extend far beyond the classroom.",
-            "Ultimately, the {challenges} of schooling are balanced by its {rewards}. This balance teaches us about {deeper_meaning} and prepares us for {future_applications}.",
+            "Ultimately, the {challenges} of schooling is balanced by its {rewards}. This balance teaches us about {deeper_meaning} and prepares us for {future_applications}.",
             "Therefore, despite the {difficulties} encountered, education remains {fundamentally_important}. The {skills} and {insights} gained have lasting {significance}."
         ]
         
         template = random.choice(conclusion_templates)
-        challenges = ['demanding workload', 'assessment pressures', 'engagement challenges']
+        # v4.0.1: Ensure grammatical consistency - all singular for "is balanced"
+        challenges = ['demanding nature', 'challenging aspect', 'complex reality']
         values = ['transformative power', 'lasting value', 'fundamental importance']
         lessons = ['resilience', 'critical thinking', 'self-discipline']
         rewards = ['intellectual rewards', 'personal growth', 'skill development']
@@ -1114,11 +1262,13 @@ class DouEssay:
 
     def calculate_calibrated_ontario_score(self, stats: Dict, structure: Dict, content: Dict, 
                                          grammar: Dict, application: Dict) -> int:
+        # v4.0.1: Adjusted weights to better represent overall essay quality
+        # Increased content/analysis weight, balanced grammar and structure
         weights = {
-            'content': 0.30,
-            'structure': 0.20,
-            'grammar': 0.15,
-            'application': 0.35
+            'content': 0.35,      # v4.0.1: Increased from 0.30 (thesis, examples, analysis)
+            'structure': 0.25,    # v4.0.1: Increased from 0.20 (organization, coherence)
+            'grammar': 0.15,      # v4.0.1: Maintained (mechanics)
+            'application': 0.25   # v4.0.1: Decreased from 0.35 (insight, reflection)
         }
         
         base_score = (
@@ -1188,10 +1338,10 @@ class DouEssay:
         for comment in teacher_comments:
             feedback.append(f"  {comment}")
         
-        # v3.0.0: Add optional self-reflection prompts
+        # v4.0.1: Add essay-specific self-reflection prompts
         feedback.append("")
         feedback.append("💭 SELF-REFLECTION PROMPTS (Optional):")
-        reflection_prompts = self.generate_reflection_prompts(score, content, application)
+        reflection_prompts = self.generate_reflection_prompts(score, content, application, essay_text)
         for prompt in reflection_prompts:
             feedback.append(f"  • {prompt}")
             
@@ -1203,26 +1353,56 @@ class DouEssay:
             
         return feedback
     
-    def generate_reflection_prompts(self, score: int, content: Dict, application: Dict) -> List[str]:
+    def generate_reflection_prompts(self, score: int, content: Dict, application: Dict, essay_text: str = "") -> List[str]:
         """
-        v3.0.0: Generate personalized self-reflection prompts to encourage critical thinking.
+        v4.0.1: Enhanced to generate essay-specific reflection prompts tied to actual content.
+        Analyzes essay to create personalized prompts instead of generic ones.
         """
         prompts = []
         
-        # Content-based prompts
+        # v4.0.1: Detect essay topic for specific prompts
+        essay_lower = essay_text.lower()
+        specific_prompts_added = False
+        
+        # Technology-specific prompts
+        if any(word in essay_lower for word in ['technology', 'computer', 'digital', 'internet']):
+            if content['analysis_quality'] < 0.7:
+                prompts.append("How has technology personally changed the way you learn? Can you describe a specific instance?")
+            else:
+                prompts.append("What aspect of technology in education do you find most transformative, and why?")
+            specific_prompts_added = True
+        
+        # Sports-specific prompts
+        elif any(word in essay_lower for word in ['sport', 'athlete', 'team', 'game']):
+            prompts.append("What personal experience with sports or teamwork shaped your perspective on this topic?")
+            specific_prompts_added = True
+        
+        # Arts-specific prompts
+        elif any(word in essay_lower for word in ['art', 'music', 'creative', 'paint']):
+            prompts.append("How has your own experience with the arts influenced your understanding of creativity in education?")
+            specific_prompts_added = True
+        
+        # Reading/Literature-specific prompts
+        elif any(word in essay_lower for word in ['read', 'book', 'literature', 'story']):
+            prompts.append("What book or reading experience had the greatest impact on your thinking about this topic?")
+            specific_prompts_added = True
+        
+        # v4.0.1: Content-based prompts with more specificity
         if content['analysis_quality'] < 0.7:
-            prompts.append("How do your examples connect to real-world situations? Can you think of a current event that relates?")
+            if not specific_prompts_added:
+                prompts.append("Which example in your essay could be developed further with real-world connections? What details would you add?")
         
         if application.get('reflection_score', 0) < 0.6:
-            prompts.append("What personal experience made you interested in this topic? How has your understanding changed?")
+            prompts.append("Looking at your main argument, what personal experience directly relates to it that you haven't mentioned?")
         
-        # Score-based prompts
+        # Score-based prompts with actionable guidance
         if score < 75:
-            prompts.append("What was the most challenging part of writing this essay? What would you do differently next time?")
-            prompts.append("If you could add one more paragraph, what would it focus on and why?")
+            prompts.append("What was the most challenging part of writing this essay? What specific strategy would help you next time?")
+            if not specific_prompts_added:
+                prompts.append("If you could strengthen one paragraph with a concrete example, which would it be and what would you add?")
         else:
-            prompts.append("What aspect of this essay are you most proud of? Why do you think it works well?")
-            prompts.append("How could you apply these writing techniques to other subjects or assignments?")
+            prompts.append("What specific technique in this essay worked best? How could you use it in other writing?")
+            prompts.append("How could you take your strongest paragraph and make it even more compelling?")
         
         # Universal prompts
         prompts.append("After reading the feedback, what is one specific change you will make in your next draft?")
