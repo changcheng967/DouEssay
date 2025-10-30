@@ -3357,13 +3357,14 @@ class DouEssay:
             'answer': 'Feature available in v10.0.0'
         }
     
-    def generate_audio_feedback(self, text_feedback: str, voice_id: str = 'default') -> bytes:
+    def generate_audio_feedback(self, text_feedback: str, voice_id: str = 'default') -> Optional[bytes]:
         """
         v10.0.0 PLACEHOLDER: Voice-assisted mentoring
         Text-to-speech integration for guidance
         PLANNED: Q2 2026
+        Returns None until feature is implemented in v10.0.0
         """
-        return b''
+        return None
     
     def analyze_multidimensional_emotions(self, text: str) -> Dict:
         """
