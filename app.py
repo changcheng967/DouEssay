@@ -1048,27 +1048,48 @@ class DouEssay:
         essay_lower = essay_text.lower()
         specific_prompts_added = False
         
+        # v6.0.0: Enhanced topic-specific prompts with real-world connections
         # Technology-specific prompts
-        if any(word in essay_lower for word in ['technology', 'computer', 'digital', 'internet']):
+        if any(word in essay_lower for word in ['technology', 'computer', 'digital', 'internet', 'app', 'software', 'online']):
             if content.get('analysis_quality', 0) < 0.7:
                 prompts.append("How has technology personally changed the way you learn? Can you describe a specific instance?")
+                prompts.append("Think of a time when technology either helped or hindered your learning. What happened and what did you learn?")
             else:
                 prompts.append("What aspect of technology in education do you find most transformative, and why?")
+                prompts.append("How might emerging technologies (AI, VR, etc.) reshape education in the next 5 years? What excites or concerns you?")
             specific_prompts_added = True
         
         # Sports-specific prompts
-        elif any(word in essay_lower for word in ['sport', 'athlete', 'team', 'game']):
+        elif any(word in essay_lower for word in ['sport', 'athlete', 'team', 'game', 'physical', 'exercise', 'competition']):
             prompts.append("What personal experience with sports or teamwork shaped your perspective on this topic?")
+            prompts.append("Describe a moment in sports where you learned something applicable to life beyond the game. What was the lesson?")
+            prompts.append("How do the skills from sports (teamwork, perseverance, strategy) apply to your academic or career goals?")
             specific_prompts_added = True
         
         # Arts-specific prompts
-        elif any(word in essay_lower for word in ['art', 'music', 'creative', 'paint']):
+        elif any(word in essay_lower for word in ['art', 'music', 'creative', 'paint', 'performance', 'theater', 'dance']):
             prompts.append("How has your own experience with the arts influenced your understanding of creativity in education?")
+            prompts.append("What artistic work (yours or someone else's) deeply affected you? Why did it resonate?")
+            prompts.append("How do creative skills learned through arts transfer to other areas of your life or studies?")
             specific_prompts_added = True
         
         # Reading/Literature-specific prompts
-        elif any(word in essay_lower for word in ['read', 'book', 'literature', 'story']):
+        elif any(word in essay_lower for word in ['read', 'book', 'literature', 'story', 'author', 'novel', 'text']):
             prompts.append("What book or reading experience had the greatest impact on your thinking about this topic?")
+            prompts.append("Describe a character or story that changed your perspective. What specific moment or quote stuck with you?")
+            prompts.append("How has your reading outside of school shaped your worldview or academic interests?")
+            specific_prompts_added = True
+        
+        # v6.0.0: Environment/Sustainability prompts
+        elif any(word in essay_lower for word in ['environment', 'climate', 'sustainability', 'nature', 'pollution', 'green']):
+            prompts.append("What environmental issue in your community concerns you most? What could you personally do about it?")
+            prompts.append("How do your daily choices impact the environment? What changes have you made or could you make?")
+            specific_prompts_added = True
+        
+        # v6.0.0: Social issues prompts
+        elif any(word in essay_lower for word in ['society', 'community', 'culture', 'diversity', 'justice', 'equity']):
+            prompts.append("What experience has shaped your understanding of this social issue? How has it influenced your perspective?")
+            prompts.append("How can young people like you contribute to positive change in your community regarding this issue?")
             specific_prompts_added = True
         
         # v4.0.1: Content-based prompts with more specificity
@@ -1127,19 +1148,82 @@ class DouEssay:
             
         return strengths
 
+    def analyze_paragraph_structure(self, essay_text: str) -> Dict:
+        """
+        v6.0.0: Analyzes each paragraph for structure issues including missing topic sentences,
+        weak examples, and analysis gaps.
+        """
+        paragraphs = [p.strip() for p in essay_text.split('\n\n') if p.strip()]
+        paragraph_issues = []
+        
+        for i, para in enumerate(paragraphs):
+            para_lower = para.lower()
+            sentences = [s.strip() for s in re.split(r'[.!?]+', para) if s.strip()]
+            
+            issues = []
+            
+            # Check for topic sentence (first sentence should introduce paragraph theme)
+            if i > 0 and i < len(paragraphs) - 1:  # Body paragraphs
+                first_sentence = sentences[0].lower() if sentences else ""
+                has_topic_sentence = any(word in first_sentence for word in 
+                    ['first', 'second', 'another', 'furthermore', 'moreover', 'additionally', 
+                     'however', 'one reason', 'one example', 'most importantly'])
+                
+                if not has_topic_sentence and len(sentences) > 2:
+                    issues.append("Missing clear topic sentence")
+            
+            # Check for examples
+            has_examples = any(indicator in para_lower for indicator in self.example_indicators)
+            if i > 0 and i < len(paragraphs) - 1 and not has_examples and len(sentences) > 2:
+                issues.append("Needs specific examples or evidence")
+            
+            # Check for analysis
+            has_analysis = any(indicator in para_lower for indicator in self.analysis_indicators)
+            if i > 0 and i < len(paragraphs) - 1 and has_examples and not has_analysis:
+                issues.append("Example provided but lacks analysis explaining its significance")
+            
+            # Check paragraph length
+            word_count = len(para.split())
+            if i > 0 and i < len(paragraphs) - 1:  # Body paragraphs
+                if word_count < 40:
+                    issues.append("Too brief - needs development")
+                elif word_count > 150:
+                    issues.append("Consider splitting into two paragraphs for clarity")
+            
+            if issues:
+                paragraph_issues.append({
+                    'paragraph_num': i + 1,
+                    'issues': issues,
+                    'word_count': word_count
+                })
+        
+        return {
+            'total_paragraphs': len(paragraphs),
+            'paragraphs_with_issues': len(paragraph_issues),
+            'issues': paragraph_issues
+        }
+
     def identify_improvements_semantic(self, structure: Dict, content: Dict, grammar: Dict, 
                                     application: Dict, stats: Dict, essay_text: str) -> List[str]:
         improvements = []
         
+        # v6.0.0: Add paragraph-level guidance
+        para_analysis = self.analyze_paragraph_structure(essay_text)
+        if para_analysis['paragraphs_with_issues'] > 0:
+            for para_issue in para_analysis['issues'][:2]:  # Show top 2 paragraph issues
+                para_num = para_issue['paragraph_num']
+                for issue in para_issue['issues']:
+                    improvements.append(f"Paragraph {para_num}: {issue}")
+        
         if content['thesis_quality'] < 0.6:
             improvements.append("Strengthen your thesis statement in the introduction")
         if content['example_count'] < 2:
-            improvements.append("Add more specific examples to support each main point")
+            improvements.append("Add more specific examples to support each main point (target: 2-3 per paragraph)")
         if content['analysis_quality'] < 0.6:
             improvements.append("Deepen your analysis by explaining how examples prove your points")
             
         if structure['intro_quality'] < 0.6:
-            improvements.append("Work on creating a more engaging introduction")
+            improvements.append("Work on creating a more engaging introduction with a clear hook")
         if structure['conclusion_quality'] < 0.6:
             improvements.append("Develop a stronger conclusion that reinforces your main idea")
         if structure['coherence_score'] < 0.5:
@@ -1153,6 +1237,16 @@ class DouEssay:
             
         if stats['word_count'] < 280:
             improvements.append("Develop your ideas more fully with additional details")
+        
+        # v6.0.0: Add argument-specific improvements
+        if 'argument_strength' in content:
+            arg_strength = content['argument_strength']
+            if not arg_strength.get('has_clear_position', False):
+                improvements.append("State your position more explicitly using phrases like 'I argue that' or 'This essay contends'")
+            if arg_strength.get('originality_score', 1.0) < 0.6:
+                improvements.append("Avoid generic opening phrases; be more original in your approach")
+            if arg_strength.get('unsupported_claims', 0) > 0:
+                improvements.append("Support absolute statements (e.g., 'always', 'never') with concrete evidence")
             
         return improvements
 
@@ -1227,14 +1321,51 @@ class DouEssay:
             "inline_feedback": []
         }
 
+    def detect_word_repetition(self, essay_text: str) -> Dict:
+        """
+        v6.0.0: Detects overused words and suggests synonyms for variety.
+        """
+        words = essay_text.lower().split()
+        word_freq = {}
+        
+        # Count significant words (exclude common articles, prepositions)
+        stop_words = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 
+                     'of', 'with', 'by', 'from', 'is', 'are', 'was', 'were', 'be', 'been',
+                     'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
+                     'should', 'may', 'might', 'can', 'this', 'that', 'these', 'those'}
+        
+        for word in words:
+            clean_word = word.strip('.,!?;:"\'-')
+            if len(clean_word) > 3 and clean_word not in stop_words:
+                word_freq[clean_word] = word_freq.get(clean_word, 0) + 1
+        
+        # Identify overused words (appearing more than expected)
+        total_words = len([w for w in words if w not in stop_words])
+        overused_threshold = max(3, total_words / 50)  # ~2% repetition threshold
+        
+        overused_words = {word: count for word, count in word_freq.items() 
+                         if count >= overused_threshold}
+        
+        # Sort by frequency
+        overused_sorted = sorted(overused_words.items(), key=lambda x: x[1], reverse=True)
+        
+        return {
+            'overused_words': dict(overused_sorted[:5]),  # Top 5 overused words
+            'total_unique_words': len(word_freq),
+            'repetition_score': 1.0 - (len(overused_words) / max(1, len(word_freq)))
+        }
+
     def analyze_inline_feedback(self, essay_text: str) -> List[Dict]:
         """
-        v4.0.0: Generate inline, color-coded feedback annotations with deduplication.
+        v6.0.0: Enhanced with word repetition detection and advanced style suggestions.
         Prevents overlapping suggestions for the same sentence.
         """
         inline_feedback = []
         sentences = [s.strip() for s in re.split(r'[.!?]+', essay_text) if s.strip()]
         feedback_seen = {}  # v4.0.0: Track feedback per sentence to avoid duplicates
+        
+        # v6.0.0: Detect word repetition across entire essay
+        repetition_analysis = self.detect_word_repetition(essay_text)
         
         for idx, sentence in enumerate(sentences):
             sentence_lower = sentence.lower()
@@ -1272,13 +1403,30 @@ class DouEssay:
                         })
                         feedback_seen[idx].add('weak_analysis')
             
+            # v6.0.0: Check for overused words from essay-wide analysis
+            sentence_words = set(sentence_lower.split())
+            for overused_word in repetition_analysis['overused_words'].keys():
+                if overused_word in sentence_words and 'repetition' not in feedback_seen[idx]:
+                    count = repetition_analysis['overused_words'][overused_word]
+                    inline_feedback.append({
+                        'sentence_index': idx,
+                        'sentence': sentence,
+                        'type': 'word_repetition',
+                        'severity': 'yellow',
+                        'suggestion': f"💡 Word Repetition: '{overused_word}' appears {count} times. Consider using synonyms for variety.",
+                        'word': overused_word,
+                        'count': count
+                    })
+                    feedback_seen[idx].add('repetition')
+                    break  # Only flag once per sentence
+            
             # Check for generic words
             generic_words = ['very', 'really', 'a lot', 'many', 'most', 'some', 'things', 'stuff', 'big', 'small']
             found_generic = [
                 word for word in generic_words
                 if re.search(r'\b' + re.escape(word) + r'\b', sentence_lower)
             ]
-            if found_generic:
+            if found_generic and 'generic_word' not in feedback_seen[idx]:
                 alternatives = self.get_vocabulary_alternatives(found_generic[0])
                 inline_feedback.append({
                     'sentence_index': idx,
@@ -1289,12 +1437,15 @@ class DouEssay:
                     'word': found_generic[0],
                     'alternatives': alternatives
                 })
+                feedback_seen[idx].add('generic_word')
             
-            # Check for sentence variety - repetitive starts
+            # v6.0.0: Enhanced sentence variety checking
             if idx > 0:
                 current_start = sentence.split()[0].lower() if sentence.split() else ''
                 prev_start = sentences[idx-1].split()[0].lower() if sentences[idx-1].split() else ''
-                if current_start == prev_start and current_start in ['the', 'it', 'this', 'they', 'students', 'teachers']:
+                
+                # Check for repetitive sentence openings
+                if current_start == prev_start and current_start in ['the', 'it', 'this', 'they', 'students', 'teachers', 'people', 'in', 'when', 'there']:
                     inline_feedback.append({
                         'sentence_index': idx,
                         'sentence': sentence,
@@ -1302,6 +1453,22 @@ class DouEssay:
                         'severity': 'yellow',
                         'suggestion': random.choice(self.inline_suggestions['repetitive_start'])
                     })
+                
+                # v6.0.0: Check for similar sentence lengths (monotonous rhythm)
+                current_len = len(sentence.split())
+                prev_len = len(sentences[idx-1].split())
+                if idx > 1:
+                    prev_prev_len = len(sentences[idx-2].split())
+                    # If 3 consecutive sentences are similar length, suggest variety
+                    if abs(current_len - prev_len) <= 2 and abs(prev_len - prev_prev_len) <= 2 and 'sentence_variety' not in feedback_seen[idx]:
+                        inline_feedback.append({
+                            'sentence_index': idx,
+                            'sentence': sentence,
+                            'type': 'monotonous_rhythm',
+                            'severity': 'yellow',
+                            'suggestion': "💡 Sentence Variety: Vary sentence length for better rhythm. Try mixing short, punchy sentences with longer, complex ones."
+                        })
+                        feedback_seen[idx].add('sentence_variety')
             
             # Check for passive voice
             passive_indicators = [' is ', ' are ', ' was ', ' were ', ' been ', ' being ']
@@ -1344,20 +1511,27 @@ class DouEssay:
         return inline_feedback
 
     def get_vocabulary_alternatives(self, word: str) -> List[str]:
-        """Get sophisticated vocabulary alternatives for common words."""
+        """
+        v6.0.0: Enhanced with more sophisticated vocabulary alternatives.
+        """
         vocab_map = {
-            'very': ['extremely', 'remarkably', 'particularly', 'exceptionally'],
-            'really': ['genuinely', 'truly', 'certainly', 'indeed'],
-            'a lot': ['numerous', 'substantial', 'considerable', 'extensive'],
-            'many': ['numerous', 'various', 'multiple', 'countless'],
-            'most': ['majority of', 'predominant', 'principal', 'primary'],
-            'some': ['several', 'certain', 'particular', 'specific'],
-            'things': ['elements', 'aspects', 'factors', 'components'],
-            'stuff': ['material', 'content', 'subject matter', 'information'],
-            'big': ['substantial', 'significant', 'considerable', 'extensive'],
-            'small': ['minimal', 'modest', 'limited', 'negligible'],
-            'good': ['beneficial', 'advantageous', 'valuable', 'effective'],
-            'bad': ['detrimental', 'problematic', 'ineffective', 'counterproductive']
+            'very': ['extremely', 'remarkably', 'particularly', 'exceptionally', 'profoundly', 'decidedly'],
+            'really': ['genuinely', 'truly', 'certainly', 'indeed', 'authentically', 'undeniably'],
+            'a lot': ['numerous', 'substantial', 'considerable', 'extensive', 'abundant', 'copious'],
+            'many': ['numerous', 'various', 'multiple', 'countless', 'myriad', 'manifold'],
+            'most': ['majority of', 'predominant', 'principal', 'primary', 'preponderant'],
+            'some': ['several', 'certain', 'particular', 'specific', 'select', 'designated'],
+            'things': ['elements', 'aspects', 'factors', 'components', 'dimensions', 'facets'],
+            'stuff': ['material', 'content', 'subject matter', 'information', 'data', 'resources'],
+            'big': ['substantial', 'significant', 'considerable', 'extensive', 'monumental', 'profound'],
+            'small': ['minimal', 'modest', 'limited', 'negligible', 'marginal', 'inconsequential'],
+            'good': ['beneficial', 'advantageous', 'valuable', 'effective', 'constructive', 'favorable'],
+            'bad': ['detrimental', 'problematic', 'ineffective', 'counterproductive', 'adverse', 'harmful'],
+            'important': ['significant', 'crucial', 'vital', 'essential', 'pivotal', 'paramount'],
+            'get': ['obtain', 'acquire', 'attain', 'procure', 'secure', 'gain'],
+            'make': ['create', 'construct', 'produce', 'generate', 'develop', 'formulate'],
+            'show': ['demonstrate', 'illustrate', 'exhibit', 'reveal', 'display', 'manifest'],
+            'use': ['utilize', 'employ', 'apply', 'implement', 'leverage', 'harness']
         }
         return vocab_map.get(word.lower(), ['more specific term'])
 
