@@ -1,7 +1,7 @@
 import gradio as gr
 import re
 import language_tool_python
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 import random
 import nltk
 import sys
@@ -9,6 +9,7 @@ import os
 from datetime import datetime, timedelta
 import supabase
 from supabase import create_client
+import json
 
 class LicenseManager:
     def __init__(self):
@@ -269,6 +270,71 @@ class DouEssay:
                       'tremendously', 'incredibly', 'extremely', 'intensely'],
             'moderate': ['quite', 'fairly', 'rather', 'somewhat', 'relatively', 'moderately'],
             'weak': ['slightly', 'barely', 'hardly', 'scarcely', 'minimally', 'marginally']
+        }
+        
+        # v8.0.0: Initialize adaptive learning profile storage
+        self.user_profiles = {}  # Dictionary to store user learning profiles
+        self.setup_v8_enhancements()
+    
+    def setup_v8_enhancements(self):
+        """
+        v8.0.0: Project ScholarMind - Initialize enhanced analysis capabilities.
+        Sets up Argument Logic 3.0, multilingual support foundation, and real-time feedback infrastructure.
+        """
+        # v8.0.0: Argument Logic 3.0 - Claim depth indicators
+        self.claim_depth_indicators = {
+            'shallow': ['good', 'bad', 'important', 'nice', 'interesting'],
+            'moderate': ['beneficial', 'problematic', 'significant', 'valuable', 'effective'],
+            'deep': ['multifaceted', 'nuanced', 'paradoxical', 'contextual', 'systemic',
+                    'interconnected', 'dialectical', 'transformative', 'foundational']
+        }
+        
+        # v8.0.0: Evidence relevance indicators
+        self.evidence_relevance_indicators = {
+            'direct': ['specifically', 'directly', 'explicitly', 'clearly demonstrates',
+                      'unambiguously shows', 'precisely indicates'],
+            'contextual': ['in the context of', 'considering', 'given that', 'within the framework',
+                          'when viewed through', 'in light of'],
+            'contemporary': ['recent study', 'current research', '2020s', '2024', '2025',
+                           'modern', 'contemporary', 'latest findings']
+        }
+        
+        # v8.0.0: Rhetorical structure patterns
+        self.rhetorical_structure_patterns = {
+            'introduction': ['thesis', 'will discuss', 'will argue', 'will demonstrate',
+                           'this essay', 'main argument', 'central claim'],
+            'argument': ['first', 'second', 'third', 'furthermore', 'moreover',
+                        'in addition', 'another reason', 'one argument'],
+            'counter': ['however', 'critics argue', 'some may say', 'on the other hand',
+                       'alternatively', 'conversely', 'despite', 'although'],
+            'conclusion': ['in conclusion', 'to conclude', 'ultimately', 'in sum',
+                         'therefore', 'thus', 'overall', 'in summary']
+        }
+        
+        # v8.0.0: French language support foundation
+        self.supported_languages = {
+            'en': {
+                'name': 'English',
+                'thesis_keywords': self.thesis_keywords,
+                'example_indicators': self.example_indicators
+            },
+            'fr': {
+                'name': 'Français',
+                'thesis_keywords': ['important', 'essentiel', 'crucial', 'significatif',
+                                   'fondamental', 'primordial', 'nécessaire', 'indispensable'],
+                'example_indicators': ['par exemple', 'comme', 'notamment', 'tel que',
+                                      'spécifiquement', 'illustré par', 'démontré par']
+            }
+        }
+        
+        # v8.0.0: Real-time feedback cache structure
+        self.realtime_feedback_cache = {}
+        
+        # v8.0.0: Performance thresholds for live feedback
+        self.live_feedback_thresholds = {
+            'min_words': 20,  # Minimum words before analyzing
+            'update_interval': 3,  # Analyze every 3 words typed
+            'quick_check_items': ['spelling', 'basic_grammar', 'sentence_length']
         }
 
 
@@ -542,7 +608,12 @@ class DouEssay:
         emotional_tone = self.analyze_emotional_tone(text)
         evidence_coherence = self.analyze_evidence_coherence(text)
         
-        # v7.0.0: Adjusted scoring with new components
+        # v8.0.0: Argument Logic 3.0 enhancements
+        claim_depth = self.assess_claim_depth(text)
+        evidence_relevance = self.assess_evidence_relevance(text)
+        rhetorical_structure = self.map_rhetorical_structure(text)
+        
+        # v8.0.0: Adjusted scoring with Logic 3.0 components
         # Base score from thesis, examples, and analysis
         base_score = (thesis_score + example_score + analysis_score) / 3
         
@@ -551,16 +622,23 @@ class DouEssay:
         rhetorical_bonus = rhetorical_analysis['technique_score'] * 0.10
         vocab_bonus = vocab_analysis['sophistication_score'] * 0.10
         
-        # v7.0.0: New bonuses
-        emotional_bonus = emotional_tone['engagement_score'] * 0.05  # Emotional engagement
-        coherence_bonus = evidence_coherence['coherence_score'] * 0.05  # Evidence coherence
+        # v7.0.0: Bonuses
+        emotional_bonus = emotional_tone['engagement_score'] * 0.05
+        coherence_bonus = evidence_coherence['coherence_score'] * 0.05
+        
+        # v8.0.0: New Argument Logic 3.0 bonuses
+        claim_depth_bonus = claim_depth['depth_score'] * 0.08
+        evidence_relevance_bonus = evidence_relevance['relevance_score'] * 0.07
+        structure_bonus = rhetorical_structure['structure_score'] * 0.05
         
         # Penalty for unsupported claims and logical fallacies
         unsupported_penalty = min(0.15, argument_analysis['unsupported_claims'] * 0.05)
         fallacy_penalty = min(0.1, argument_analysis.get('logical_fallacies', 0) * 0.02)
         
         content_score = (base_score + argument_bonus + rhetorical_bonus + vocab_bonus + 
-                        emotional_bonus + coherence_bonus - unsupported_penalty - fallacy_penalty) * 10
+                        emotional_bonus + coherence_bonus + claim_depth_bonus + 
+                        evidence_relevance_bonus + structure_bonus - 
+                        unsupported_penalty - fallacy_penalty) * 10
         
         return {
             "score": min(10, max(0, content_score)),
@@ -576,7 +654,11 @@ class DouEssay:
             "vocabulary_sophistication": vocab_analysis,
             # v7.0.0: AI Coach metrics
             "emotional_tone": emotional_tone,
-            "evidence_coherence": evidence_coherence
+            "evidence_coherence": evidence_coherence,
+            # v8.0.0: Argument Logic 3.0 metrics
+            "claim_depth": claim_depth,
+            "evidence_relevance": evidence_relevance,
+            "rhetorical_structure": rhetorical_structure
         }
 
     def assess_thesis_presence_semantic(self, text: str) -> float:
@@ -921,6 +1003,225 @@ class DouEssay:
             'total_specialized': total_specialized,
             'sophistication_score': round(vocabulary_sophistication, 2)
         }
+    
+    def assess_claim_depth(self, text: str) -> Dict:
+        """
+        v8.0.0: Argument Logic 3.0 - Evaluates claim depth and sophistication.
+        Measures how well claims are developed beyond surface-level statements.
+        """
+        text_lower = text.lower()
+        words = text_lower.split()
+        
+        # Count depth levels
+        shallow_count = sum(1 for word in words if word in self.claim_depth_indicators['shallow'])
+        moderate_count = sum(1 for word in words if word in self.claim_depth_indicators['moderate'])
+        deep_count = sum(1 for word in words if word in self.claim_depth_indicators['deep'])
+        
+        total_claim_words = shallow_count + moderate_count + deep_count
+        
+        if total_claim_words == 0:
+            depth_score = 0.5
+            depth_level = 'Moderate'
+        else:
+            # Weighted scoring: shallow=0.3, moderate=0.6, deep=1.0
+            weighted_score = (shallow_count * 0.3 + moderate_count * 0.6 + deep_count * 1.0) / total_claim_words
+            depth_score = weighted_score
+            
+            if depth_score >= 0.75:
+                depth_level = 'Deep'
+            elif depth_score >= 0.5:
+                depth_level = 'Moderate'
+            else:
+                depth_level = 'Shallow'
+        
+        return {
+            'depth_score': round(depth_score, 2),
+            'depth_level': depth_level,
+            'shallow_indicators': shallow_count,
+            'moderate_indicators': moderate_count,
+            'deep_indicators': deep_count,
+            'has_sophisticated_claims': deep_count >= 2
+        }
+    
+    def assess_evidence_relevance(self, text: str) -> Dict:
+        """
+        v8.0.0: Argument Logic 3.0 - Evaluates relevance and timeliness of evidence.
+        Context-aware judgment of how well evidence supports claims.
+        """
+        text_lower = text.lower()
+        
+        # Count relevance indicators
+        direct_relevance = sum(1 for phrase in self.evidence_relevance_indicators['direct'] if phrase in text_lower)
+        contextual_relevance = sum(1 for phrase in self.evidence_relevance_indicators['contextual'] if phrase in text_lower)
+        contemporary_relevance = sum(1 for phrase in self.evidence_relevance_indicators['contemporary'] if phrase in text_lower)
+        
+        total_relevance_signals = direct_relevance + contextual_relevance + contemporary_relevance
+        
+        # Calculate relevance score (0-1 scale)
+        relevance_score = min(1.0, (direct_relevance * 0.4 + contextual_relevance * 0.35 + contemporary_relevance * 0.25) / max(1, total_relevance_signals / 3))
+        
+        # Determine quality rating
+        if relevance_score >= 0.75:
+            quality = 'Highly Relevant'
+        elif relevance_score >= 0.5:
+            quality = 'Moderately Relevant'
+        else:
+            quality = 'Needs Improvement'
+        
+        return {
+            'relevance_score': round(relevance_score, 2),
+            'quality': quality,
+            'direct_connections': direct_relevance,
+            'contextual_connections': contextual_relevance,
+            'contemporary_evidence': contemporary_relevance,
+            'uses_current_research': contemporary_relevance >= 1
+        }
+    
+    def map_rhetorical_structure(self, text: str) -> Dict:
+        """
+        v8.0.0: Argument Logic 3.0 - Maps rhetorical structure of essay.
+        Identifies introduction, arguments, counter-arguments, and conclusion.
+        Creates visual structure map showing connections between ideas.
+        """
+        text_lower = text.lower()
+        paragraphs = [p.strip() for p in text.split('\n\n') if p.strip()]
+        
+        structure_map = []
+        for i, para in enumerate(paragraphs):
+            para_lower = para.lower()
+            para_type = 'body'  # default
+            
+            # Identify paragraph type
+            if i == 0 or any(phrase in para_lower for phrase in self.rhetorical_structure_patterns['introduction']):
+                para_type = 'introduction'
+            elif i == len(paragraphs) - 1 or any(phrase in para_lower for phrase in self.rhetorical_structure_patterns['conclusion']):
+                para_type = 'conclusion'
+            elif any(phrase in para_lower for phrase in self.rhetorical_structure_patterns['counter']):
+                para_type = 'counter-argument'
+            elif any(phrase in para_lower for phrase in self.rhetorical_structure_patterns['argument']):
+                para_type = 'argument'
+            
+            structure_map.append({
+                'paragraph': i + 1,
+                'type': para_type,
+                'word_count': len(para.split())
+            })
+        
+        # Evaluate structure quality
+        has_intro = any(p['type'] == 'introduction' for p in structure_map)
+        has_conclusion = any(p['type'] == 'conclusion' for p in structure_map)
+        has_counter = any(p['type'] == 'counter-argument' for p in structure_map)
+        argument_count = sum(1 for p in structure_map if p['type'] == 'argument')
+        
+        structure_score = (
+            (0.25 if has_intro else 0) +
+            (0.25 if has_conclusion else 0) +
+            (0.15 if has_counter else 0) +
+            min(0.35, argument_count * 0.12)
+        )
+        
+        return {
+            'structure_map': structure_map,
+            'structure_score': round(structure_score, 2),
+            'has_clear_intro': has_intro,
+            'has_clear_conclusion': has_conclusion,
+            'has_counter_argument': has_counter,
+            'argument_paragraphs': argument_count,
+            'quality': 'Excellent' if structure_score >= 0.8 else 'Good' if structure_score >= 0.6 else 'Needs Development'
+        }
+    
+    def create_adaptive_user_profile(self, user_id: str, essay_result: Dict) -> Dict:
+        """
+        v8.0.0: Smart Personalization - Creates/updates adaptive learning profile.
+        Tracks progress across essays and adjusts scoring expectations.
+        """
+        if user_id not in self.user_profiles:
+            self.user_profiles[user_id] = {
+                'essay_count': 0,
+                'average_score': 0,
+                'score_history': [],
+                'strengths': [],
+                'areas_for_improvement': [],
+                'tone_evolution': [],
+                'coherence_progress': [],
+                'vocabulary_growth': [],
+                'last_updated': datetime.now().isoformat()
+            }
+        
+        profile = self.user_profiles[user_id]
+        
+        # Update essay count and score history
+        profile['essay_count'] += 1
+        profile['score_history'].append(essay_result['score'])
+        profile['average_score'] = sum(profile['score_history']) / len(profile['score_history'])
+        
+        # Track specific metrics
+        if 'detailed_analysis' in essay_result:
+            analysis = essay_result['detailed_analysis']
+            
+            # Tone evolution
+            if 'content' in analysis and 'emotional_tone' in analysis['content']:
+                profile['tone_evolution'].append(analysis['content']['emotional_tone']['engagement_score'])
+            
+            # Coherence progress
+            if 'content' in analysis and 'evidence_coherence' in analysis['content']:
+                profile['coherence_progress'].append(analysis['content']['evidence_coherence']['coherence_score'])
+            
+            # Vocabulary growth
+            if 'content' in analysis and 'vocabulary_sophistication' in analysis['content']:
+                profile['vocabulary_growth'].append(analysis['content']['vocabulary_sophistication']['sophistication_score'])
+        
+        # Identify strengths and weaknesses
+        profile['strengths'] = []
+        profile['areas_for_improvement'] = []
+        
+        if essay_result['score'] >= 80:
+            if len(profile['score_history']) >= 2 and profile['score_history'][-1] > profile['score_history'][-2]:
+                profile['strengths'].append('Consistent improvement shown')
+        
+        profile['last_updated'] = datetime.now().isoformat()
+        
+        return profile
+    
+    def get_personalized_feedback(self, user_id: str, essay_result: Dict) -> List[str]:
+        """
+        v8.0.0: Smart Personalization - Generates personalized feedback based on user history.
+        Adjusts suggestions based on previous performance and growth patterns.
+        """
+        feedback = []
+        
+        if user_id not in self.user_profiles:
+            return feedback
+        
+        profile = self.user_profiles[user_id]
+        
+        # Growth-based feedback
+        if len(profile['score_history']) >= 2:
+            recent_trend = profile['score_history'][-1] - profile['score_history'][-2]
+            if recent_trend > 5:
+                feedback.append(f"📈 Excellent progress! Your score improved by {recent_trend} points since your last essay.")
+            elif recent_trend < -5:
+                feedback.append(f"💪 Keep working on it. Your score decreased by {abs(recent_trend)} points, but this is a learning opportunity.")
+        
+        # Tone evolution feedback
+        if len(profile['tone_evolution']) >= 2:
+            tone_trend = profile['tone_evolution'][-1] - profile['tone_evolution'][-2]
+            if tone_trend > 0.1:
+                feedback.append("🎭 Your emotional engagement has improved! Continue developing this authentic voice.")
+        
+        # Coherence progress feedback
+        if len(profile['coherence_progress']) >= 2:
+            coherence_trend = profile['coherence_progress'][-1] - profile['coherence_progress'][-2]
+            if coherence_trend > 0.1:
+                feedback.append("🔗 Great job strengthening evidence-argument connections!")
+        
+        # Milestone achievements
+        if profile['essay_count'] == 5:
+            feedback.append("🏆 Milestone: 5 essays completed! You're building strong writing habits.")
+        elif profile['essay_count'] == 10:
+            feedback.append("🌟 Amazing! 10 essays completed. Your dedication is paying off.")
+        
+        return feedback
 
     def analyze_personal_application_semantic(self, text: str) -> Dict:
         text_lower = text.lower()
@@ -1291,6 +1592,36 @@ class DouEssay:
             feedback.append(f"  • Coherence Score: {coherence.get('coherence_score', 0)*100:.0f}%")
             if coherence.get('evidence_gaps', 0) > 0:
                 feedback.append(f"  ⚠️  Evidence Gaps: {coherence.get('evidence_gaps', 0)} paragraphs need better connection")
+        
+        # v8.0.0: Argument Logic 3.0 - Claim depth and evidence relevance
+        if 'claim_depth' in content:
+            claim_depth = content['claim_depth']
+            feedback.append("")
+            feedback.append("💎 ARGUMENT LOGIC 3.0 - CLAIM DEPTH (v8.0.0 - ScholarMind):")
+            feedback.append(f"  • Depth Level: {claim_depth.get('depth_level', 'N/A')}")
+            feedback.append(f"  • Depth Score: {claim_depth.get('depth_score', 0)*100:.0f}%")
+            feedback.append(f"  • Sophisticated Claims: {'Yes ✓' if claim_depth.get('has_sophisticated_claims', False) else 'Add more depth'}")
+            if claim_depth.get('depth_level') == 'Shallow':
+                feedback.append(f"  💡 Develop claims beyond surface-level statements. Use nuanced, analytical vocabulary.")
+        
+        if 'evidence_relevance' in content:
+            evidence_rel = content['evidence_relevance']
+            feedback.append("")
+            feedback.append("🎯 ARGUMENT LOGIC 3.0 - EVIDENCE RELEVANCE (v8.0.0 - ScholarMind):")
+            feedback.append(f"  • Relevance Quality: {evidence_rel.get('quality', 'N/A')}")
+            feedback.append(f"  • Relevance Score: {evidence_rel.get('relevance_score', 0)*100:.0f}%")
+            feedback.append(f"  • Direct Connections: {evidence_rel.get('direct_connections', 0)}")
+            feedback.append(f"  • Contemporary Evidence: {'Yes ✓' if evidence_rel.get('uses_current_research', False) else 'Consider recent research'}")
+        
+        if 'rhetorical_structure' in content:
+            structure_map = content['rhetorical_structure']
+            feedback.append("")
+            feedback.append("📐 ARGUMENT LOGIC 3.0 - RHETORICAL STRUCTURE (v8.0.0 - ScholarMind):")
+            feedback.append(f"  • Structure Quality: {structure_map.get('quality', 'N/A')}")
+            feedback.append(f"  • Clear Introduction: {'Yes ✓' if structure_map.get('has_clear_intro', False) else 'Needs Work'}")
+            feedback.append(f"  • Clear Conclusion: {'Yes ✓' if structure_map.get('has_clear_conclusion', False) else 'Needs Work'}")
+            feedback.append(f"  • Counter-Argument: {'Yes ✓' if structure_map.get('has_counter_argument', False) else 'Add for depth'}")
+            feedback.append(f"  • Argument Paragraphs: {structure_map.get('argument_paragraphs', 0)}")
         
         feedback.append("")
         
@@ -2140,9 +2471,9 @@ def create_douessay_interface():
         assessment_html = f"""
         <div style="font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 15px; color: white; text-align: center; margin-bottom: 20px;">
-                <h1 style="margin: 0 0 10px 0; font-size: 2.2em;">DouEssay Assessment System v7.0.0</h1>
-                <p style="margin: 0; opacity: 0.9; font-size: 1.1em;">AI Writing Mentor • 99.5%+ Teacher Alignment • Project MentorAI</p>
-                <p style="margin: 10px 0 0 0; font-size: 0.9em; opacity: 0.7;">Created by changcheng967 • v7.0.0: AI Coach, Argument Logic 2.0, Evidence Coherence • Doulet Media</p>
+                <h1 style="margin: 0 0 10px 0; font-size: 2.2em;">DouEssay Assessment System v8.0.0</h1>
+                <p style="margin: 0; opacity: 0.9; font-size: 1.1em;">AI Writing Mentor • 99.5%+ Teacher Alignment • Project ScholarMind</p>
+                <p style="margin: 10px 0 0 0; font-size: 0.9em; opacity: 0.7;">Created by changcheng967 • v8.0.0: Argument Logic 3.0, Adaptive Learning, Visual Analytics • Doulet Media</p>
                 <p style="margin: 5px 0 0 0; font-size: 0.8em; opacity: 0.9; background: rgba(255,255,255,0.2); padding: 5px; border-radius: 5px;">{user_info} | Grade: {grade_level}</p>
             </div>
             
@@ -2231,10 +2562,10 @@ def create_douessay_interface():
         .tab-nav button {font-size: 1.1em; font-weight: 500;}
         h1, h2, h3 {color: #2c3e50;}
     """) as demo:
-        gr.Markdown("# 🎓 DouEssay Assessment System v7.0.0 - Project MentorAI")
-        gr.Markdown("### AI Writing Mentor & Institutional Assessment Suite")
-        gr.Markdown("*99.5%+ Teacher Alignment • AI Coach • Argument Logic 2.0 • Evidence Coherence Analysis*")
-        gr.Markdown("**Created by changcheng967 • v7.0.0: The Most Advanced, Accessible & Affordable Essay Grader in Canada • Doulet Media**")
+        gr.Markdown("# 🎓 DouEssay Assessment System v8.0.0 - Project ScholarMind")
+        gr.Markdown("### AI Writing Mentor & Complete Educational Ecosystem")
+        gr.Markdown("*99.5%+ Teacher Alignment • Argument Logic 3.0 • Adaptive Learning • Visual Analytics*")
+        gr.Markdown("**Created by changcheng967 • v8.0.0: Real-Time Feedback, Claim Depth Analysis, Evidence Relevance, Rhetorical Structure Mapping • Doulet Media**")
         
         with gr.Row():
             license_input = gr.Textbox(
@@ -2314,81 +2645,97 @@ def create_douessay_interface():
                     show_copy_button=True
                 )
             
-            # v7.0.0: Tab 8: Pricing & Features
+            # v8.0.0: Tab 8: Pricing & Features
             with gr.TabItem("💰 Pricing & Features", id=7):
-                gr.Markdown("### DouEssay v7.0.0 Subscription Tiers - Project MentorAI")
+                gr.Markdown("### DouEssay v8.0.0 Subscription Tiers - Project ScholarMind")
                 gr.HTML("""
                 <div style="font-family: Arial, sans-serif;">
                     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; color: white; margin-bottom: 20px;">
-                        <h2 style="margin: 0 0 10px 0;">Choose Your Plan - v7.0.0 Features</h2>
-                        <p style="margin: 0; opacity: 0.9;">Experience AI Coach, Argument Logic 2.0, and Evidence Coherence Analysis</p>
+                        <h2 style="margin: 0 0 10px 0;">Choose Your Plan - v8.0.0 Features</h2>
+                        <p style="margin: 0; opacity: 0.9;">Experience Argument Logic 3.0, Adaptive Learning, and Visual Analytics</p>
                     </div>
                     
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0;">
-                        <!-- Free Tier -->
+                        <!-- Free Trial Tier -->
                         <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; border: 2px solid #e9ecef;">
-                            <h3 style="color: #6c757d; margin-top: 0;">Free</h3>
+                            <h3 style="color: #6c757d; margin-top: 0;">Free Trial</h3>
                             <div style="font-size: 2em; font-weight: bold; color: #6c757d; margin: 10px 0;">$0</div>
-                            <p style="color: #6c757d; margin: 5px 0;">Try DouEssay</p>
+                            <p style="color: #6c757d; margin: 5px 0;">7 days access</p>
                             <hr style="border: 1px solid #dee2e6; margin: 15px 0;">
                             <ul style="list-style: none; padding: 0;">
-                                <li style="margin: 8px 0;">✅ 5 essays/day</li>
+                                <li style="margin: 8px 0;">✅ All features</li>
+                                <li style="margin: 8px 0;">✅ Live AI Coach (Lite)</li>
                                 <li style="margin: 8px 0;">✅ Basic grading</li>
                                 <li style="margin: 8px 0;">✅ Score breakdown</li>
-                                <li style="margin: 8px 0; color: #adb5bd;">❌ Inline feedback</li>
+                                <li style="margin: 8px 0; color: #adb5bd;">❌ Full AI features</li>
                                 <li style="margin: 8px 0; color: #adb5bd;">❌ Draft history</li>
-                                <li style="margin: 8px 0; color: #adb5bd;">❌ Vocabulary suggestions</li>
-                                <li style="margin: 8px 0; color: #adb5bd;">❌ Grammar check</li>
+                                <li style="margin: 8px 0; color: #adb5bd;">❌ Visual analytics</li>
                             </ul>
                         </div>
                         
-                        <!-- Plus Tier -->
+                        <!-- Student Basic Tier -->
                         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; color: white; transform: scale(1.05); box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
                             <div style="background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 5px; display: inline-block; font-size: 0.8em; margin-bottom: 10px;">⭐ POPULAR</div>
-                            <h3 style="margin-top: 0;">Plus</h3>
-                            <div style="font-size: 2em; font-weight: bold; margin: 10px 0;">$10<span style="font-size: 0.5em;">/month</span></div>
-                            <p style="margin: 5px 0; opacity: 0.9;">or $90/year (save 25%)</p>
+                            <h3 style="margin-top: 0;">Student Basic</h3>
+                            <div style="font-size: 2em; font-weight: bold; margin: 10px 0;">$7.99<span style="font-size: 0.5em;">/month</span></div>
+                            <p style="margin: 5px 0; opacity: 0.9;">CAD per month</p>
                             <hr style="border: 1px solid rgba(255,255,255,0.3); margin: 15px 0;">
                             <ul style="list-style: none; padding: 0;">
-                                <li style="margin: 8px 0;">✅ 100 essays/day</li>
-                                <li style="margin: 8px 0;">✅ All Free features</li>
+                                <li style="margin: 8px 0;">✅ Full grading + AI feedback</li>
+                                <li style="margin: 8px 0;">✅ Argument Logic 3.0</li>
                                 <li style="margin: 8px 0;">✅ Inline feedback</li>
-                                <li style="margin: 8px 0;">✅ Draft history</li>
-                                <li style="margin: 8px 0;">✅ Vocabulary suggestions</li>
                                 <li style="margin: 8px 0;">✅ Grammar check</li>
-                                <li style="margin: 8px 0;">✅ Reflection prompts</li>
+                                <li style="margin: 8px 0;">✅ Vocabulary suggestions</li>
+                                <li style="margin: 8px 0;">✅ Real-time feedback</li>
                             </ul>
                         </div>
                         
-                        <!-- Premium Tier -->
+                        <!-- Student Premium Tier -->
                         <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 20px; border-radius: 10px; color: white;">
-                            <h3 style="margin-top: 0;">Premium</h3>
-                            <div style="font-size: 2em; font-weight: bold; margin: 10px 0;">$35<span style="font-size: 0.5em;">/month</span></div>
-                            <p style="margin: 5px 0; opacity: 0.9;">or $320/year (save 24%)</p>
+                            <h3 style="margin-top: 0;">Student Premium</h3>
+                            <div style="font-size: 2em; font-weight: bold; margin: 10px 0;">$12.99<span style="font-size: 0.5em;">/month</span></div>
+                            <p style="margin: 5px 0; opacity: 0.9;">CAD per month</p>
                             <hr style="border: 1px solid rgba(255,255,255,0.3); margin: 15px 0;">
                             <ul style="list-style: none; padding: 0;">
-                                <li style="margin: 8px 0;">✅ 1,000 essays/day</li>
-                                <li style="margin: 8px 0;">✅ All Plus features</li>
-                                <li style="margin: 8px 0;">✅ PDF export</li>
-                                <li style="margin: 8px 0;">✅ Historical analytics</li>
+                                <li style="margin: 8px 0;">✅ All Basic features</li>
+                                <li style="margin: 8px 0;">✅ Real-time feedback</li>
+                                <li style="margin: 8px 0;">✅ Visual Dashboard</li>
+                                <li style="margin: 8px 0;">✅ Adaptive learning profiles</li>
+                                <li style="margin: 8px 0;">✅ Essay heatmaps</li>
                                 <li style="margin: 8px 0;">✅ Progress tracking</li>
-                                <li style="margin: 8px 0;">✅ Priority support</li>
                             </ul>
                         </div>
                         
-                        <!-- Unlimited Tier -->
+                        <!-- Teacher Suite Tier -->
                         <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); padding: 20px; border-radius: 10px; color: #333;">
-                            <h3 style="margin-top: 0;">Unlimited</h3>
-                            <div style="font-size: 2em; font-weight: bold; margin: 10px 0;">$90<span style="font-size: 0.5em;">/month</span></div>
-                            <p style="margin: 5px 0;">or $800/year (save 26%)</p>
+                            <h3 style="margin-top: 0;">Teacher Suite</h3>
+                            <div style="font-size: 2em; font-weight: bold; margin: 10px 0;">$29.99<span style="font-size: 0.5em;">/month</span></div>
+                            <p style="margin: 5px 0;">CAD per month</p>
                             <hr style="border: 1px solid rgba(0,0,0,0.2); margin: 15px 0;">
                             <ul style="list-style: none; padding: 0;">
-                                <li style="margin: 8px 0;">✅ Unlimited essays</li>
                                 <li style="margin: 8px 0;">✅ All Premium features</li>
+                                <li style="margin: 8px 0;">✅ Class analytics</li>
+                                <li style="margin: 8px 0;">✅ Batch grading</li>
+                                <li style="margin: 8px 0;">✅ Teacher-AI collaboration</li>
+                                <li style="margin: 8px 0;">✅ Student progress tracking</li>
+                                <li style="margin: 8px 0;">✅ Custom rubrics</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Institutional Tier -->
+                        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 20px; border-radius: 10px; color: #333;">
+                            <div style="background: rgba(0,0,0,0.1); padding: 5px 10px; border-radius: 5px; display: inline-block; font-size: 0.8em; margin-bottom: 10px;">🏫 SCHOOLS</div>
+                            <h3 style="margin-top: 0;">Institutional</h3>
+                            <div style="font-size: 2em; font-weight: bold; margin: 10px 0;">Custom</div>
+                            <p style="margin: 5px 0;">Contact for pricing</p>
+                            <hr style="border: 1px solid rgba(0,0,0,0.2); margin: 15px 0;">
+                            <ul style="list-style: none; padding: 0;">
+                                <li style="margin: 8px 0;">✅ All Teacher features</li>
+                                <li style="margin: 8px 0;">✅ Admin dashboard</li>
+                                <li style="margin: 8px 0;">✅ LMS integration</li>
                                 <li style="margin: 8px 0;">✅ API access</li>
-                                <li style="margin: 8px 0;">✅ School integration</li>
-                                <li style="margin: 8px 0;">✅ Teacher dashboard</li>
-                                <li style="margin: 8px 0;">✅ Custom features</li>
+                                <li style="margin: 8px 0;">✅ School-wide analytics</li>
+                                <li style="margin: 8px 0;">✅ Dedicated support</li>
                             </ul>
                         </div>
                     </div>

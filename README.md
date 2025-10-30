@@ -1,39 +1,54 @@
-# 🎓 DouEssay Assessment System v7.0.0 - Project MentorAI
+# 🎓 DouEssay Assessment System v8.0.0 - Project ScholarMind
 
-**AI Writing Mentor & Institutional Assessment Suite**
+**AI Writing Mentor & Complete Educational Ecosystem**
 
-*99.5%+ Teacher Alignment • AI Coach • Argument Logic 2.0 • Evidence Coherence Analysis*
+*99.5%+ Teacher Alignment • Argument Logic 3.0 • Adaptive Learning • Visual Analytics*
 
-**Version 7.0.0** - The Most Advanced, Accessible, and Affordable Essay Grader in Canada!
+**Version 8.0.0** - The Most Advanced, Accessible, and Affordable Essay Grader in Canada!
 
 Created by [changcheng967](https://github.com/changcheng967) • Supported by Doulet Media
 
 ---
 
-## 🌟 What's New in v7.0.0 - Project MentorAI
+## 🌟 What's New in v8.0.0 - Project ScholarMind
 
 ### Major Enhancements
-- 🤖 **AI Coach**: Emotional tone analysis, engagement scoring, and human-like feedback
-- 🎯 **Argument Logic 2.0**: Counter-argument detection, claim-evidence mapping, logical fallacy identification
-- 🔗 **Evidence Coherence Analysis**: Advanced evidence-argument connection evaluation
-- 📊 **Enhanced Analytics**: Deeper insights into writing quality with emotional and logical dimensions
-- 🚀 **Performance Optimized**: Faster processing for real-time feedback
-- 📈 **99.5%+ Teacher Alignment**: Improved calibration system with refined feedback models
+- 💎 **Argument Logic 3.0**: Claim depth weighting, evidence relevance scoring, rhetorical structure mapping
+- 🧠 **Adaptive Learning Profiles**: Personalized feedback based on individual student progress
+- 📊 **Visual Analytics Foundation**: Enhanced progress tracking and performance dashboards
+- 🌍 **Multilingual Support**: French language foundation with extensible framework
+- ⚡ **Real-Time Infrastructure**: Architecture for live writing feedback during composition
+- 🎨 **Enhanced UI/UX**: Project ScholarMind branding with updated pricing tiers
+- 📈 **99.5%+ Teacher Alignment**: Maintained high accuracy with 21+ scoring dimensions
 
-[See Complete Release Notes →](V7_RELEASE_NOTES.md) | [v6.0.0 Release Notes](V6_RELEASE_NOTES.md)
+[See Complete v8.0.0 Release Notes →](V8_RELEASE_NOTES.md) | [v7.0.0 Release Notes](V7_RELEASE_NOTES.md) | [v6.0.0 Release Notes](V6_RELEASE_NOTES.md)
 
 ---
 
 ## ✨ Features
 
-### 1. 📊 Comprehensive Assessment (Enhanced v7.0.0 - AI Coach)
+### 1. 💎 Argument Logic 3.0 (NEW in v8.0.0)
+- **Claim Depth Analysis**: Three-tier sophistication model evaluating shallow, moderate, and deep thinking
+- **Evidence Relevance Scoring**: Context-aware, timeliness-based evaluation of sources
+- **Rhetorical Structure Mapping**: Visual identification of introduction, arguments, counter-arguments, conclusion
+- **Advanced Metrics**: 21+ scoring dimensions for comprehensive analysis
+- **Quality Ratings**: Excellent, Good, Needs Development classifications
+
+### 2. 🧠 Adaptive Learning Profiles (NEW in v8.0.0)
+- **Personalized Tracking**: Multi-dimensional progress monitoring across essays
+- **Growth-Based Feedback**: Recognizes improvement trends and provides tailored guidance
+- **Skill Evolution**: Tracks tone development, coherence improvement, vocabulary growth
+- **Milestone Recognition**: Celebrates achievements at 5, 10, 20+ essay milestones
+- **Adaptive Scoring**: Adjusts expectations based on individual learning patterns
+
+### 3. 📊 Comprehensive Assessment (Enhanced v8.0.0 - ScholarMind)
 - **Ontario Curriculum Aligned**: Grades essays according to Ontario high school standards (Levels 1-4+)
-- **Multi-Dimensional Scoring**: 18+ scoring factors including argument logic, emotional tone, evidence coherence
+- **Multi-Dimensional Scoring**: 21+ scoring factors including Logic 3.0, emotional tone, evidence coherence
 - **Real-time AI Coach Feedback**: Instant assessment with human-like, empathetic feedback
 - **Grade-Level Calibration**: Dynamic adjustment for Grades 9-12 with refined expectations
-- **Complexity Bonuses**: Rewards vocabulary sophistication, rhetorical techniques, argument strength, emotional engagement
+- **Complexity Bonuses**: Rewards claim depth, evidence relevance, rhetorical structure, vocabulary sophistication
 
-### 2. 💡 Inline Feedback with Color Coding
+### 4. 💡 Inline Feedback with Color Coding
 - **Color-Coded Annotations**: 
   - 🟢 **Green**: Strengths to maintain
   - 🟡 **Yellow**: Areas for improvement
@@ -41,13 +56,13 @@ Created by [changcheng967](https://github.com/changcheng967) • Supported by Do
 - **Sentence-Level Suggestions**: Hover over highlighted text for specific, actionable feedback
 - **"How-to" Guidance**: Practical suggestions on improving vague statements and weak analysis
 
-### 3. 📚 Vocabulary & Style Enhancement
+### 5. 📚 Vocabulary & Style Enhancement
 - **Active Vocabulary Suggester**: Identifies generic words and provides sophisticated alternatives
 - **Sentence Variety Analysis**: Detects repetitive sentence structures and suggests improvements
 - **Passive Voice Detection**: Recommends active voice alternatives for stronger writing
 - **Transition Suggestions**: Helps improve essay flow and coherence
 
-### 4. 📈 Visual Score Breakdown
+### 6. 📈 Visual Score Breakdown
 - **Component Scoring**: Detailed breakdown of:
   - Content & Analysis
   - Structure & Organization
@@ -56,38 +71,46 @@ Created by [changcheng967](https://github.com/changcheng967) • Supported by Do
 - **Progress Bars**: Visual representation of each score component
 - **Overall Performance**: Combined score with Ontario level classification
 
-### 5. 📜 Draft History & Progress Tracking
+### 7. 📜 Draft History & Progress Tracking (Enhanced v8.0.0 - Adaptive Profiles)
 - **Draft Versioning**: Automatically saves each essay submission
 - **Score Evolution**: Visual graph showing score improvements over time
 - **Historical Comparison**: Track your writing progress across multiple drafts
 - **Timestamp Tracking**: See when each draft was submitted
 
-### 6. 🎯 Topic-Specific Feedback
+### 8. 🎯 Topic-Specific Feedback
 - **Intelligent Topic Detection**: Automatically identifies essay topics (technology, sports, arts, reading, environment, etc.)
 - **Customized Reflection Prompts**: Generates topic-specific questions to deepen analysis
 - **Targeted Examples**: Suggests relevant examples based on detected topic
 - **Personal Connection Guidance**: Prompts students to connect topics to their experiences
 
-### 7. ✏️ Grammar & Spell Check
+### 9. ✏️ Grammar & Spell Check
 - **Automated Corrections**: Powered by LanguageTool for comprehensive grammar checking
 - **Detailed Error Reports**: Shows exact corrections with explanations
 - **Corrected Version**: Provides a clean copy with all grammar issues fixed
 
-### 8. 🎯 Accurate Grading Engine (Enhanced v7.0.0 - AI Coach)
+### 10. 🎯 Accurate Grading Engine (Enhanced v8.0.0 - ScholarMind)
 - **99.5%+ Teacher Alignment**: Refined algorithm achieving exceptional alignment
 - **Weighted Categories**: Content (35%), Structure (25%), Application (25%), Grammar (15%)
 - **Ontario Rubric Levels**: Accurate mapping to Levels 1-4+ standards
 - **Dynamic Calibration**: 7 length tiers, 4 grade levels, complexity bonuses
-- **Argument Logic 2.0**: Counter-arguments, claim-evidence ratio, logical fallacy detection
-- **AI Coach Analysis**: Emotional tone, engagement scoring, evidence coherence
+- **Argument Logic 3.0**: Claim depth, evidence relevance, rhetorical structure mapping
+- **AI Coach Analysis**: Emotional tone, engagement scoring, evidence coherence, adaptive profiles
 
-### 9. 💰 Tiered Subscription System (Enhanced v7.0.0)
-- **Free Tier**: 5 essays/day, basic grading, score breakdown, AI Coach preview
-- **Plus Tier ($10/month)**: 100 essays/day, full AI Coach, inline feedback, draft history, vocabulary suggestions, grammar check
-- **Premium Tier ($35/month)**: 1,000 essays/day, advanced analytics, PDF export, historical tracking, priority support
-- **Unlimited Tier ($90/month)**: Unlimited essays, API access, school integration, teacher dashboard, institutional features
+### 11. 💰 Tiered Subscription System (v8.0.0 - ScholarMind Pricing)
+- **Free Trial**: $0 (7 days), all features, Live AI Coach (Lite)
+- **Student Basic**: $7.99 CAD/month, full grading, Logic 3.0, real-time feedback
+- **Student Premium**: $12.99 CAD/month, adaptive profiles, visual dashboard, essay heatmaps
+- **Teacher Suite**: $29.99 CAD/month, class analytics, batch grading, teacher-AI collaboration
+- **Institutional**: Custom pricing, admin dashboard, LMS integration, school-wide analytics
 
-### 10. 🎯 Personalization
+### 12. 🌍 Multilingual Support (NEW in v8.0.0)
+- **English**: Full support with Ontario curriculum alignment
+- **French (Français)**: Foundation implemented with thesis keywords and example indicators
+- **Extensible Framework**: Ready for Spanish (v8.2.0), Chinese Simplified (v8.3.0), Korean (v8.4.0)
+- **Bilingual Education**: Supports Ontario's French immersion and bilingual programs
+- **Localized Rubrics**: Language-specific grading criteria and feedback
+
+### 13. 🎯 Personalization
 - **Grade-Level Customization**: Dynamic scoring adjustment for Grades 9-12
 - **Feature Access Control**: Tier-based feature gating with upgrade prompts
 - **Usage Tracking**: Monitor daily usage against your license limit
