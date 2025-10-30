@@ -953,6 +953,369 @@ class DouEssay:
             variety_comment = " Good tonal variety enhances the essay's depth."
         
         return base_comment + engagement_comment + motivation_comment + variety_comment
+    
+    def update_smartprofile(self, user_id: str, essay_result: Dict) -> Dict:
+        """
+        v9.0.0: Global SmartProfile 2.0 - Deep Adaptive Learning
+        Tracks 20+ dimensions, provides predictive insights, and generates mentor missions.
+        Maintains cross-session learning profiles for personalized growth tracking.
+        """
+        # Initialize profile if new user
+        if user_id not in self.user_profiles:
+            self.user_profiles[user_id] = {
+                'essay_count': 0,
+                'dimensions': {dim: [] for dim in self.smartprofile_dimensions},
+                'achievements': [],
+                'creation_date': datetime.now().isoformat(),
+                'last_updated': datetime.now().isoformat()
+            }
+        
+        profile = self.user_profiles[user_id]
+        profile['essay_count'] += 1
+        profile['last_updated'] = datetime.now().isoformat()
+        
+        # Extract current performance across 20+ dimensions
+        current_scores = self.extract_dimension_scores(essay_result)
+        
+        # Update dimension history
+        for dim, score in current_scores.items():
+            if dim in profile['dimensions']:
+                profile['dimensions'][dim].append(score)
+                # Keep last 50 essays for trend analysis
+                if len(profile['dimensions'][dim]) > 50:
+                    profile['dimensions'][dim] = profile['dimensions'][dim][-50:]
+        
+        # Calculate growth trends
+        growth_analysis = self.analyze_growth_trends(profile)
+        
+        # Generate predictive insights
+        predictive_insights = self.generate_predictive_insights(profile, current_scores)
+        
+        # Create personalized mentor missions
+        mentor_missions = self.generate_mentor_missions(profile, current_scores, growth_analysis)
+        
+        # Check for new achievements
+        new_achievements = self.check_achievements(profile, essay_result)
+        profile['achievements'].extend(new_achievements)
+        
+        # Generate weekly learning pulse
+        learning_pulse = self.generate_learning_pulse(profile)
+        
+        return {
+            'profile_summary': {
+                'user_id': user_id,
+                'total_essays': profile['essay_count'],
+                'member_since': profile['creation_date'],
+                'current_level': self.calculate_overall_level(current_scores)
+            },
+            'current_performance': current_scores,
+            'growth_trends': growth_analysis,
+            'predictive_insights': predictive_insights,
+            'mentor_missions': mentor_missions,
+            'new_achievements': new_achievements,
+            'learning_pulse': learning_pulse
+        }
+    
+    def extract_dimension_scores(self, essay_result: Dict) -> Dict:
+        """v9.0.0: Extracts scores across 20+ SmartProfile dimensions from essay result."""
+        scores = {}
+        
+        # Extract from Neural Rubric
+        if 'neural_rubric' in essay_result:
+            rubric = essay_result['neural_rubric']['rubric_scores']
+            scores['clarity'] = rubric.get('communication', 2.5) / 4.5 * 100
+            scores['argument_depth'] = rubric.get('thinking', 2.5) / 4.5 * 100
+            scores['logic_strength'] = rubric.get('thinking', 2.5) / 4.5 * 100
+            scores['evidence_quality'] = rubric.get('knowledge', 2.5) / 4.5 * 100
+        
+        # Extract from EmotionFlow
+        if 'emotionflow' in essay_result:
+            emotion = essay_result['emotionflow']
+            scores['tone_control'] = emotion.get('engagement_level', 50)
+            scores['engagement_level'] = emotion.get('engagement_level', 50)
+            scores['emotional_resonance'] = emotion.get('engagement_level', 50)
+        
+        # Extract from detailed analysis
+        if 'detailed_analysis' in essay_result:
+            analysis = essay_result['detailed_analysis']
+            
+            # Structure metrics
+            if 'structure' in analysis:
+                struct = analysis['structure']
+                scores['structure_coherence'] = min(100, struct.get('structure_score', 50))
+                scores['thesis_strength'] = min(100, struct.get('thesis_strength', 50))
+                scores['transition_quality'] = min(100, struct.get('transition_score', 50))
+            
+            # Content metrics
+            if 'content' in analysis:
+                content = analysis['content']
+                scores['analysis_depth'] = min(100, content.get('analysis_score', 50))
+                scores['creativity'] = min(100, content.get('originality_score', 50))
+                scores['critical_thinking'] = min(100, content.get('critical_thinking_score', 50))
+            
+            # Grammar metrics
+            if 'grammar' in analysis:
+                grammar = analysis['grammar']
+                scores['grammar_accuracy'] = max(0, 100 - (grammar.get('error_count', 5) * 5))
+            
+            # Application metrics
+            if 'application' in analysis:
+                app = analysis['application']
+                scores['originality'] = min(100, app.get('originality_score', 50))
+        
+        # Fill in any missing dimensions with neutral scores
+        for dim in self.smartprofile_dimensions:
+            if dim not in scores:
+                scores[dim] = 50.0  # Neutral baseline
+        
+        return {dim: round(score, 1) for dim, score in scores.items()}
+    
+    def analyze_growth_trends(self, profile: Dict) -> Dict:
+        """v9.0.0: Analyzes growth trends across dimensions."""
+        trends = {}
+        
+        for dim, history in profile['dimensions'].items():
+            if len(history) < 2:
+                trends[dim] = 'Insufficient data'
+                continue
+            
+            # Calculate trend (last 5 vs previous 5)
+            recent = history[-5:] if len(history) >= 5 else history
+            previous = history[-10:-5] if len(history) >= 10 else history[:-5] if len(history) > 5 else []
+            
+            if previous:
+                recent_avg = sum(recent) / len(recent)
+                previous_avg = sum(previous) / len(previous)
+                change = recent_avg - previous_avg
+                
+                if change > 5:
+                    trends[dim] = f'Improving (+{change:.1f})'
+                elif change < -5:
+                    trends[dim] = f'Declining ({change:.1f})'
+                else:
+                    trends[dim] = 'Stable'
+            else:
+                trends[dim] = 'Building baseline'
+        
+        return trends
+    
+    def generate_predictive_insights(self, profile: Dict, current_scores: Dict) -> List[str]:
+        """v9.0.0: Generates predictive insights based on performance trends."""
+        insights = []
+        
+        # Predict path to Level 4
+        avg_score = sum(current_scores.values()) / len(current_scores)
+        points_to_level4 = max(0, 88.0 - avg_score)  # Level 4 ≈ 88%
+        
+        if points_to_level4 > 0:
+            # Find weakest dimensions
+            weak_dims = sorted(current_scores.items(), key=lambda x: x[1])[:3]
+            weak_names = [dim.replace('_', ' ').title() for dim, _ in weak_dims]
+            
+            insights.append(
+                f"You're {points_to_level4:.1f} points away from Level 4 — "
+                f"focus on {', '.join(weak_names[:2])}."
+            )
+        else:
+            insights.append("Excellent work! You're performing at Level 4 standard. Keep maintaining this level.")
+        
+        # Growth rate prediction
+        if profile['essay_count'] >= 5:
+            # Calculate average improvement rate
+            growth_rates = []
+            for dim, history in profile['dimensions'].items():
+                if len(history) >= 5:
+                    recent_avg = sum(history[-3:]) / 3
+                    early_avg = sum(history[:3]) / 3
+                    growth_rates.append(recent_avg - early_avg)
+            
+            if growth_rates:
+                avg_growth = sum(growth_rates) / len(growth_rates)
+                if avg_growth > 3:
+                    insights.append(f"Strong growth trajectory! Average improvement of {avg_growth:.1f} points per dimension.")
+                elif avg_growth > 0:
+                    insights.append(f"Steady progress with {avg_growth:.1f} point improvement. Consider focusing on high-impact areas.")
+        
+        # Consistency check
+        score_variance = max(current_scores.values()) - min(current_scores.values())
+        if score_variance > 30:
+            insights.append(
+                "Your skills vary significantly across dimensions. "
+                "Focusing on your weakest areas will boost your overall performance."
+            )
+        
+        return insights
+    
+    def generate_mentor_missions(self, profile: Dict, current_scores: Dict, 
+                                growth_analysis: Dict) -> List[Dict]:
+        """v9.0.0: Generates personalized AI mentor missions."""
+        missions = []
+        
+        # Find dimensions that need improvement
+        improving_needed = []
+        for dim, score in sorted(current_scores.items(), key=lambda x: x[1])[:5]:
+            if score < 70:
+                improving_needed.append((dim, score))
+        
+        # Mission 1: Address weakest dimension
+        if improving_needed:
+            weakest_dim, weakest_score = improving_needed[0]
+            mission_text = self.get_mission_for_dimension(weakest_dim, weakest_score)
+            missions.append({
+                'priority': 'High',
+                'dimension': weakest_dim.replace('_', ' ').title(),
+                'current_score': weakest_score,
+                'mission': mission_text,
+                'estimated_impact': '+5-10 points'
+            })
+        
+        # Mission 2: Strengthen a declining trend
+        declining_dims = [dim for dim, trend in growth_analysis.items() 
+                         if isinstance(trend, str) and 'Declining' in trend]
+        if declining_dims:
+            dim = declining_dims[0]
+            missions.append({
+                'priority': 'Medium',
+                'dimension': dim.replace('_', ' ').title(),
+                'current_score': current_scores.get(dim, 50),
+                'mission': f"Reverse the declining trend in {dim.replace('_', ' ')} by reviewing recent feedback.",
+                'estimated_impact': '+3-7 points'
+            })
+        
+        # Mission 3: Build on strengths
+        strong_dims = [dim for dim, score in current_scores.items() if score >= 80]
+        if strong_dims and len(missions) < 3:
+            dim = strong_dims[0]
+            missions.append({
+                'priority': 'Low',
+                'dimension': dim.replace('_', ' ').title(),
+                'current_score': current_scores[dim],
+                'mission': f"Maintain excellence in {dim.replace('_', ' ')} while exploring advanced techniques.",
+                'estimated_impact': '+1-3 points'
+            })
+        
+        return missions[:3]  # Return top 3 missions
+    
+    def get_mission_for_dimension(self, dimension: str, score: float) -> str:
+        """v9.0.0: Returns specific mission text for a dimension."""
+        missions = {
+            'clarity': "Strengthen clarity by using topic sentences and clear transitions between ideas.",
+            'argument_depth': "Deepen arguments by adding 'why' and 'how' analysis after each claim.",
+            'tone_control': "Practice varying emotional tone - mix assertive, reflective, and analytical language.",
+            'logic_strength': "Strengthen logic using contrast connectors (however, although, despite).",
+            'evidence_quality': "Improve evidence by citing specific research, data, or expert opinions.",
+            'structure_coherence': "Enhance structure by ensuring each paragraph has: claim, evidence, analysis.",
+            'thesis_strength': "Strengthen thesis by making it more specific and arguable.",
+            'transition_quality': "Use more sophisticated transitions (furthermore, consequently, nevertheless).",
+            'grammar_accuracy': "Review common grammar patterns and use active voice more consistently.",
+            'vocabulary_sophistication': "Replace generic words with precise, academic alternatives.",
+            'analysis_depth': "Add deeper analysis by explaining implications and broader significance.",
+            'creativity': "Bring in unique perspectives or unexpected connections to strengthen originality.",
+            'critical_thinking': "Challenge assumptions and consider alternative viewpoints.",
+            'emotional_resonance': "Connect ideas to real experiences and emotions for greater impact."
+        }
+        return missions.get(dimension, f"Focus on improving {dimension.replace('_', ' ')} through practice and feedback review.")
+    
+    def check_achievements(self, profile: Dict, essay_result: Dict) -> List[str]:
+        """v9.0.0: Checks and awards achievement badges."""
+        new_achievements = []
+        existing = set(profile['achievements'])
+        
+        # Essay count milestones
+        if profile['essay_count'] == 1 and 'first_essay' not in existing:
+            new_achievements.append('first_essay')
+        elif profile['essay_count'] == 5 and 'five_essays' not in existing:
+            new_achievements.append('five_essays')
+        elif profile['essay_count'] == 10 and 'ten_essays' not in existing:
+            new_achievements.append('ten_essays')
+        
+        # Performance achievements
+        if essay_result.get('rubric_level') in ['Level 4', 'Level 4+']:
+            if 'level_4_achieved' not in existing:
+                new_achievements.append('level_4_achieved')
+        
+        # Grammar excellence
+        if 'detailed_analysis' in essay_result:
+            grammar = essay_result['detailed_analysis'].get('grammar', {})
+            if grammar.get('error_count', 10) == 0 and 'perfect_grammar' not in existing:
+                new_achievements.append('perfect_grammar')
+        
+        # Strong argument
+        if 'neural_rubric' in essay_result:
+            thinking_score = essay_result['neural_rubric']['rubric_scores'].get('thinking', 0)
+            if thinking_score >= 4.0 and 'strong_argument' not in existing:
+                new_achievements.append('strong_argument')
+        
+        return new_achievements
+    
+    def generate_learning_pulse(self, profile: Dict) -> Dict:
+        """v9.0.0: Generates weekly learning pulse progress chart data."""
+        if profile['essay_count'] < 2:
+            return {
+                'message': 'Keep writing! Your learning pulse will appear after a few essays.',
+                'chart_data': []
+            }
+        
+        # Get last 7 essays or all available
+        chart_data = []
+        for dim in ['clarity', 'argument_depth', 'structure_coherence', 'evidence_quality']:
+            history = profile['dimensions'].get(dim, [])
+            if history:
+                recent = history[-7:]  # Last 7 essays
+                chart_data.append({
+                    'dimension': dim.replace('_', ' ').title(),
+                    'scores': recent,
+                    'average': round(sum(recent) / len(recent), 1),
+                    'trend': 'up' if len(recent) >= 2 and recent[-1] > recent[0] else 'stable'
+                })
+        
+        return {
+            'message': f'Your learning pulse based on {min(7, profile["essay_count"])} recent essays',
+            'chart_data': chart_data,
+            'overall_progress': self.calculate_overall_progress(profile)
+        }
+    
+    def calculate_overall_level(self, current_scores: Dict) -> str:
+        """v9.0.0: Calculates overall achievement level from dimension scores."""
+        avg_score = sum(current_scores.values()) / len(current_scores)
+        
+        if avg_score >= 90:
+            return 'Level 4+ (Mastery)'
+        elif avg_score >= 80:
+            return 'Level 4 (High Achievement)'
+        elif avg_score >= 70:
+            return 'Level 3 (Proficient)'
+        elif avg_score >= 60:
+            return 'Level 2 (Developing)'
+        else:
+            return 'Level 1 (Beginning)'
+    
+    def calculate_overall_progress(self, profile: Dict) -> str:
+        """v9.0.0: Calculates overall progress description."""
+        if profile['essay_count'] < 3:
+            return 'Building your foundation'
+        
+        # Calculate average improvement across all dimensions
+        improvements = []
+        for dim, history in profile['dimensions'].items():
+            if len(history) >= 3:
+                recent = sum(history[-3:]) / 3
+                early = sum(history[:3]) / 3
+                improvements.append(recent - early)
+        
+        if not improvements:
+            return 'Establishing baseline'
+        
+        avg_improvement = sum(improvements) / len(improvements)
+        
+        if avg_improvement > 10:
+            return 'Excellent growth trajectory! 🚀'
+        elif avg_improvement > 5:
+            return 'Strong steady progress! 📈'
+        elif avg_improvement > 0:
+            return 'Making gradual improvements 👍'
+        else:
+            return 'Focus on consistency for better growth 💡'
 
     def grade_essay(self, essay_text: str, grade_level: str = "Grade 10") -> Dict:
         """
