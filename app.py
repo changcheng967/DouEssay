@@ -137,31 +137,32 @@ class DouEssay:
 
 
     def setup_feedback_templates(self):
+        # v5.0.0: Enhanced feedback templates with specific, actionable guidance
         self.teacher_feedback_templates = {
             'thesis': [
-                "Your main idea is clear but could be more explicit",
-                "The thesis is present but could be stronger with specific language",
-                "Good start on the main idea; make it more focused and direct"
+                "Your main idea needs to be stated more explicitly in the introduction. Try: 'This essay will argue that...'",
+                "Strengthen your thesis by making a clear, arguable claim. Current thesis is too broad or vague.",
+                "Good foundation - now refine your thesis to include your specific position on the topic."
             ],
             'examples': [
-                "Your examples are relevant; add more specific details",
-                "Good use of examples; include examples from different contexts",
-                "Examples work well; connect them more clearly to your main points"
+                "Add at least 2-3 specific, detailed examples. Include names, dates, situations, or concrete evidence.",
+                "Your examples need more depth. For each example, add: who, what, where, when, and why it matters.",
+                "Examples are present but generic. Replace general statements with specific real-world instances or personal experiences."
             ],
             'analysis': [
-                "You explain points well; deepen analysis by discussing the why",
-                "Good analysis; connect each example back to your thesis",
-                "Clear explanations; expand on how examples support your argument"
+                "After each example, explain WHY it supports your thesis. Add 2-3 sentences of analysis per example.",
+                "Connect your examples back to your main argument. Show the 'so what' - why does this example matter?",
+                "Deepen your analysis by explaining the cause-effect relationship between your examples and your thesis."
             ],
             'structure': [
-                "Solid structure; use more sophisticated transitions",
-                "Good organization; ensure clear topic sentences",
-                "Clear structure; vary sentence structure for better flow"
+                "Use transition words at the start of body paragraphs: 'Furthermore,' 'Additionally,' 'However,' 'Moreover'.",
+                "Each paragraph needs: (1) topic sentence, (2) example/evidence, (3) analysis, (4) link back to thesis.",
+                "Improve flow by ensuring each paragraph builds on the previous one. Add connecting sentences."
             ],
             'application': [
-                "Good real-world connections; add more personal reflection",
-                "Nice application; connect ideas to broader implications",
-                "Valid insights; add more profound personal connections"
+                "Add a personal experience or real-world example that directly relates to your topic.",
+                "Connect your argument to current events, community issues, or your own life. Make it relatable.",
+                "Include reflection: What did you learn? How does this apply beyond the classroom?"
             ]
         }
         
@@ -713,13 +714,13 @@ class DouEssay:
 
     def calculate_calibrated_ontario_score(self, stats: Dict, structure: Dict, content: Dict, 
                                          grammar: Dict, application: Dict) -> int:
-        # v4.0.1: Adjusted weights to better represent overall essay quality
-        # Increased content/analysis weight, balanced grammar and structure
+        # v5.0.0: Optimized weights for accurate teacher-aligned grading
+        # Focus on content depth, structural organization, real-world application, and mechanics
         weights = {
-            'content': 0.35,      # v4.0.1: Increased from 0.30 (thesis, examples, analysis)
-            'structure': 0.25,    # v4.0.1: Increased from 0.20 (organization, coherence)
-            'grammar': 0.15,      # v4.0.1: Maintained (mechanics)
-            'application': 0.25   # v4.0.1: Decreased from 0.35 (insight, reflection)
+            'content': 0.35,      # Content & Analysis (thesis, examples, argument depth)
+            'structure': 0.25,    # Structure & Organization (coherence, transitions, flow)
+            'application': 0.25,  # Application & Insight (real-world connections, reflection)
+            'grammar': 0.15       # Grammar & Mechanics (accuracy, sentence variety)
         }
         
         base_score = (
@@ -1418,9 +1419,9 @@ def create_douessay_interface():
         assessment_html = f"""
         <div style="font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 15px; color: white; text-align: center; margin-bottom: 20px;">
-                <h1 style="margin: 0 0 10px 0; font-size: 2.2em;">DouEssay Assessment System v4.0.0</h1>
-                <p style="margin: 0; opacity: 0.9; font-size: 1.1em;">Ontario Standards • Intelligent Scoring • Enhanced Transparency</p>
-                <p style="margin: 10px 0 0 0; font-size: 0.9em; opacity: 0.7;">Created by changcheng967 • v4.0.0: Normalized Scoring & 5-Category Analysis • Doulet Media Copyright</p>
+                <h1 style="margin: 0 0 10px 0; font-size: 2.2em;">DouEssay Assessment System v5.0.0</h1>
+                <p style="margin: 0; opacity: 0.9; font-size: 1.1em;">Ontario Standards • Teacher-Aligned Grading • Actionable Feedback</p>
+                <p style="margin: 10px 0 0 0; font-size: 0.9em; opacity: 0.7;">Created by changcheng967 • v5.0.0: Focus on Accurate Grading & Topic-Specific Guidance • Doulet Media Copyright</p>
                 <p style="margin: 5px 0 0 0; font-size: 0.8em; opacity: 0.9; background: rgba(255,255,255,0.2); padding: 5px; border-radius: 5px;">{user_info} | Grade: {grade_level}</p>
             </div>
             
