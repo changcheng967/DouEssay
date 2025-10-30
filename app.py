@@ -611,10 +611,6 @@ class DouEssay:
         """
         if used_content is None:
             used_content = {'examples': set(), 'insights': set()}
-        if 'examples' not in used_content:
-            used_content['examples'] = set()
-        if 'insights' not in used_content:
-            used_content['insights'] = set()
         
         # v4.0.1: Use different opening structures to avoid repetition
         opening_structures = [
@@ -683,7 +679,8 @@ class DouEssay:
         ]
         
         template = random.choice(conclusion_templates)
-        challenges = ['demanding workload', 'assessment pressures', 'engagement challenges']
+        # v4.0.1: Ensure grammatical consistency - all singular for "is balanced"
+        challenges = ['demanding nature', 'challenging aspect', 'complex reality']
         values = ['transformative power', 'lasting value', 'fundamental importance']
         lessons = ['resilience', 'critical thinking', 'self-discipline']
         rewards = ['intellectual rewards', 'personal growth', 'skill development']
