@@ -82,7 +82,6 @@ class DouEssay:
         self.setup_nltk()
         self.setup_grammar_tool()
         self.setup_semantic_analyzers()
-        self.setup_enhancement_resources()
         self.setup_feedback_templates()
         self.license_manager = LicenseManager()
     
@@ -135,41 +134,7 @@ class DouEssay:
             'grateful', 'frustrating', 'encouraging', 'motivating', 'impactful'
         ]
 
-    def setup_enhancement_resources(self):
-        self.level4_transitions = [
-            'however', 'although', 'despite', 'while', 'whereas', 'conversely',
-            'furthermore', 'moreover', 'additionally', 'in addition', 'not only',
-            'but also', 'on the one hand', 'on the other hand', 'in contrast',
-            'similarly', 'likewise', 'by comparison', 'nevertheless', 'nonetheless'
-        ]
-        
-        self.sophisticated_vocab = {
-            'very': ['extremely', 'remarkably', 'particularly', 'exceptionally'],
-            'really': ['genuinely', 'truly', 'certainly', 'indeed'],
-            'hard': ['challenging', 'demanding', 'rigorous', 'arduous'],
-            'important': ['significant', 'crucial', 'vital', 'essential', 'paramount'],
-            'good': ['beneficial', 'advantageous', 'valuable', 'productive'],
-            'bad': ['detrimental', 'counterproductive', 'ineffective', 'problematic'],
-            'big': ['substantial', 'considerable', 'significant', 'extensive'],
-            'small': ['minimal', 'negligible', 'modest', 'limited'],
-            'show': ['demonstrate', 'illustrate', 'exemplify', 'manifest'],
-            'think': ['contend', 'maintain', 'assert', 'posit'],
-            'because': ['due to', 'owing to', 'as a consequence of', 'resulting from'],
-            'many': ['numerous', 'various', 'multiple', 'countless'],
-            'some': ['several', 'certain', 'particular', 'specific']
-        }
-        
-        self.analysis_boosters = [
-            'this demonstrates that', 'this reveals the importance of',
-            'this underscores the need for', 'this highlights the significance of',
-            'this exemplifies how', 'this illustrates the connection between'
-        ]
-        
-        self.personal_insight_boosters = [
-            'from my personal experience', 'through my own observations',
-            'what I have come to understand is', 'this has taught me that',
-            'reflecting on this, I realize', 'this experience has shown me'
-        ]
+
 
     def setup_feedback_templates(self):
         self.teacher_feedback_templates = {
@@ -271,124 +236,22 @@ class DouEssay:
             }
         }
 
-    def enhance_to_level4(self, original_essay: str) -> Dict:
-        """
-        v4.0.0: Enhanced with detailed 5-category change tracking and explanations.
-        Returns dict with enhanced essay and comprehensive change details for transparency.
-        """
-        if not original_essay.strip():
-            return {
-                'enhanced_essay': original_essay, 
-                'changes': [],
-                'detailed_changes': {
-                    'vocabulary': {'count': 0, 'examples': []},
-                    'grammar': {'count': 0, 'examples': []},
-                    'transitions': {'count': 0, 'examples': []},
-                    'analysis': {'count': 0, 'examples': []},
-                    'topic_preservation': {'score': 1.0, 'status': 'Excellent'}
-                },
-                'similarity': 1.0
-            }
-        
-        # Track changes made with detailed examples
-        changes = []
-        detailed_changes = {
-            'vocabulary': {'count': 0, 'examples': [], 'description': 'Enhanced word choice for academic sophistication'},
-            'grammar': {'count': 0, 'examples': [], 'description': 'Corrected errors and refined sentence structure'},
-            'transitions': {'count': 0, 'examples': [], 'description': 'Added sophisticated transitions for better flow'},
-            'analysis': {'count': 0, 'examples': [], 'description': 'Deepened analytical connections and insights'},
-            'topic_preservation': {'score': 0.0, 'status': 'Pending', 'description': 'Maintained focus on original topic'}
-        }
-        
-        themes = self.analyze_essay_themes(original_essay)
-        enhanced_intro = self.enhance_introduction(original_essay, themes)
-        changes.append({'type': 'Introduction', 'description': 'Elevated thesis clarity and academic tone'})
-        detailed_changes['analysis']['count'] += 1
-        detailed_changes['analysis']['examples'].append('Enhanced introduction with stronger thesis')
-        
-        enhanced_body = self.enhance_body_paragraphs(original_essay, themes)
-        changes.append({'type': 'Body Paragraphs', 'description': 'Added analytical depth and sophisticated transitions'})
-        detailed_changes['analysis']['count'] += 1
-        detailed_changes['transitions']['count'] += 1
-        detailed_changes['analysis']['examples'].append('Strengthened body paragraph analysis')
-        detailed_changes['transitions']['examples'].append('Added transition words between paragraphs')
-        
-        enhanced_conclusion = self.enhance_conclusion(original_essay, themes)
-        changes.append({'type': 'Conclusion', 'description': 'Strengthened synthesis and broader implications'})
-        detailed_changes['analysis']['count'] += 1
-        detailed_changes['analysis']['examples'].append('Enhanced conclusion with synthesis')
-        
-        enhanced_essay = f"{enhanced_intro}\n\n{enhanced_body}\n\n{enhanced_conclusion}"
-        
-        # Track vocabulary changes with examples
-        vocab_before = len([w for w in original_essay.lower().split() if len(w) > 7])
-        original_words = set(original_essay.lower().split())
-        enhanced_essay = self.apply_vocabulary_enhancement(enhanced_essay)
-        enhanced_words = set(enhanced_essay.lower().split())
-        vocab_after = len([w for w in enhanced_essay.lower().split() if len(w) > 7])
-        
-        # Track specific vocabulary replacements
-        vocab_replacements = []
-        for simple_word in self.sophisticated_vocab.keys():
-            if simple_word in original_essay.lower():
-                vocab_replacements.append(simple_word)
-        
-        if vocab_after > vocab_before:
-            vocab_diff = vocab_after - vocab_before
-            changes.append({'type': 'Vocabulary', 'description': f'Replaced {vocab_diff}+ words with sophisticated alternatives'})
-            detailed_changes['vocabulary']['count'] = vocab_diff
-            detailed_changes['vocabulary']['examples'] = [f'Upgraded common words: {", ".join(vocab_replacements[:3])}']
-        
-        enhanced_essay = self.apply_grammar_enhancement(enhanced_essay)
-        changes.append({'type': 'Grammar', 'description': 'Corrected grammar and refined sentence structure'})
-        detailed_changes['grammar']['count'] = 1
-        detailed_changes['grammar']['examples'].append('Applied grammar corrections and refinements')
-        
-        # v4.0.0: Check semantic similarity with detailed reporting
-        similarity_check = self.check_semantic_similarity(original_essay, enhanced_essay)
-        
-        # v4.0.0: Enhanced topic preservation reporting
-        similarity_score = similarity_check['similarity']
-        if similarity_score >= 0.7:
-            preservation_status = 'Excellent'
-        elif similarity_score >= 0.5:
-            preservation_status = 'Good'
-        else:
-            preservation_status = 'Moderate'
-        
-        detailed_changes['topic_preservation']['score'] = similarity_score
-        detailed_changes['topic_preservation']['status'] = preservation_status
-        detailed_changes['topic_preservation']['themes_preserved'] = similarity_check.get('preserved_themes', 0)
-        detailed_changes['topic_preservation']['total_themes'] = similarity_check.get('total_themes', 0)
-        
-        if similarity_check['drift']:
-            # If significant drift detected, blend more of original content
-            changes.append({'type': 'Topic Preservation', 'description': f'Adjusted to maintain topic focus (similarity: {similarity_check["similarity"]})'})
-        
-        return {
-            'enhanced_essay': enhanced_essay,
-            'changes': changes,
-            'detailed_changes': detailed_changes,  # v4.0.0: New 5-category breakdown
-            'similarity': similarity_check['similarity'],
-            'drift_detected': similarity_check['drift'],
-            'theme_preservation': similarity_check['theme_preservation']
-        }
+
 
     def analyze_essay_themes(self, essay: str) -> Dict:
         """
-        v4.0.1: Enhanced to detect specific topics (e.g., technology, sports, arts)
-        in addition to generic education themes to preserve topic focus.
+        v5.0.0: Detect specific topics for generating targeted feedback and reflection prompts.
         """
         text_lower = essay.lower()
         
-        # v4.0.1: Detect specific topics to maintain focus
+        # Detect specific topics for targeted feedback
         specific_topics = {
-            'technology': any(word in text_lower for word in ['technology', 'computer', 'digital', 'internet', 'software', 'app', 'device', 'tablet', 'smartphone']),
-            'sports': any(word in text_lower for word in ['sport', 'athlete', 'team', 'game', 'play', 'physical', 'exercise']),
-            'arts': any(word in text_lower for word in ['art', 'music', 'paint', 'creative', 'artist', 'cultural']),
-            'friendship': any(word in text_lower for word in ['friend', 'friendship', 'social', 'companion', 'peer']),
-            'environment': any(word in text_lower for word in ['environment', 'climate', 'nature', 'pollution', 'sustainability']),
-            'reading': any(word in text_lower for word in ['read', 'book', 'literature', 'novel', 'story'])
+            'technology': any(word in text_lower for word in ['technology', 'computer', 'digital', 'internet', 'software', 'app', 'device', 'tablet', 'smartphone', 'online', 'tech']),
+            'sports': any(word in text_lower for word in ['sport', 'athlete', 'team', 'game', 'play', 'physical', 'exercise', 'coach', 'training', 'competition']),
+            'arts': any(word in text_lower for word in ['art', 'music', 'paint', 'creative', 'artist', 'cultural', 'performance', 'theater', 'drama', 'dance']),
+            'friendship': any(word in text_lower for word in ['friend', 'friendship', 'social', 'companion', 'peer', 'relationship', 'connection']),
+            'environment': any(word in text_lower for word in ['environment', 'climate', 'nature', 'pollution', 'sustainability', 'green', 'eco', 'conservation']),
+            'reading': any(word in text_lower for word in ['read', 'book', 'literature', 'novel', 'story', 'author', 'writing', 'text'])
         }
         
         # Original generic themes
@@ -398,370 +261,24 @@ class DouEssay:
             'boring': any(word in text_lower for word in ['boring', 'not interesting', 'pay attention']),
             'difficult': any(word in text_lower for word in ['hard', 'difficult', 'challenging']),
             'school_negative': any(word in text_lower for word in ['not fun', 'don\'t like', 'hate', 'dislike']),
-            # v4.0.1: Add detected specific topics
             'specific_topic': next((topic for topic, detected in specific_topics.items() if detected), None),
             'has_specific_topic': any(specific_topics.values())
         }
         return themes
 
-    def enhance_introduction(self, original_essay: str, themes: Dict) -> str:
-        """
-        v4.0.1: Enhanced to preserve specific topics (e.g., technology, sports)
-        instead of defaulting to generic education themes.
-        """
-        introduction_templates = [
-            "While {subject} is universally recognized as {positive_adj}, {context} This essay will explore {topic_focus} and examine {specific_aspects}.",
-            "The {domain}, though {positive_adj}, presents {challenges} for {audience}. This analysis will delve into {key_issues} and consider {broader_implications}.",
-            "Despite the {positive_aspects} of {subject}, {context_challenge} This discussion will address {main_points} and reflect on {personal_significance}."
-        ]
-        
-        template = random.choice(introduction_templates)
-        positive_adjs = ['essential', 'valuable', 'important', 'crucial']
-        challenge_adjs = ['challenging', 'demanding', 'complex', 'multifaceted']
-        challenges = ['significant challenges', 'various difficulties', 'notable obstacles', 'particular hurdles']
-        positive_aspects = ['benefits', 'advantages', 'positive aspects', 'merits']
-        
-        # v4.0.1: Preserve specific topics when detected
-        if themes.get('has_specific_topic') and themes.get('specific_topic'):
-            topic = themes['specific_topic']
-            if topic == 'technology':
-                subject = "technology in education"
-                domain = "integration of technology in learning"
-                context = "the way students learn has been transformed by digital tools."
-                context_challenge = "technology also presents challenges that must be addressed."
-                topic_focus = "how technology impacts the learning experience"
-                specific_aspects = "both the benefits and challenges of educational technology"
-                audience = "students and educators"
-            elif topic == 'sports':
-                subject = "athletic participation"
-                domain = "world of sports"
-                context = "physical activity plays a vital role in student development."
-                context_challenge = "competitive sports also bring unique challenges."
-                topic_focus = "the role of sports in education"
-                specific_aspects = "how athletic pursuits shape personal growth"
-                audience = "student athletes"
-            elif topic == 'arts':
-                subject = "artistic education"
-                domain = "realm of creative arts"
-                context = "creativity and artistic expression enrich the learning experience."
-                context_challenge = "pursuing the arts requires dedication and perseverance."
-                topic_focus = "the significance of arts in education"
-                specific_aspects = "how creative pursuits foster personal development"
-                audience = "students and artists"
-            elif topic == 'reading':
-                subject = "reading and literacy"
-                domain = "practice of reading"
-                context = "reading remains fundamental to academic success."
-                context_challenge = "developing strong reading habits requires consistent effort."
-                topic_focus = "the importance of reading in education"
-                specific_aspects = "how reading shapes critical thinking and knowledge"
-                audience = "students and readers"
-            else:
-                # Default for other specific topics
-                subject = f"{topic} in education"
-                domain = f"field of {topic}"
-                context = f"the impact of {topic} on learning is significant."
-                context_challenge = f"{topic} presents both opportunities and challenges."
-                topic_focus = f"the role of {topic} in education"
-                specific_aspects = f"how {topic} affects student development"
-                audience = "students"
-        elif themes['workload']:
-            subject = "education"
-            domain = "educational experience"
-            context = "many students find the academic journey to be demanding."
-            context_challenge = "many learners encounter substantial obstacles."
-            topic_focus = "the challenges of academic workload management"
-            specific_aspects = "strategies for balancing academic demands"
-            audience = "students"
-        elif themes['tests']:
-            subject = "education"
-            domain = "educational experience"
-            context = "assessment methods significantly impact student learning."
-            context_challenge = "evaluation systems can create considerable pressure."
-            topic_focus = "the psychological impact of assessment methods"
-            specific_aspects = "alternative approaches to student evaluation"
-            audience = "students"
-        else:
-            subject = "education"
-            domain = "educational experience"
-            context = "many students find the academic journey to be complex."
-            context_challenge = "many learners encounter various difficulties."
-            topic_focus = "the complex nature of the educational experience"
-            specific_aspects = "both the challenges and rewards of learning"
-            audience = "students"
-        
-        enhanced_intro = template.format(
-            subject=subject,
-            domain=domain,
-            context=context,
-            context_challenge=context_challenge,
-            positive_adj=random.choice(positive_adjs),
-            challenge_adj=random.choice(challenge_adjs),
-            challenges=random.choice(challenges),
-            positive_aspects=random.choice(positive_aspects),
-            topic_focus=topic_focus,
-            specific_aspects=specific_aspects,
-            key_issues=topic_focus,
-            broader_implications=specific_aspects,
-            main_points=topic_focus,
-            personal_significance=specific_aspects,
-            audience=audience
-        )
-        
-        # v4.0.1: Reduce frequency of transition words at start (can sound awkward)
-        if random.random() > 0.7:
-            transition = random.choice(['Furthermore', 'Moreover', 'Additionally'])
-            enhanced_intro = f"{transition}, {enhanced_intro[0].lower()}{enhanced_intro[1:]}"
-        
-        return enhanced_intro
 
-    def enhance_body_paragraphs(self, original_essay: str, themes: Dict) -> str:
-        paragraphs = []
-        
-        if themes['workload']:
-            paragraphs.append(self.create_enhanced_paragraph('workload'))
-        if themes['tests']:
-            paragraphs.append(self.create_enhanced_paragraph('tests'))
-        if themes['boring']:
-            paragraphs.append(self.create_enhanced_paragraph('boring'))
-        
-        # v4.0.1: Track used content (examples and insights) to avoid duplication
-        if not paragraphs:
-            used_content = {'examples': set(), 'insights': set()}
-            for topic in ["academic challenges", "learning experiences", "personal growth"]:
-                para = self.create_generic_enhanced_paragraph(topic, used_content)
-                paragraphs.append(para)
-        
-        # v4.0.1: Expanded transitions to avoid repetition and mechanical feel
-        enhanced_body = ""
-        varied_transitions = [
-            'Furthermore,', 'Additionally,', 'Moreover,', 
-            'In addition,', 'Another consideration is that',
-            'Equally important,', 'Beyond this,', 'Similarly,'
-        ]
-        
-        for i, paragraph in enumerate(paragraphs):
-            if i > 0:
-                # v4.0.1: Ensure transitions are not repeated
-                if i < len(varied_transitions):
-                    transition = varied_transitions[i]
-                else:
-                    transition = random.choice(['Furthermore,', 'Additionally,', 'Moreover,'])
-                paragraph = f"{transition} {paragraph[0].lower()}{paragraph[1:]}"
-            enhanced_body += paragraph + "\n\n"
-        
-        return enhanced_body.strip()
 
-    def create_enhanced_paragraph(self, paragraph_type: str) -> str:
-        paragraph_enhancements = {
-            'workload': {
-                'template': "The substantial academic workload presents a significant challenge. {specific_example} This demanding schedule {analysis_connection} {personal_impact}",
-                'examples': [
-                    "For instance, balancing multiple advanced courses while participating in extracurricular activities requires exceptional time management skills.",
-                    "Specifically, the cumulative effect of daily homework assignments, projects, and exam preparation creates considerable pressure."
-                ]
-            },
-            'tests': {
-                'template': "Assessment methods, particularly standardized testing, create considerable anxiety. {specific_example} This evaluation approach {analysis_connection} {broader_implication}",
-                'examples': [
-                    "High-stakes examinations often fail to capture students' true understanding and can induce significant stress that affects performance.",
-                    "The pressure of timed tests can undermine learning by prioritizing memorization over genuine comprehension."
-                ]
-            },
-            'boring': {
-                'template': "Certain aspects of the curriculum may lack engagement for some students. {specific_example} However, this {alternative_perspective} {deeper_understanding}",
-                'examples': [
-                    "While traditional lecture-based instruction may seem monotonous, it's important to recognize the foundational knowledge it provides.",
-                    "Subjects that appear less immediately relevant often develop critical thinking skills essential for future success."
-                ]
-            }
-        }
-        
-        enhancement = paragraph_enhancements[paragraph_type]
-        template = enhancement['template']
-        example = random.choice(enhancement['examples'])
-        
-        if paragraph_type == 'workload':
-            analysis = "not only tests academic abilities but also teaches valuable time management and prioritization skills"
-            personal = "From personal experience, learning to manage this workload has been instrumental in developing organizational habits that extend beyond academics."
-        elif paragraph_type == 'tests':
-            analysis = "raises important questions about how we measure learning and whether alternative assessment methods might better serve educational goals"
-            personal = "This has led me to appreciate assessments that focus on understanding rather than memorization."
-        else:
-            analysis = "challenges us to find personal relevance in all learning opportunities"
-            personal = "I've discovered that even seemingly dry subjects contain valuable lessons when approached with curiosity."
-        
-        return template.format(
-            specific_example=example,
-            analysis_connection=analysis,
-            personal_impact=personal,
-            broader_implication=personal,
-            alternative_perspective=analysis,
-            deeper_understanding=personal
-        )
 
-    def create_generic_enhanced_paragraph(self, topic: str, used_content: dict = None) -> str:
-        """
-        v4.0.1: Improved to avoid repetitive structures and "on one hand" overuse.
-        Creates varied paragraph structures based on topic, tracking used content to avoid duplication.
-        
-        Args:
-            topic: The topic for the paragraph
-            used_content: Dict with 'examples' and 'insights' sets to track used content
-        """
-        if used_content is None:
-            used_content = {'examples': set(), 'insights': set()}
-        
-        # v4.0.1: Use different opening structures to avoid repetition
-        opening_structures = [
-            f"When examining {topic}, it becomes evident that they present both obstacles and opportunities.",
-            f"The experience of {topic} reveals a complex dynamic worth exploring.",
-            f"Considering the nature of {topic}, we find both significant challenges and valuable lessons."
-        ]
-        
-        opening = random.choice(opening_structures)
-        
-        # v4.0.1: Varied analytical statements
-        analysis_statements = [
-            f"While {topic} may initially seem discouraging, they often foster the most significant growth.",
-            f"Though {topic} can be demanding, they frequently lead to profound learning experiences.",
-            f"Despite the difficulty {topic} may present, they typically yield important developmental benefits."
-        ]
-        
-        analysis = random.choice(analysis_statements)
-        
-        # v4.0.1: Ensure examples are unique across paragraphs
-        all_examples = [
-            "For example, struggling with a difficult concept initially can lead to a more profound understanding once mastered.",
-            "Consider how overcoming academic obstacles builds resilience and problem-solving abilities.",
-            "Research shows that moderate challenge is essential for cognitive growth and skill development.",
-            "Studies demonstrate that perseverance through difficulty strengthens problem-solving capabilities.",
-            "Evidence indicates that embracing challenges fosters intellectual maturity and adaptability."
-        ]
-        
-        # Select an unused example
-        available_examples = [ex for ex in all_examples if ex not in used_content['examples']]
-        if not available_examples:
-            available_examples = all_examples  # Reset if all used
-        
-        example = random.choice(available_examples)
-        used_content['examples'].add(example)
-        
-        # v4.0.1: Also track used insights to avoid repetition (separate from examples)
-        all_insights = [
-            "the most meaningful learning often occurs outside our comfort zones.",
-            "education is as much about developing character as it is about acquiring knowledge.",
-            "true understanding comes from engaging deeply with challenging material.",
-            "challenges shape us into more capable and resilient individuals.",
-            "growth emerges from embracing difficulty rather than avoiding it."
-        ]
-        
-        insight_prefix = random.choice(self.personal_insight_boosters)
-        
-        # Select unused insight (tracked separately from examples)
-        available_insights = [ins for ins in all_insights if ins not in used_content['insights']]
-        if not available_insights:
-            available_insights = all_insights  # Reset if all used
-        
-        insight_text = random.choice(available_insights)
-        used_content['insights'].add(insight_text)
-        
-        insight = f"{insight_prefix} {insight_text}"
-        
-        return f"{opening} {analysis} {example} {insight}"
 
-    def enhance_conclusion(self, original_essay: str, themes: Dict) -> str:
-        # v4.0.1: Fixed grammar in template - "challenges...are balanced" -> "challenges...is balanced"
-        conclusion_templates = [
-            "In conclusion, while {acknowledge_challenges}, the {value} of education cannot be overstated. The {lessons} learned extend far beyond the classroom.",
-            "Ultimately, the {challenges} of schooling is balanced by its {rewards}. This balance teaches us about {deeper_meaning} and prepares us for {future_applications}.",
-            "Therefore, despite the {difficulties} encountered, education remains {fundamentally_important}. The {skills} and {insights} gained have lasting {significance}."
-        ]
-        
-        template = random.choice(conclusion_templates)
-        # v4.0.1: Ensure grammatical consistency - all singular for "is balanced"
-        challenges = ['demanding nature', 'challenging aspect', 'complex reality']
-        values = ['transformative power', 'lasting value', 'fundamental importance']
-        lessons = ['resilience', 'critical thinking', 'self-discipline']
-        rewards = ['intellectual rewards', 'personal growth', 'skill development']
-        deeper_meanings = ['perseverance', 'lifelong learning', 'personal development']
-        future_applications = ['future challenges', 'professional endeavors', 'life decisions']
-        difficulties = ['academic pressures', 'learning obstacles', 'educational demands']
-        fundamentally_important = ['essential for success', 'fundamentally important', 'critical for development']
-        skills = ['analytical skills', 'communication abilities', 'problem-solving capabilities']
-        insights = ['personal insights', 'academic discoveries', 'educational revelations']
-        significance = ['personal significance', 'lasting impact', 'enduring value']
-        
-        enhanced_conclusion = template.format(
-            acknowledge_challenges=random.choice(challenges),
-            value=random.choice(values),
-            lessons=random.choice(lessons),
-            challenges=random.choice(challenges),
-            rewards=random.choice(rewards),
-            deeper_meaning=random.choice(deeper_meanings),
-            future_applications=random.choice(future_applications),
-            difficulties=random.choice(difficulties),
-            fundamentally_important=random.choice(fundamentally_important),
-            skills=random.choice(skills),
-            insights=random.choice(insights),
-            significance=random.choice(significance)
-        )
-        
-        reflection = random.choice([
-            "This reflection has deepened my appreciation for the educational journey.",
-            "These insights will continue to inform my approach to learning.",
-            "The lessons extend far beyond academic settings into all aspects of life."
-        ])
-        
-        return f"{enhanced_conclusion} {reflection}"
 
-    def apply_vocabulary_enhancement(self, text: str) -> str:
-        """
-        v3.0.0: Context-aware vocabulary enhancement with safe replacements.
-        Considers sentence context to avoid inappropriate substitutions.
-        """
-        enhanced_text = text
-        sentences = re.split(r'([.!?]+)', text)
-        
-        for i in range(0, len(sentences), 2):  # Process sentence and punctuation pairs
-            if i >= len(sentences):
-                break
-            sentence = sentences[i]
-            
-            for simple_word, sophisticated_options in self.sophisticated_vocab.items():
-                # Check if word appears in sentence
-                pattern = re.compile(r'\b' + re.escape(simple_word) + r'\b', re.IGNORECASE)
-                if pattern.search(sentence):
-                    # v3.0.0: Context-aware selection (prefer first option for consistency)
-                    # In educational contexts, use first (most formal) alternative
-                    sentence_lower = sentence.lower()
-                    if any(word in sentence_lower for word in ['important', 'significant', 'crucial', 'essential']):
-                        # Academic context - use most formal
-                        replacement = sophisticated_options[0]
-                    elif any(word in sentence_lower for word in ['student', 'learn', 'teach', 'education']):
-                        # Educational context - use moderate formality
-                        replacement = sophisticated_options[min(1, len(sophisticated_options)-1)]
-                    else:
-                        # General context - use first option for safety
-                        replacement = sophisticated_options[0]
-                    
-                    # Replace only whole words (not parts of words)
-                    sentence = pattern.sub(replacement, sentence, count=1)
-            
-            sentences[i] = sentence
-        
-        return ''.join(sentences)
 
-    def apply_grammar_enhancement(self, text: str) -> str:
-        if not self.grammar_enabled:
-            return text
-            
-        try:
-            matches = self.grammar_tool.check(text)
-            corrected_text = self.grammar_tool.correct(text)
-            return corrected_text
-        except:
-            return text
+
+
+
+
+
+
+
 
     def analyze_basic_stats(self, text: str) -> Dict:
         words = text.split()
@@ -1146,73 +663,7 @@ class DouEssay:
             'usage_by_type': transition_usage
         }
     
-    def check_semantic_similarity(self, original_text: str, enhanced_text: str) -> Dict:
-        """
-        v3.0.0: Check semantic similarity to prevent topic drift during enhancement.
-        Uses keyword overlap and theme preservation to ensure enhanced essay stays on topic.
-        """
-        # Extract key nouns and themes from original
-        original_lower = original_text.lower()
-        enhanced_lower = enhanced_text.lower()
-        
-        # Get significant words (length > 4, not common stopwords)
-        stopwords = {'this', 'that', 'with', 'from', 'have', 'been', 'were', 'what',
-                    'when', 'where', 'which', 'while', 'their', 'there', 'these', 'those',
-                    'would', 'could', 'should', 'about', 'after', 'before', 'other'}
-        
-        original_words = [w.strip('.,!?;:') for w in original_lower.split() 
-                         if len(w) > 4 and w.strip('.,!?;:') not in stopwords]
-        enhanced_words = [w.strip('.,!?;:') for w in enhanced_lower.split() 
-                         if len(w) > 4 and w.strip('.,!?;:') not in stopwords]
-        
-        # Find unique significant words in each
-        original_set = set(original_words)
-        enhanced_set = set(enhanced_words)
-        
-        # Calculate overlap
-        common_words = original_set & enhanced_set
-        if not original_set:
-            return {'similarity': 0.0, 'drift': True, 'preserved_themes': 0}
-        
-        similarity_ratio = len(common_words) / len(original_set)
-        
-        # Check theme preservation (original themes should appear in enhanced)
-        theme_keywords = {
-            'education': ['school', 'learn', 'teach', 'student', 'education', 'class', 'study'],
-            'work': ['work', 'job', 'career', 'employ', 'profession', 'occupation'],
-            'technology': ['technology', 'computer', 'digital', 'internet', 'software'],
-            'friendship': ['friend', 'friendship', 'social', 'relationship', 'companion'],
-            'challenge': ['challenge', 'difficult', 'problem', 'obstacle', 'struggle'],
-            'success': ['success', 'achieve', 'accomplish', 'goal', 'progress']
-        }
-        
-        original_themes = set()
-        for theme, keywords in theme_keywords.items():
-            if any(keyword in original_lower for keyword in keywords):
-                original_themes.add(theme)
-        
-        preserved_themes = 0
-        for theme, keywords in theme_keywords.items():
-            if theme in original_themes:
-                if any(keyword in enhanced_lower for keyword in keywords):
-                    preserved_themes += 1
-        
-        theme_preservation = preserved_themes / len(original_themes) if original_themes else 1.0
-        
-        # Combined similarity score
-        overall_similarity = (similarity_ratio * 0.6 + theme_preservation * 0.4)
-        
-        # Topic drift detected if similarity < 0.5
-        drift_detected = overall_similarity < 0.5
-        
-        return {
-            'similarity': round(overall_similarity, 2),
-            'keyword_overlap': round(similarity_ratio, 2),
-            'theme_preservation': round(theme_preservation, 2),
-            'drift': drift_detected,
-            'preserved_themes': preserved_themes,
-            'total_themes': len(original_themes)
-        }
+
 
     def check_grammar_errors(self, text: str) -> Dict:
         if not self.grammar_enabled:
@@ -2040,127 +1491,16 @@ def create_douessay_interface():
             result['rubric_level']['level']
         )
     
-    def enhance_essay(essay_text, license_key):
-        """v4.0.0: Enhanced with detailed 5-category change tracking and explanations."""
-        if not license_key.strip():
-            return "", "", "Please enter a valid license key."
-        
-        license_result = douessay.validate_license_and_increment(license_key)
-        if not license_result['valid']:
-            return "", "", f"License Error: {license_result['message']}"
-        
-        if not essay_text.strip():
-            return "", "", "Please enter an essay to enhance."
-        
-        # v4.0.0: Get detailed enhancement results with 5-category breakdown
-        enhancement_result = douessay.enhance_to_level4(essay_text)
-        enhanced_essay = enhancement_result['enhanced_essay']
-        changes = enhancement_result['changes']
-        detailed_changes = enhancement_result.get('detailed_changes', {})
-        similarity = enhancement_result['similarity']
-        
-        user_info = f"User: {license_result['user_type'].title()} | Usage: {license_result['daily_usage'] + 1}/{license_result['daily_limit']}"
-        
-        # v4.0.0: Enhanced 5-category breakdown
-        changes_html = '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">'
-        
-        # Category 1: Vocabulary
-        vocab_data = detailed_changes.get('vocabulary', {})
-        changes_html += f'''
-        <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #9b59b6;">
-            <h4 style="color: #6c3483; margin-top: 0;">📚 Vocabulary</h4>
-            <p style="margin: 5px 0; color: #555;"><strong>Changes:</strong> {vocab_data.get('count', 0)}</p>
-            <p style="margin: 5px 0; color: #555; font-size: 0.9em;">{vocab_data.get('description', '')}</p>
-            {'<p style="margin: 5px 0; color: #777; font-size: 0.85em;">' + '<br>'.join(vocab_data.get('examples', [])[:2]) + '</p>' if vocab_data.get('examples') else ''}
-        </div>
-        '''
-        
-        # Category 2: Grammar
-        grammar_data = detailed_changes.get('grammar', {})
-        changes_html += f'''
-        <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #27ae60;">
-            <h4 style="color: #1e8449; margin-top: 0;">✏️ Grammar</h4>
-            <p style="margin: 5px 0; color: #555;"><strong>Corrections:</strong> {grammar_data.get('count', 0)}+</p>
-            <p style="margin: 5px 0; color: #555; font-size: 0.9em;">{grammar_data.get('description', '')}</p>
-        </div>
-        '''
-        
-        # Category 3: Transitions
-        transitions_data = detailed_changes.get('transitions', {})
-        changes_html += f'''
-        <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db;">
-            <h4 style="color: #2874a6; margin-top: 0;">🔗 Transitions</h4>
-            <p style="margin: 5px 0; color: #555;"><strong>Added:</strong> {transitions_data.get('count', 0)}</p>
-            <p style="margin: 5px 0; color: #555; font-size: 0.9em;">{transitions_data.get('description', '')}</p>
-            {'<p style="margin: 5px 0; color: #777; font-size: 0.85em;">' + '<br>'.join(transitions_data.get('examples', [])[:2]) + '</p>' if transitions_data.get('examples') else ''}
-        </div>
-        '''
-        
-        # Category 4: Analysis
-        analysis_data = detailed_changes.get('analysis', {})
-        changes_html += f'''
-        <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #e74c3c;">
-            <h4 style="color: #c0392b; margin-top: 0;">🔬 Analysis</h4>
-            <p style="margin: 5px 0; color: #555;"><strong>Enhancements:</strong> {analysis_data.get('count', 0)}</p>
-            <p style="margin: 5px 0; color: #555; font-size: 0.9em;">{analysis_data.get('description', '')}</p>
-            {'<p style="margin: 5px 0; color: #777; font-size: 0.85em;">' + '<br>'.join(analysis_data.get('examples', [])[:2]) + '</p>' if analysis_data.get('examples') else ''}
-        </div>
-        '''
-        
-        changes_html += '</div>'
-        
-        # v4.0.0: Topic Preservation as 5th category
-        topic_data = detailed_changes.get('topic_preservation', {})
-        similarity_score = topic_data.get('score', similarity)
-        preservation_status = topic_data.get('status', 'Good')
-        
-        similarity_color = '#28a745' if similarity_score >= 0.7 else '#ffc107' if similarity_score >= 0.5 else '#dc3545'
-        similarity_text = preservation_status
-        
-        # v4.0.0: Enhanced before/after comparison with 5-category transparency
-        comparison_html = f"""
-        <div style="font-family: Arial, sans-serif;">
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 12px; color: white; text-align: center; margin-bottom: 20px;">
-                <h2 style="margin: 0;">✨ Level 4+ Enhancement Complete (v4.0.0)</h2>
-                <p style="margin: 10px 0 0 0; opacity: 0.9;">{user_info}</p>
-            </div>
-            
-            <div style="background: #d4edda; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745; margin-bottom: 15px;">
-                <h3 style="color: #155724; margin-top: 0;">🎯 5-Category Enhancement Breakdown</h3>
-                {changes_html}
-            </div>
-            
-            <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; border-left: 4px solid {similarity_color}; margin-bottom: 15px;">
-                <h4 style="color: #004085; margin-top: 0;">🔍 Topic Preservation (Category 5)</h4>
-                <p style="color: #004085; margin: 0;">
-                    <strong>Similarity Score:</strong> {similarity_score:.0%} ({similarity_text})<br>
-                    <strong>Themes Preserved:</strong> {topic_data.get('themes_preserved', 'N/A')}/{topic_data.get('total_themes', 'N/A')}<br>
-                    The enhanced essay {'maintains excellent' if similarity_score >= 0.7 else 'mostly preserves' if similarity_score >= 0.5 else 'partially preserves'} fidelity to your original topic and themes.
-                </p>
-            </div>
-            
-            <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
-                <h4 style="color: #856404; margin-top: 0;">💡 Learning Opportunity</h4>
-                <p style="color: #856404; margin: 0;">
-                    Review the enhanced version to see how Level 4+ essays are structured. Notice the sophisticated vocabulary, 
-                    complex sentence structures, and deeper analytical connections. Compare specific changes to understand 
-                    the techniques used. You can copy the enhanced essay and modify it further to maintain your personal voice!
-                </p>
-            </div>
-        </div>
-        """
-        
-        return essay_text, enhanced_essay, comparison_html
-    
+
     with gr.Blocks(title="DouEssay Assessment System", theme=gr.themes.Soft(), css="""
         .gradio-container {max-width: 1400px !important;}
         .tab-nav button {font-size: 1.1em; font-weight: 500;}
         h1, h2, h3 {color: #2c3e50;}
     """) as demo:
-        gr.Markdown("# 🎓 DouEssay Assessment System v4.0.0")
-        gr.Markdown("### Professional Essay Grading and Level 4+ Enhancement Tool")
-        gr.Markdown("*Ontario Standards • Intelligent Scoring • Real-time Enhancement • Advanced Analytics*")
-        gr.Markdown("**Created by changcheng967 • v4.0.0: Enhanced Transparency & Normalized Scoring • Supported by Doulet Media**")
+        gr.Markdown("# 🎓 DouEssay Assessment System v5.0.0")
+        gr.Markdown("### Professional Essay Grading and Feedback Tool")
+        gr.Markdown("*Ontario Standards • Intelligent Scoring • Actionable Feedback • Advanced Analytics*")
+        gr.Markdown("**Created by changcheng967 • v5.0.0: Focus on Accurate Grading & Topic-Specific Feedback • Supported by Doulet Media**")
         
         with gr.Row():
             license_input = gr.Textbox(
@@ -2189,7 +1529,6 @@ def create_douessay_interface():
                 
                 with gr.Row():
                     grade_btn = gr.Button("📊 Grade Essay", variant="primary", size="lg")
-                    enhance_btn = gr.Button("✨ Enhance to Level 4+", variant="secondary", size="lg")
                     clear_btn = gr.Button("🗑️ Clear", size="lg")
             
             # Tab 2: Assessment Results
@@ -2231,22 +1570,8 @@ def create_douessay_interface():
                 gr.Markdown("### Track Your Progress Across Drafts")
                 draft_history_output = gr.HTML()
             
-            # Tab 7: Level 4+ Enhancer
-            with gr.TabItem("✨ Level 4+ Enhancer", id=6):
-                gr.Markdown("### Before & After Comparison")
-                enhancement_info = gr.HTML()
-                
-                with gr.Row():
-                    with gr.Column():
-                        gr.Markdown("#### 📄 Original Essay")
-                        original_essay_display = gr.Textbox(lines=12, interactive=False, show_copy_button=True)
-                    
-                    with gr.Column():
-                        gr.Markdown("#### ⭐ Enhanced Essay")
-                        enhanced_essay_display = gr.Textbox(lines=12, interactive=False, show_copy_button=True)
-            
-            # Tab 8: Grammar Corrections
-            with gr.TabItem("✏️ Grammar Check", id=7):
+            # Tab 7: Grammar Corrections
+            with gr.TabItem("✏️ Grammar Check", id=6):
                 gr.Markdown("### Grammar and Spelling Corrections")
                 corrected_output = gr.Textbox(
                     label="Corrected Essay",
@@ -2271,20 +1596,14 @@ def create_douessay_interface():
             ]
         )
         
-        enhance_btn.click(
-            enhance_essay,
-            inputs=[essay_input, license_input],
-            outputs=[original_essay_display, enhanced_essay_display, enhancement_info]
-        )
-        
         clear_btn.click(
-            lambda: ("", "", "", "", "", "", "", 0, ""),
+            lambda: ("", "", "", "", "", "", 0, ""),
             outputs=[
                 assessment_output,
                 annotated_output,
                 score_breakdown_output,
                 vocab_output,
-                enhancement_info,
+                draft_history_output,
                 corrected_output,
                 score_display,
                 level_display
