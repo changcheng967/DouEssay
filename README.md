@@ -104,11 +104,13 @@ Created by [changcheng967](https://github.com/changcheng967) • Supported by Do
 - **Institutional**: Custom pricing, admin dashboard, LMS integration, school-wide analytics
 
 ### 12. 🌍 Multilingual Support (NEW in v8.0.0)
-- **Plus Tier ($10/month)**: 100 essays/day, full AI Coach, inline feedback, draft history, vocabulary suggestions, grammar check
-- **Premium Tier ($35/month)**: 1,000 essays/day, advanced analytics, PDF export, historical tracking, priority support
-- **Unlimited Tier ($90/month)**: Unlimited essays, API access, school integration, teacher dashboard, institutional features
+- **English**: Full support with Ontario curriculum alignment
+- **French (Français)**: Foundation implemented with thesis keywords and example indicators
+- **Extensible Framework**: Ready for Spanish (v8.2.0), Chinese Simplified (v8.3.0), Korean (v8.4.0)
+- **Bilingual Education**: Supports Ontario's French immersion and bilingual programs
+- **Localized Rubrics**: Language-specific grading criteria and feedback
 
-### 10. 🎯 Personalization
+### 13. 🎯 Personalization
 - **Grade-Level Customization**: Dynamic scoring adjustment for Grades 9-12
 - **Feature Access Control**: Tier-based feature gating with upgrade prompts
 - **Usage Tracking**: Monitor daily usage against your license limit
