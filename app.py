@@ -168,6 +168,7 @@ class DouEssay:
         self.setup_grammar_tool()
         self.setup_semantic_analyzers()
         self.setup_feedback_templates()
+        self.setup_emotional_tone_analyzers()  # v7.0.0: AI Coach emotional analysis
         self.license_manager = LicenseManager()
     
     def setup_nltk(self):
@@ -243,6 +244,31 @@ class DouEssay:
             'rhetorical_question': ['?', 'why', 'how', 'what if', 'can we', 'should we'],
             'irony': ['ironically', 'paradoxically', 'surprisingly', 'contrary to'],
             'persuasive': ['must', 'should', 'need to', 'have to', 'ought to', 'it is imperative']
+        }
+    
+    def setup_emotional_tone_analyzers(self):
+        """
+        v7.0.0: AI Coach - Emotional tone analysis for more human-like feedback.
+        Detects emotional engagement, empathy, and persuasive tone in essays.
+        """
+        # Emotional tone categories
+        self.emotional_tones = {
+            'positive': ['optimistic', 'hopeful', 'encouraging', 'inspiring', 'uplifting', 'passionate', 
+                        'enthusiastic', 'confident', 'proud', 'grateful', 'joyful', 'excited'],
+            'negative': ['pessimistic', 'discouraging', 'depressing', 'cynical', 'bitter', 'resentful',
+                        'angry', 'frustrated', 'disappointed', 'worried', 'anxious', 'fearful'],
+            'neutral': ['objective', 'balanced', 'impartial', 'factual', 'analytical', 'rational',
+                       'logical', 'reasoned', 'measured', 'detached', 'dispassionate'],
+            'empathetic': ['understand', 'relate', 'appreciate', 'recognize', 'acknowledge', 'respect',
+                          'compassionate', 'sympathetic', 'caring', 'concerned', 'sensitive']
+        }
+        
+        # Emotional strength indicators
+        self.emotional_strength_words = {
+            'strong': ['absolutely', 'completely', 'entirely', 'totally', 'profoundly', 'deeply',
+                      'tremendously', 'incredibly', 'extremely', 'intensely'],
+            'moderate': ['quite', 'fairly', 'rather', 'somewhat', 'relatively', 'moderately'],
+            'weak': ['slightly', 'barely', 'hardly', 'scarcely', 'minimally', 'marginally']
         }
 
 
@@ -512,7 +538,11 @@ class DouEssay:
         rhetorical_analysis = self.detect_rhetorical_techniques(text)
         vocab_analysis = self.detect_context_vocabulary(text)
         
-        # v6.0.0: Adjusted scoring to include new components
+        # v7.0.0: AI Coach enhancements
+        emotional_tone = self.analyze_emotional_tone(text)
+        evidence_coherence = self.analyze_evidence_coherence(text)
+        
+        # v7.0.0: Adjusted scoring with new components
         # Base score from thesis, examples, and analysis
         base_score = (thesis_score + example_score + analysis_score) / 3
         
@@ -521,10 +551,16 @@ class DouEssay:
         rhetorical_bonus = rhetorical_analysis['technique_score'] * 0.10
         vocab_bonus = vocab_analysis['sophistication_score'] * 0.10
         
-        # Penalty for unsupported claims
-        unsupported_penalty = min(0.15, argument_analysis['unsupported_claims'] * 0.05)
+        # v7.0.0: New bonuses
+        emotional_bonus = emotional_tone['engagement_score'] * 0.05  # Emotional engagement
+        coherence_bonus = evidence_coherence['coherence_score'] * 0.05  # Evidence coherence
         
-        content_score = (base_score + argument_bonus + rhetorical_bonus + vocab_bonus - unsupported_penalty) * 10
+        # Penalty for unsupported claims and logical fallacies
+        unsupported_penalty = min(0.15, argument_analysis['unsupported_claims'] * 0.05)
+        fallacy_penalty = min(0.1, argument_analysis.get('logical_fallacies', 0) * 0.02)
+        
+        content_score = (base_score + argument_bonus + rhetorical_bonus + vocab_bonus + 
+                        emotional_bonus + coherence_bonus - unsupported_penalty - fallacy_penalty) * 10
         
         return {
             "score": min(10, max(0, content_score)),
@@ -534,10 +570,13 @@ class DouEssay:
             "thesis_quality": round(thesis_score, 2),
             "example_quality": round(example_score, 2),
             "analysis_quality": round(analysis_score, 2),
-            # v6.0.0: New metrics
+            # v6.0.0: Metrics
             "argument_strength": argument_analysis,
             "rhetorical_techniques": rhetorical_analysis,
-            "vocabulary_sophistication": vocab_analysis
+            "vocabulary_sophistication": vocab_analysis,
+            # v7.0.0: AI Coach metrics
+            "emotional_tone": emotional_tone,
+            "evidence_coherence": evidence_coherence
         }
 
     def assess_thesis_presence_semantic(self, text: str) -> float:
@@ -573,8 +612,8 @@ class DouEssay:
 
     def assess_argument_strength(self, text: str) -> Dict:
         """
-        v6.0.0: Enhanced argument analysis detecting thesis strength, relevance, and originality.
-        Returns detailed metrics about argument quality.
+        v7.0.0: Argument Logic 2.0 - Enhanced argument analysis with counter-argument detection,
+        claim-evidence mapping, and logical fallacy identification.
         """
         text_lower = text.lower()
         paragraphs = [p.strip() for p in text.split('\n\n') if p.strip()]
@@ -585,7 +624,10 @@ class DouEssay:
                 'has_clear_position': False,
                 'originality_score': 0.0,
                 'logical_flow_score': 0.0,
-                'unsupported_claims': 0
+                'unsupported_claims': 0,
+                'counter_arguments': 0,
+                'logical_fallacies': 0,
+                'claim_evidence_ratio': 0.0
             }
         
         first_para = paragraphs[0].lower()
@@ -603,6 +645,21 @@ class DouEssay:
         # Detect unsupported claims (absolute statements without evidence)
         unsupported_count = sum(1 for phrase in self.unsupported_indicators if phrase in text_lower)
         
+        # v7.0.0: Detect counter-arguments (shows critical thinking)
+        counter_argument_phrases = [
+            'however', 'on the other hand', 'critics argue', 'opponents claim',
+            'some may say', 'it could be argued', 'alternatively', 'conversely',
+            'despite this', 'nevertheless', 'yet', 'although'
+        ]
+        counter_argument_count = sum(1 for phrase in counter_argument_phrases if phrase in text_lower)
+        
+        # v7.0.0: Detect logical fallacies
+        fallacy_indicators = [
+            'everyone knows', 'everybody agrees', 'always', 'never', 'all people',
+            'no one', 'it is obvious', 'clearly', 'without a doubt'
+        ]
+        fallacy_count = sum(1 for phrase in fallacy_indicators if phrase in text_lower)
+        
         # Assess logical flow between examples and analysis
         logical_connectors = ['therefore', 'consequently', 'as a result', 'this shows that',
                              'this demonstrates', 'this proves', 'thus', 'hence', 'accordingly']
@@ -613,19 +670,32 @@ class DouEssay:
         expected_connectors = max(1, len(words) // 100)  # ~1 per 100 words
         logical_flow_score = min(1.0, logical_count / expected_connectors)
         
-        # Calculate overall strength score
-        position_weight = 0.4 if has_clear_position else 0.0
-        originality_weight = originality_score * 0.3
-        logical_weight = logical_flow_score * 0.3
+        # v7.0.0: Calculate claim-evidence ratio
+        claim_indicators = ['i argue', 'i believe', 'i contend', 'my position', 'my thesis']
+        evidence_indicators = ['for example', 'research shows', 'according to', 'studies indicate']
+        claims = sum(1 for phrase in claim_indicators if phrase in text_lower)
+        evidence = sum(1 for phrase in evidence_indicators if phrase in text_lower)
+        claim_evidence_ratio = evidence / max(1, claims) if claims > 0 else 0.5
         
-        strength_score = position_weight + originality_weight + logical_weight
+        # Calculate overall strength score with v7.0.0 enhancements
+        position_weight = 0.4 if has_clear_position else 0.0
+        originality_weight = originality_score * 0.25
+        logical_weight = logical_flow_score * 0.25
+        counter_arg_bonus = min(0.1, counter_argument_count * 0.05)  # Bonus for critical thinking
+        fallacy_penalty = min(0.1, fallacy_count * 0.02)  # Penalty for logical fallacies
+        
+        strength_score = position_weight + originality_weight + logical_weight + counter_arg_bonus - fallacy_penalty
+        strength_score = max(0.0, min(1.0, strength_score))
         
         return {
             'strength_score': round(strength_score, 2),
             'has_clear_position': has_clear_position,
             'originality_score': round(originality_score, 2),
             'logical_flow_score': round(logical_flow_score, 2),
-            'unsupported_claims': unsupported_count
+            'unsupported_claims': unsupported_count,
+            'counter_arguments': counter_argument_count,  # v7.0.0
+            'logical_fallacies': fallacy_count,  # v7.0.0
+            'claim_evidence_ratio': round(claim_evidence_ratio, 2)  # v7.0.0
         }
 
     def assess_examples_quality_semantic(self, text: str) -> Tuple[float, int]:
@@ -700,6 +770,114 @@ class DouEssay:
             'persuasive_language': persuasive_count,
             'technique_score': round(technique_score, 2),
             'has_advanced_techniques': total_techniques >= 2
+        }
+
+    def analyze_emotional_tone(self, text: str) -> Dict:
+        """
+        v7.0.0: AI Coach - Analyzes emotional tone and engagement level.
+        Returns detailed emotional profile for more human-like feedback.
+        """
+        text_lower = text.lower()
+        words = text_lower.split()
+        
+        # Count emotional tone indicators
+        tone_counts = {}
+        for tone_category, tone_words in self.emotional_tones.items():
+            count = sum(1 for word in words if any(tone_word in word for tone_word in tone_words))
+            tone_counts[tone_category] = count
+        
+        # Determine dominant tone
+        total_emotional_words = sum(tone_counts.values())
+        if total_emotional_words > 0:
+            dominant_tone = max(tone_counts.items(), key=lambda x: x[1])[0]
+            tone_balance = tone_counts[dominant_tone] / total_emotional_words
+        else:
+            dominant_tone = 'neutral'
+            tone_balance = 0.0
+        
+        # Assess emotional strength
+        strength_scores = {}
+        for strength, words_list in self.emotional_strength_words.items():
+            strength_scores[strength] = sum(1 for word in words if word in words_list)
+        
+        total_strength_words = sum(strength_scores.values())
+        emotional_intensity = 0.0
+        if total_strength_words > 0:
+            # Weight: strong=1.0, moderate=0.6, weak=0.3
+            emotional_intensity = (
+                strength_scores['strong'] * 1.0 + 
+                strength_scores['moderate'] * 0.6 + 
+                strength_scores['weak'] * 0.3
+            ) / max(1, len(words) / 50)  # Normalize by essay length
+        
+        # Calculate engagement score (combination of tone variety and intensity)
+        tone_variety = len([c for c in tone_counts.values() if c > 0]) / len(self.emotional_tones)
+        engagement_score = min(1.0, (tone_variety * 0.5 + emotional_intensity * 0.5))
+        
+        return {
+            'dominant_tone': dominant_tone,
+            'tone_balance': round(tone_balance, 2),
+            'tone_counts': tone_counts,
+            'emotional_intensity': round(emotional_intensity, 2),
+            'engagement_score': round(engagement_score, 2),
+            'total_emotional_words': total_emotional_words,
+            'has_emotional_engagement': total_emotional_words >= 3
+        }
+    
+    def analyze_evidence_coherence(self, text: str) -> Dict:
+        """
+        v7.0.0: Enhanced evidence coherence analysis.
+        Evaluates how well evidence connects to arguments with improved logic detection.
+        """
+        text_lower = text.lower()
+        sentences = [s.strip() for s in re.split(r'[.!?]+', text) if s.strip()]
+        
+        # Enhanced evidence markers
+        evidence_markers = [
+            'according to', 'research shows', 'studies indicate', 'data reveals',
+            'statistics show', 'evidence suggests', 'experts say', 'scholars argue',
+            'findings demonstrate', 'results indicate', 'surveys show'
+        ]
+        
+        # Connection phrases that link evidence to argument
+        connection_phrases = [
+            'this shows that', 'this demonstrates', 'this proves', 'this illustrates',
+            'this indicates', 'this suggests', 'therefore', 'thus', 'consequently',
+            'as a result', 'this means that', 'which shows', 'which proves'
+        ]
+        
+        # Count evidence instances
+        evidence_count = sum(1 for marker in evidence_markers if marker in text_lower)
+        
+        # Count evidence-argument connections
+        connection_count = sum(1 for phrase in connection_phrases if phrase in text_lower)
+        
+        # Calculate coherence ratio
+        if evidence_count > 0:
+            coherence_ratio = min(1.0, connection_count / evidence_count)
+        else:
+            coherence_ratio = 0.5  # No evidence to evaluate
+        
+        # Detect evidence gaps (examples without analysis)
+        paragraphs = [p.strip() for p in text.split('\n\n') if p.strip()]
+        evidence_gaps = 0
+        for para in paragraphs:
+            para_lower = para.lower()
+            has_evidence = any(marker in para_lower for marker in evidence_markers)
+            has_analysis = any(phrase in para_lower for phrase in connection_phrases)
+            if has_evidence and not has_analysis:
+                evidence_gaps += 1
+        
+        # Calculate overall coherence score
+        coherence_score = coherence_ratio * 0.7 + (1.0 - min(1.0, evidence_gaps / max(1, len(paragraphs)))) * 0.3
+        
+        return {
+            'evidence_count': evidence_count,
+            'connection_count': connection_count,
+            'coherence_ratio': round(coherence_ratio, 2),
+            'evidence_gaps': evidence_gaps,
+            'coherence_score': round(coherence_score, 2),
+            'quality': 'Excellent' if coherence_score >= 0.8 else 'Good' if coherence_score >= 0.6 else 'Needs Improvement'
         }
 
     def detect_context_vocabulary(self, text: str) -> Dict:
@@ -1073,17 +1251,46 @@ class DouEssay:
         feedback.append(f"Overall Score: {score}/100")
         feedback.append(f"Ontario Level: {rubric['level']} - {rubric['description']}")
         
-        # v6.0.0: Add advanced analysis summary
+        # v7.0.0: Enhanced AI Coach analysis summary
         if 'argument_strength' in content:
             arg_strength = content['argument_strength']
             feedback.append("")
-            feedback.append("🎯 ARGUMENT ANALYSIS (v6.0.0):")
+            feedback.append("🎯 ARGUMENT LOGIC 2.0 (v7.0.0 - AI Coach):")
             feedback.append(f"  • Argument Strength: {arg_strength.get('strength_score', 0)*100:.0f}%")
             feedback.append(f"  • Clear Position: {'Yes ✓' if arg_strength.get('has_clear_position', False) else 'Needs Work'}")
             feedback.append(f"  • Originality: {arg_strength.get('originality_score', 0)*100:.0f}%")
             feedback.append(f"  • Logical Flow: {arg_strength.get('logical_flow_score', 0)*100:.0f}%")
+            feedback.append(f"  • Counter-Arguments: {arg_strength.get('counter_arguments', 0)} (shows critical thinking)")
+            feedback.append(f"  • Claim-Evidence Ratio: {arg_strength.get('claim_evidence_ratio', 0):.2f}")
             if arg_strength.get('unsupported_claims', 0) > 0:
-                feedback.append(f"  ⚠️  Unsupported Claims Detected: {arg_strength.get('unsupported_claims', 0)}")
+                feedback.append(f"  ⚠️  Unsupported Claims: {arg_strength.get('unsupported_claims', 0)}")
+            if arg_strength.get('logical_fallacies', 0) > 0:
+                feedback.append(f"  ⚠️  Logical Fallacies Detected: {arg_strength.get('logical_fallacies', 0)}")
+        
+        # v7.0.0: AI Coach - Emotional tone analysis
+        if 'emotional_tone' in content:
+            tone = content['emotional_tone']
+            feedback.append("")
+            feedback.append("🎭 EMOTIONAL TONE & ENGAGEMENT (v7.0.0 - AI Coach):")
+            feedback.append(f"  • Dominant Tone: {tone.get('dominant_tone', 'neutral').title()}")
+            feedback.append(f"  • Engagement Score: {tone.get('engagement_score', 0)*100:.0f}%")
+            feedback.append(f"  • Emotional Intensity: {tone.get('emotional_intensity', 0)*100:.0f}%")
+            if tone.get('has_emotional_engagement', False):
+                feedback.append(f"  ✓ Good emotional connection with topic")
+            else:
+                feedback.append(f"  💡 Consider adding more personal emotion and engagement")
+        
+        # v7.0.0: AI Coach - Evidence coherence
+        if 'evidence_coherence' in content:
+            coherence = content['evidence_coherence']
+            feedback.append("")
+            feedback.append("🔗 EVIDENCE COHERENCE (v7.0.0 - AI Coach):")
+            feedback.append(f"  • Evidence Count: {coherence.get('evidence_count', 0)}")
+            feedback.append(f"  • Evidence-Argument Connections: {coherence.get('connection_count', 0)}")
+            feedback.append(f"  • Coherence Quality: {coherence.get('quality', 'N/A')}")
+            feedback.append(f"  • Coherence Score: {coherence.get('coherence_score', 0)*100:.0f}%")
+            if coherence.get('evidence_gaps', 0) > 0:
+                feedback.append(f"  ⚠️  Evidence Gaps: {coherence.get('evidence_gaps', 0)} paragraphs need better connection")
         
         feedback.append("")
         
@@ -1933,9 +2140,9 @@ def create_douessay_interface():
         assessment_html = f"""
         <div style="font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 15px; color: white; text-align: center; margin-bottom: 20px;">
-                <h1 style="margin: 0 0 10px 0; font-size: 2.2em;">DouEssay Assessment System v6.0.0</h1>
-                <p style="margin: 0; opacity: 0.9; font-size: 1.1em;">Ontario Standards • ≥99% Teacher Alignment • AI-Enhanced Analysis</p>
-                <p style="margin: 10px 0 0 0; font-size: 0.9em; opacity: 0.7;">Created by changcheng967 • v6.0.0: Advanced AI Refinement & Professional Features • Doulet Media Copyright</p>
+                <h1 style="margin: 0 0 10px 0; font-size: 2.2em;">DouEssay Assessment System v7.0.0</h1>
+                <p style="margin: 0; opacity: 0.9; font-size: 1.1em;">AI Writing Mentor • 99.5%+ Teacher Alignment • Project MentorAI</p>
+                <p style="margin: 10px 0 0 0; font-size: 0.9em; opacity: 0.7;">Created by changcheng967 • v7.0.0: AI Coach, Argument Logic 2.0, Evidence Coherence • Doulet Media</p>
                 <p style="margin: 5px 0 0 0; font-size: 0.8em; opacity: 0.9; background: rgba(255,255,255,0.2); padding: 5px; border-radius: 5px;">{user_info} | Grade: {grade_level}</p>
             </div>
             
@@ -2024,10 +2231,10 @@ def create_douessay_interface():
         .tab-nav button {font-size: 1.1em; font-weight: 500;}
         h1, h2, h3 {color: #2c3e50;}
     """) as demo:
-        gr.Markdown("# 🎓 DouEssay Assessment System v6.0.0")
-        gr.Markdown("### The #1 Professional Essay Grading Tool for Ontario Students")
-        gr.Markdown("*≥99% Teacher Alignment • AI-Enhanced Analysis • Dynamic Scoring • Advanced Feedback*")
-        gr.Markdown("**Created by changcheng967 • v6.0.0: Most Reliable & Accurate Essay Grading Platform • Supported by Doulet Media**")
+        gr.Markdown("# 🎓 DouEssay Assessment System v7.0.0 - Project MentorAI")
+        gr.Markdown("### AI Writing Mentor & Institutional Assessment Suite")
+        gr.Markdown("*99.5%+ Teacher Alignment • AI Coach • Argument Logic 2.0 • Evidence Coherence Analysis*")
+        gr.Markdown("**Created by changcheng967 • v7.0.0: The Most Advanced, Accessible & Affordable Essay Grader in Canada • Doulet Media**")
         
         with gr.Row():
             license_input = gr.Textbox(
@@ -2107,14 +2314,14 @@ def create_douessay_interface():
                     show_copy_button=True
                 )
             
-            # v6.0.0: Tab 8: Pricing & Features
+            # v7.0.0: Tab 8: Pricing & Features
             with gr.TabItem("💰 Pricing & Features", id=7):
-                gr.Markdown("### DouEssay v6.0.0 Subscription Tiers")
+                gr.Markdown("### DouEssay v7.0.0 Subscription Tiers - Project MentorAI")
                 gr.HTML("""
                 <div style="font-family: Arial, sans-serif;">
                     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; color: white; margin-bottom: 20px;">
-                        <h2 style="margin: 0 0 10px 0;">Choose Your Plan</h2>
-                        <p style="margin: 0; opacity: 0.9;">Unlock the full power of DouEssay with features designed for every level of writer</p>
+                        <h2 style="margin: 0 0 10px 0;">Choose Your Plan - v7.0.0 Features</h2>
+                        <p style="margin: 0; opacity: 0.9;">Experience AI Coach, Argument Logic 2.0, and Evidence Coherence Analysis</p>
                     </div>
                     
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0;">
