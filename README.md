@@ -1,10 +1,10 @@
 # 🎓 DouEssay Assessment System
 
-**Professional Essay Grading and Level 4+ Enhancement Tool**
+**Professional Essay Grading and Feedback Tool**
 
-*Ontario Standards • Intelligent Scoring • Real-time Enhancement • Draft Tracking • Advanced Analytics*
+*Ontario Standards • Teacher-Aligned Scoring • Actionable Feedback • Draft Tracking • Advanced Analytics*
 
-**Version 4.0.0** - Now with Enhanced Transparency, Normalized Scoring, 5-Category Analysis, and Improved UI/UX!
+**Version 5.0.0** - Now Focused on Accurate Grading with Topic-Specific Feedback!
 
 Created by [changcheng967](https://github.com/changcheng967) • Supported by Doulet Media
 
@@ -46,23 +46,24 @@ Created by [changcheng967](https://github.com/changcheng967) • Supported by Do
 - **Historical Comparison**: Track your writing progress across multiple drafts
 - **Timestamp Tracking**: See when each draft was submitted
 
-### 6. ✨ Level 4+ Enhancement Feature
-- **Intelligent Enhancement**: Automatically elevates essays to Level 4+ standards
-- **Before/After Comparison**: Side-by-side view of original and enhanced versions
-- **Transparent Changes**: Detailed explanation of enhancements made:
-  - Vocabulary elevation
-  - Sentence structure sophistication
-  - Analytical depth strengthening
-  - Transition improvements
-  - Personal insight deepening
-- **Learning Tool**: Use enhancements as examples for future writing
+### 6. 🎯 Topic-Specific Feedback
+- **Intelligent Topic Detection**: Automatically identifies essay topics (technology, sports, arts, reading, environment, etc.)
+- **Customized Reflection Prompts**: Generates topic-specific questions to deepen analysis
+- **Targeted Examples**: Suggests relevant examples based on detected topic
+- **Personal Connection Guidance**: Prompts students to connect topics to their experiences
 
 ### 7. ✏️ Grammar & Spell Check
 - **Automated Corrections**: Powered by LanguageTool for comprehensive grammar checking
 - **Detailed Error Reports**: Shows exact corrections with explanations
 - **Corrected Version**: Provides a clean copy with all grammar issues fixed
 
-### 8. 🎯 Personalization
+### 8. 🎯 Accurate Grading Engine
+- **Teacher-Aligned Scoring**: Targets ≥99% alignment with teacher evaluations
+- **Weighted Categories**: Content (35%), Structure (25%), Application (25%), Grammar (15%)
+- **Ontario Rubric Levels**: Accurate mapping to Levels 1-4+ standards
+- **Fair Scoring**: Normalized across essay lengths and complexity
+
+### 9. 🎯 Personalization
 - **Grade-Level Customization**: Adjust feedback complexity based on student grade (9-12)
 - **User Type Support**: Free, Plus, Premium, and Unlimited license tiers
 - **Usage Tracking**: Monitor daily usage against your license limit
@@ -104,16 +105,13 @@ Created by [changcheng967](https://github.com/changcheng967) • Supported by Do
 1. **Enter License Key**: Input your license key for access
 2. **Select Grade Level**: Choose your current grade (9-12)
 3. **Write/Paste Essay**: Enter your essay in the input tab (250-500 words recommended)
-4. **Choose Action**:
-   - **Grade Essay**: Get comprehensive assessment with inline feedback
-   - **Enhance to Level 4+**: Automatically improve essay to Level 4+ standards
+4. **Grade Essay**: Click the "Grade Essay" button to receive comprehensive assessment
 5. **Review Feedback**: Navigate through tabs to explore different aspects:
    - **Assessment**: Overall score and detailed feedback
    - **Inline Feedback**: Color-coded annotations with suggestions
    - **Score Breakdown**: Visual component analysis
    - **Vocabulary & Style**: Specific word alternatives
    - **Draft History**: Track progress over time
-   - **Level 4+ Enhancer**: Before/after comparison
    - **Grammar Check**: Corrected version of your essay
 
 ---
