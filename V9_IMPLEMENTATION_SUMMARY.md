@@ -3,7 +3,7 @@
 **Version**: 9.0.0  
 **Codename**: Project Horizon  
 **Implementation Date**: October 31, 2025  
-**Developer**: changcheng967 & GitHub Copilot  
+**Developer**: changcheng967 (with GitHub Copilot assistance)  
 **Organization**: Doulet Media
 
 ---

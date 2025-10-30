@@ -409,6 +409,7 @@ class DouEssay:
         # v8.0.0: Initialize adaptive learning profile storage
         self.user_profiles = {}  # Dictionary to store user learning profiles
         self.setup_v8_enhancements()
+        # v9.0.0: Call v9 setup (called from setup_v8_enhancements)
     
     def setup_v8_enhancements(self):
         """
@@ -654,6 +655,9 @@ class DouEssay:
         rubric_scores = {}
         rubric_rationales = {}
         
+        # Pre-calculate word density factor to avoid redundant computation
+        word_density_factor = max(1, word_count / 100)
+        
         # Assess each rubric category
         for category, config in self.neural_rubric_categories.items():
             # Count indicators for this category
@@ -661,7 +665,7 @@ class DouEssay:
                                    if indicator in text_lower)
             
             # Calculate base score (0-4 scale, Ontario levels)
-            indicator_density = indicator_matches / max(1, word_count / 100)
+            indicator_density = indicator_matches / word_density_factor
             
             # Adjust based on text features
             if category == 'knowledge':
@@ -2486,7 +2490,7 @@ class DouEssay:
         else:
             return {"level": "R", "description": "Remedial - Needs Significant Improvement"}
 
-    def generate_ontario_teacher_feedback(self, score: int, rubric, stats: Dict, 
+    def generate_ontario_teacher_feedback(self, score: float, rubric, stats: Dict, 
                                         structure: Dict, content: Dict, grammar: Dict, 
                                         application: Dict, essay_text: str) -> List[str]:
         """
