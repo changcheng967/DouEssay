@@ -643,11 +643,26 @@ class DouEssay:
         example = random.choice(available_examples)
         used_examples.add(example)
         
-        insight = random.choice(self.personal_insight_boosters) + " " + random.choice([
+        # v4.0.1: Also track used insights to avoid repetition
+        all_insights = [
             "the most meaningful learning often occurs outside our comfort zones.",
             "education is as much about developing character as it is about acquiring knowledge.",
-            "true understanding comes from engaging deeply with challenging material."
-        ])
+            "true understanding comes from engaging deeply with challenging material.",
+            "challenges shape us into more capable and resilient individuals.",
+            "growth emerges from embracing difficulty rather than avoiding it."
+        ]
+        
+        insight_prefix = random.choice(self.personal_insight_boosters)
+        
+        # Select unused insight
+        available_insights = [ins for ins in all_insights if ins not in used_examples]
+        if not available_insights:
+            available_insights = all_insights  # Reset if all used
+        
+        insight_text = random.choice(available_insights)
+        used_examples.add(insight_text)
+        
+        insight = f"{insight_prefix} {insight_text}"
         
         return f"{opening} {analysis} {example} {insight}"
 
