@@ -12,8 +12,8 @@ from supabase import create_client
 import json
 
 # Version Information
-VERSION = "9.0.0"
-VERSION_NAME = "Project Horizon"
+VERSION = "10.0.0"
+VERSION_NAME = "Project Apex"
 
 class LicenseManager:
     def __init__(self):
@@ -26,12 +26,12 @@ class LicenseManager:
         else:
             self.client = None  # No client in test/offline mode
         
-        # v9.0.0: Feature access matrix for different tiers (Project Horizon)
+        # v10.0.0: Feature access matrix for different tiers (Project Apex)
         self.feature_access = {
             'free_trial': {
                 'daily_limit': 35,  # 5 essays/week ≈ 5 per day (7-day trial)
                 'basic_grading': True,
-                'neural_rubric': True,  # v9.0.0: Logic 4.0
+                'neural_rubric': True,  # v9.0.0: Logic 4.0, v10.0.0: Logic 5.0 (basic)
                 'inline_feedback': False,
                 'draft_history': False,
                 'vocabulary_suggestions': False,
@@ -46,12 +46,22 @@ class LicenseManager:
                 'emotionflow': False,  # v9.0.0
                 'api_access': False,
                 'priority_support': False,
-                'batch_grading': False  # v9.0.0
+                'batch_grading': False,  # v9.0.0
+                # v10.0.0 Project Apex features
+                'logic_5_neural_reasoning': False,  # v10.0.0: Multi-paragraph chains
+                'smartprofile_3': False,  # v10.0.0: 30+ dimensions
+                'realtime_mentor_3': False,  # v10.0.0: Voice + predictive
+                'emotionflow_2': False,  # v10.0.0: Multi-dimensional
+                'visual_analytics_3': False,  # v10.0.0: Heatmaps + predictions
+                'voice_assistance': False,  # v10.0.0
+                'gamification_full': False,  # v10.0.0
+                'creativity_metrics': False,  # v10.0.0
+                'multilingual_full': False,  # v10.0.0: Full 4 languages
             },
             'student_basic': {
                 'daily_limit': 25,
                 'basic_grading': True,
-                'neural_rubric': True,  # v9.0.0: Logic 4.0
+                'neural_rubric': True,  # v9.0.0: Logic 4.0, v10.0.0: Logic 5.0
                 'inline_feedback': True,
                 'draft_history': True,
                 'vocabulary_suggestions': True,
@@ -66,12 +76,22 @@ class LicenseManager:
                 'emotionflow': True,  # v9.0.0
                 'api_access': False,
                 'priority_support': False,
-                'batch_grading': False
+                'batch_grading': False,
+                # v10.0.0 Project Apex features
+                'logic_5_neural_reasoning': True,  # v10.0.0: Full Logic 5.0
+                'smartprofile_3': True,  # v10.0.0: 30+ dimensions
+                'realtime_mentor_3': True,  # v10.0.0: Text-based (no voice)
+                'emotionflow_2': True,  # v10.0.0: Multi-dimensional
+                'visual_analytics_3': False,  # v10.0.0
+                'voice_assistance': False,  # v10.0.0
+                'gamification_full': True,  # v10.0.0: Badges + quests
+                'creativity_metrics': True,  # v10.0.0
+                'multilingual_full': True,  # v10.0.0: Full 4 languages
             },
             'student_premium': {
                 'daily_limit': 100,
                 'basic_grading': True,
-                'neural_rubric': True,  # v9.0.0: Logic 4.0
+                'neural_rubric': True,  # v9.0.0: Logic 4.0, v10.0.0: Logic 5.0
                 'inline_feedback': True,
                 'draft_history': True,
                 'vocabulary_suggestions': True,
@@ -86,12 +106,22 @@ class LicenseManager:
                 'emotionflow': True,  # v9.0.0
                 'api_access': False,
                 'priority_support': True,
-                'batch_grading': False
+                'batch_grading': False,
+                # v10.0.0 Project Apex features
+                'logic_5_neural_reasoning': True,  # v10.0.0: Full Logic 5.0
+                'smartprofile_3': True,  # v10.0.0: 30+ dimensions + all features
+                'realtime_mentor_3': True,  # v10.0.0: Full with voice
+                'emotionflow_2': True,  # v10.0.0: Complete multi-dimensional
+                'visual_analytics_3': True,  # v10.0.0: Heatmaps + predictions
+                'voice_assistance': True,  # v10.0.0: Full voice features
+                'gamification_full': True,  # v10.0.0: All including leaderboards
+                'creativity_metrics': True,  # v10.0.0: Full novelty index
+                'multilingual_full': True,  # v10.0.0: Full 4 languages
             },
             'teacher_suite': {
                 'daily_limit': float('inf'),
                 'basic_grading': True,
-                'neural_rubric': True,  # v9.0.0: Logic 4.0
+                'neural_rubric': True,  # v9.0.0: Logic 4.0, v10.0.0: Logic 5.0
                 'inline_feedback': True,
                 'draft_history': True,
                 'vocabulary_suggestions': True,
@@ -106,7 +136,21 @@ class LicenseManager:
                 'emotionflow': True,  # v9.0.0
                 'api_access': True,
                 'priority_support': True,
-                'batch_grading': True  # v9.0.0
+                'batch_grading': True,  # v9.0.0
+                # v10.0.0 Project Apex features
+                'logic_5_neural_reasoning': True,  # v10.0.0
+                'smartprofile_3': True,  # v10.0.0
+                'realtime_mentor_3': True,  # v10.0.0
+                'emotionflow_2': True,  # v10.0.0
+                'visual_analytics_3': True,  # v10.0.0
+                'voice_assistance': True,  # v10.0.0
+                'gamification_full': True,  # v10.0.0
+                'creativity_metrics': True,  # v10.0.0
+                'multilingual_full': True,  # v10.0.0
+                'teacher_dashboard_2': True,  # v10.0.0: Enhanced dashboard
+                'batch_grading_ai': True,  # v10.0.0: AI assistant
+                'parent_interface': True,  # v10.0.0
+                'lms_integration': True,  # v10.0.0: 6 platforms
             },
             # Legacy support for old tier names
             'free': {
@@ -3196,6 +3240,208 @@ class DouEssay:
         
         html.append('</div>')
         return ''.join(html)
+    
+    # ===== v10.0.0 Project Apex Feature Placeholders =====
+    # These methods are placeholders for planned v10.0.0 features
+    # Full implementation planned for Q2 2026
+    
+    def analyze_multi_paragraph_reasoning(self, paragraphs: List[str]) -> Dict:
+        """
+        v10.0.0 PLACEHOLDER: Logic 5.0 - Multi-paragraph reasoning chain analysis
+        Detects logical relationships and fallacies across multiple paragraphs
+        PLANNED: Q2 2026
+        """
+        return {
+            'status': 'planned',
+            'version': '10.0.0',
+            'feature': 'Multi-paragraph reasoning chains',
+            'description': 'Analyzes logical flow across entire essay structure'
+        }
+    
+    def evaluate_counter_argument_depth(self, essay: str) -> Dict:
+        """
+        v10.0.0 PLACEHOLDER: Logic 5.0 - Counter-argument depth scoring
+        Evaluates sophistication of opposing viewpoints and rebuttals
+        PLANNED: Q2 2026
+        """
+        return {
+            'status': 'planned',
+            'version': '10.0.0',
+            'feature': 'Counter-argument depth scoring',
+            'depth_score': 0.0
+        }
+    
+    def suggest_claim_synthesis(self, claims: List[str]) -> Dict:
+        """
+        v10.0.0 PLACEHOLDER: Logic 5.0 - AI-powered claim consolidation
+        Suggests unified thesis statements and logical groupings
+        PLANNED: Q2 2026
+        """
+        return {
+            'status': 'planned',
+            'version': '10.0.0',
+            'feature': 'Claim synthesis suggestions'
+        }
+    
+    def evaluate_creativity(self, text: str) -> Dict:
+        """
+        v10.0.0 PLACEHOLDER: Creativity evaluation layer
+        Multi-dimensional creativity assessment with novelty index
+        PLANNED: Q2 2026
+        """
+        return {
+            'status': 'planned',
+            'version': '10.0.0',
+            'feature': 'Creativity evaluation',
+            'novelty_index': 0,
+            'originality_score': 0.0,
+            'innovation_areas': []
+        }
+    
+    def suggest_research_sources(self, topic: str, claim: str) -> List[Dict]:
+        """
+        v10.0.0 PLACEHOLDER: Real-time scholarly reference suggestions
+        AI-powered research recommendations from academic databases
+        PLANNED: Q2 2026
+        """
+        return [{
+            'status': 'planned',
+            'version': '10.0.0',
+            'feature': 'Real-time research suggestions'
+        }]
+    
+    def update_smartprofile_3(self, user_id: str, essay_result: Dict) -> Dict:
+        """
+        v10.0.0 PLACEHOLDER: SmartProfile 3.0 - 30+ dimensions
+        Enhanced adaptive learning with emotional resilience tracking
+        PLANNED: Q2 2026
+        """
+        return {
+            'status': 'planned',
+            'version': '10.0.0',
+            'feature': 'SmartProfile 3.0 with 30+ dimensions',
+            'dimensions_tracked': 30
+        }
+    
+    def generate_daily_micro_mission(self, profile: Dict) -> Dict:
+        """
+        v10.0.0 PLACEHOLDER: Daily micro-missions
+        Bite-sized practice challenges (15-minute exercises)
+        PLANNED: Q2 2026
+        """
+        return {
+            'status': 'planned',
+            'version': '10.0.0',
+            'feature': 'Daily micro-missions',
+            'estimated_time': 15
+        }
+    
+    def predict_sentence_completion(self, context: str, partial: str) -> List[str]:
+        """
+        v10.0.0 PLACEHOLDER: Real-Time Mentor 3.0 - Predictive completion
+        Context-aware AI suggestions while writing
+        PLANNED: Q2 2026
+        """
+        return []
+    
+    def answer_student_question(self, question: str, essay_context: str) -> Dict:
+        """
+        v10.0.0 PLACEHOLDER: Interactive Q&A panel
+        Real-time explanations of scoring rationale
+        PLANNED: Q2 2026
+        """
+        return {
+            'status': 'planned',
+            'version': '10.0.0',
+            'feature': 'Interactive Q&A panel',
+            'answer': 'Feature available in v10.0.0'
+        }
+    
+    def generate_audio_feedback(self, text_feedback: str, voice_id: str = 'default') -> bytes:
+        """
+        v10.0.0 PLACEHOLDER: Voice-assisted mentoring
+        Text-to-speech integration for guidance
+        PLANNED: Q2 2026
+        """
+        return b''
+    
+    def analyze_multidimensional_emotions(self, text: str) -> Dict:
+        """
+        v10.0.0 PLACEHOLDER: EmotionFlow 2.0 - Multi-dimensional mapping
+        Separate analysis of empathy, assertiveness, inspiration
+        PLANNED: Q2 2026
+        """
+        return {
+            'status': 'planned',
+            'version': '10.0.0',
+            'feature': 'Multi-dimensional emotional mapping',
+            'empathy': 0.0,
+            'assertiveness': 0.0,
+            'inspiration': 0.0
+        }
+    
+    def generate_argument_heatmap(self, essay: str) -> Dict:
+        """
+        v10.0.0 PLACEHOLDER: Visual Analytics 3.0 - Heatmaps
+        Argument strength visualization across essay
+        PLANNED: Q2 2026
+        """
+        return {
+            'status': 'planned',
+            'version': '10.0.0',
+            'feature': 'Argument strength heatmap'
+        }
+    
+    def predict_score_trajectory(self, user_id: str) -> Dict:
+        """
+        v10.0.0 PLACEHOLDER: Predictive score trajectory
+        ML-based performance prediction
+        PLANNED: Q2 2026
+        """
+        return {
+            'status': 'planned',
+            'version': '10.0.0',
+            'feature': 'Predictive score trajectory',
+            'predicted_next_score': 0.0
+        }
+    
+    def batch_grade_essays(self, essays: List[Dict]) -> Dict:
+        """
+        v10.0.0 PLACEHOLDER: Teacher Dashboard 2.0 - Batch grading AI
+        Automated pre-scoring with exception flagging
+        PLANNED: Q2 2026
+        """
+        return {
+            'status': 'planned',
+            'version': '10.0.0',
+            'feature': 'Batch grading AI assistant',
+            'graded_count': 0
+        }
+    
+    def generate_parent_report(self, student_id: str) -> Dict:
+        """
+        v10.0.0 PLACEHOLDER: Parent interface
+        Secure, parent-friendly progress view
+        PLANNED: Q2 2026
+        """
+        return {
+            'status': 'planned',
+            'version': '10.0.0',
+            'feature': 'Parent interface'
+        }
+    
+    def sync_with_lms(self, lms_platform: str, course_id: str) -> Dict:
+        """
+        v10.0.0 PLACEHOLDER: LMS Integration v2.0
+        Canvas, Moodle, Google Classroom, Microsoft Teams, etc.
+        PLANNED: Q2 2026
+        """
+        return {
+            'status': 'planned',
+            'version': '10.0.0',
+            'feature': f'{lms_platform} LMS integration',
+            'supported_platforms': ['Canvas', 'Moodle', 'Google Classroom', 'Microsoft Teams', 'Blackboard', 'Schoology']
+        }
 
 def create_douessay_interface():
     douessay = DouEssay()
