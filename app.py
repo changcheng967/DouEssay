@@ -10,10 +10,143 @@ from datetime import datetime, timedelta
 import supabase
 from supabase import create_client
 import json
+import logging
 
 # Version Information
-VERSION = "10.0.0"
-VERSION_NAME = "Project Apex"
+VERSION = "10.1.0"
+VERSION_NAME = "Project Apex Hotfix"
+
+# v10.1.0: Setup logging for error tracking
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# v10.1.0: Helper functions for schema validation and safe extraction
+def extract_rubric_level(result: Dict) -> Dict:
+    """
+    v10.1.0: Unified extractor for rubric_level.
+    Returns a dict with keys: {'level': <str>, 'description': <str>, 'score': <float>|None}
+    Never raises. Returns fallback when missing.
+    """
+    # default fallback
+    fallback = {'level': 'Unknown', 'description': 'Assessment unavailable', 'score': None}
+    
+    if not isinstance(result, dict):
+        logger.error("extract_rubric_level: result is not a dict: %r", type(result))
+        return fallback
+
+    # Common patterns:
+    # 1) result['rubric_level'] already a dict with 'level' and/or 'description'
+    # 2) result['rubric_level'] is a string like 'Level 3'
+    # 3) result['rubric_level'] is a JSON-stringified dict
+
+    rl = result.get('rubric_level')
+    
+    if isinstance(rl, dict):
+        # Already a dict, just normalize keys
+        return {
+            'level': rl.get('level') or rl.get('name') or 'Unknown',
+            'description': rl.get('description') or rl.get('desc') or '',
+            'score': rl.get('score') or result.get('score')
+        }
+    
+    if isinstance(rl, str):
+        # Try to parse JSON if possible
+        try:
+            parsed = json.loads(rl)
+            if isinstance(parsed, dict):
+                return {
+                    'level': parsed.get('level') or parsed.get('name') or rl,
+                    'description': parsed.get('description') or parsed.get('desc') or '',
+                    'score': parsed.get('score') or result.get('score')
+                }
+        except (json.JSONDecodeError, ValueError):
+            # Not JSON, use the string as the level
+            pass
+        
+        # String is the level itself (common in v9.0.0)
+        return {
+            'level': rl,
+            'description': get_level_description(rl),
+            'score': result.get('score')
+        }
+    
+    # Unexpected type or None
+    logger.error("extract_rubric_level: rubric_level has unexpected type: %r (value=%r)", type(rl), rl)
+    return fallback
+
+def get_level_description(level: str) -> str:
+    """v10.1.0: Get standard description for Ontario level."""
+    level_descriptions = {
+        'Level 4+': 'Excellent - Exceeds Standards',
+        'Level 4': 'Excellent - Exceeds Standards',
+        'Level 3': 'Good - Meets Standards',
+        'Level 2+': 'Developing - Approaching Standards',
+        'Level 2': 'Developing - Basic Standards',
+        'Level 1': 'Limited - Below Standards',
+        'R': 'Remedial - Needs Significant Improvement'
+    }
+    return level_descriptions.get(level, 'Assessment in progress')
+
+def normalize_grading_result(raw_result: Dict) -> Dict:
+    """
+    v10.1.0: Ensure result follows canonical schema.
+    Normalizes various result formats to a consistent structure.
+    """
+    if not isinstance(raw_result, dict):
+        logger.error("normalize_grading_result: input is not a dict: %r", type(raw_result))
+        return {
+            "score": None,
+            "rubric_level": {"level": "Unknown", "description": "Error in grading", "score": None},
+            "feedback": ["Error processing essay grading"],
+            "corrections": [],
+            "inline_feedback": [],
+            "detailed_analysis": {},
+            "metadata": {"error": "Invalid result type"}
+        }
+    
+    # Extract and normalize score
+    score = raw_result.get('score')
+    if score is None:
+        score = raw_result.get('overall_score')
+    if score is None:
+        score = raw_result.get('overall_percentage')
+    
+    # Extract and normalize rubric_level to dict format
+    rl = raw_result.get('rubric_level')
+    if isinstance(rl, str):
+        rubric_level = {
+            'level': rl,
+            'description': get_level_description(rl),
+            'score': score
+        }
+    elif isinstance(rl, dict):
+        rubric_level = {
+            'level': rl.get('level') or rl.get('name') or 'Unknown',
+            'description': rl.get('description') or rl.get('desc') or get_level_description(rl.get('level', '')),
+            'score': rl.get('score') or score
+        }
+    else:
+        rubric_level = {
+            'level': 'Unknown',
+            'description': 'Assessment unavailable',
+            'score': score
+        }
+    
+    # Build canonical result
+    return {
+        "score": score,
+        "rubric_level": rubric_level,
+        "feedback": raw_result.get('feedback', []),
+        "corrections": raw_result.get('corrections', []),
+        "inline_feedback": raw_result.get('inline_feedback', []),
+        "neural_rubric": raw_result.get('neural_rubric'),
+        "emotionflow": raw_result.get('emotionflow'),
+        "detailed_analysis": raw_result.get('detailed_analysis', {}),
+        "metadata": {"normalized": True}
+    }
 
 class LicenseManager:
     def __init__(self):
@@ -1386,6 +1519,7 @@ class DouEssay:
 
     def grade_essay(self, essay_text: str, grade_level: str = "Grade 10") -> Dict:
         """
+        v10.1.0: Fixed to return rubric_level as dict (canonical schema).
         v9.0.0: Enhanced with Neural Rubric Engine (Logic 4.0) and EmotionFlow analysis.
         Maintains backwards compatibility with v8.0.0 analysis methods.
         """
@@ -1407,7 +1541,14 @@ class DouEssay:
         
         # v9.0.0: Use Neural Rubric score as primary, with v8 score as backup
         score = neural_rubric_result['overall_percentage']
-        rubric_level = neural_rubric_result['ontario_level']
+        ontario_level_str = neural_rubric_result['ontario_level']
+        
+        # v10.1.0: Convert string level to dict format for consistency
+        rubric_level = {
+            'level': ontario_level_str,
+            'description': get_level_description(ontario_level_str),
+            'score': score
+        }
         
         # Generate comprehensive feedback incorporating all analyses
         feedback = self.generate_ontario_teacher_feedback(
@@ -1416,7 +1557,8 @@ class DouEssay:
         corrections = self.get_grammar_corrections(essay_text)
         inline_feedback = self.analyze_inline_feedback(essay_text)
         
-        return {
+        # v10.1.0: Return normalized result
+        result = {
             "score": score,
             "rubric_level": rubric_level,
             "feedback": feedback,
@@ -1432,6 +1574,8 @@ class DouEssay:
                 "application": application
             }
         }
+        
+        return result
 
 
 
@@ -2538,17 +2682,27 @@ class DouEssay:
                                         structure: Dict, content: Dict, grammar: Dict, 
                                         application: Dict, essay_text: str) -> List[str]:
         """
+        v10.1.0: Enhanced to safely handle rubric in any format (dict or string).
         v9.0.0: Updated to accept rubric as either Dict (v8 format) or str (v9 format).
         """
         feedback = []
         feedback.append(f"Overall Score: {score:.1f}/100")
         
-        # v9.0.0: Handle both old Dict format and new string format
+        # v10.1.0: Safely extract rubric information
         if isinstance(rubric, dict):
-            feedback.append(f"Ontario Level: {rubric['level']} - {rubric['description']}")
-        else:
-            # v9.0.0: rubric is now a string like "Level 3" from Neural Rubric
+            level = rubric.get('level', 'Unknown')
+            description = rubric.get('description', '')
+            if description:
+                feedback.append(f"Ontario Level: {level} - {description}")
+            else:
+                feedback.append(f"Ontario Level: {level}")
+        elif isinstance(rubric, str):
+            # v9.0.0 compatibility: rubric is a string like "Level 3"
             feedback.append(f"Ontario Level: {rubric}")
+        else:
+            # v10.1.0: Unexpected format
+            logger.warning("generate_ontario_teacher_feedback: unexpected rubric type: %r", type(rubric))
+            feedback.append("Ontario Level: Assessment in progress")
         
         # v7.0.0: Enhanced AI Coach analysis summary
         if 'argument_strength' in content:
@@ -3484,7 +3638,10 @@ def create_douessay_interface():
         return html
     
     def save_draft(essay_text, result):
-        """v3.0.0: Enhanced draft saving with vocabulary tracking."""
+        """
+        v10.1.0: Fixed TypeError with safe rubric extraction.
+        v3.0.0: Enhanced draft saving with vocabulary tracking.
+        """
         # Calculate vocabulary metrics
         words = essay_text.lower().split()
         generic_words = ['very', 'really', 'a lot', 'many', 'most', 'some', 'things', 'stuff', 'big', 'small', 'good', 'bad']
@@ -3493,16 +3650,21 @@ def create_douessay_interface():
         sophisticated_words = [w for w in words if len(w) > 7 and w.isalpha()]
         vocab_score = max(0, 10 - generic_count) + min(10, len(sophisticated_words) / 5)
         
+        # v10.1.0: Safe extraction of rubric level
+        rubric = extract_rubric_level(result)
+        
         draft_entry = {
             'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             'essay': essay_text,
-            'score': result['score'],
-            'level': result['rubric_level']['level'],
+            'score': result.get('score', 0),
+            'level': rubric['level'],
             'word_count': len(words),
             'generic_word_count': generic_count,
             'sophisticated_word_count': len(sophisticated_words),
             'vocab_score': round(vocab_score, 1),
-            'reflection_score': result.get('detailed_analysis', {}).get('application', {}).get('reflection_score', 0)
+            'reflection_score': result.get('detailed_analysis', {}).get('application', {}).get('reflection_score', 0),
+            # v10.1.0: Store raw result excerpt for debugging
+            'raw_result_excerpt': str(result.get('rubric_level'))[:200]
         }
         draft_history.append(draft_entry)
         return draft_history
@@ -3618,16 +3780,37 @@ def create_douessay_interface():
         if not essay_text.strip():
             return "Please enter an essay to analyze.", "", "", "", "", "", "", ""
         
-        # v6.0.0: Pass grade_level to grading function
-        result = douessay.grade_essay(essay_text, grade_level)
+        # v10.1.0: Add error handling for grading process
+        try:
+            # v6.0.0: Pass grade_level to grading function
+            result = douessay.grade_essay(essay_text, grade_level)
+            
+            # v10.1.0: Normalize result to ensure canonical schema
+            result = normalize_grading_result(result)
+        except Exception as e:
+            # v10.1.0: Log error and return user-friendly message
+            logger.error("Error in process_essay grading: %s", str(e), exc_info=True)
+            error_html = f"""
+            <div style="padding: 20px; background: #f8d7da; border-radius: 8px; border-left: 4px solid #dc3545;">
+                <h3 style="color: #721c24; margin-top: 0;">⚠️ Temporary Grading Error</h3>
+                <p style="color: #721c24;">We're sorry — a temporary grading error occurred. 
+                Engineers have been notified. Please try again in a moment.</p>
+                <p style="color: #721c24; font-size: 0.9em;">Error ID: {datetime.now().strftime('%Y%m%d-%H%M%S')}</p>
+            </div>
+            """
+            return error_html, "", "", "", "", "", 0, "Error"
         
         # v6.0.0: Get feature access for current user
         user_type = license_result['user_type']
         features = license_result.get('features', {})
         
-        # Save to draft history (only if user has access)
+        # v10.1.0: Save to draft history with error handling (only if user has access)
         if features.get('draft_history', False):
-            save_draft(essay_text, result)
+            try:
+                save_draft(essay_text, result)
+            except Exception as e:
+                # v10.1.0: Log but don't fail the entire request
+                logger.error("Error saving draft: %s", str(e), exc_info=True)
         
         # v6.0.0: Apply feature gating
         # Create annotated essay HTML (only if user has access)
@@ -3672,9 +3855,9 @@ def create_douessay_interface():
         assessment_html = f"""
         <div style="font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 15px; color: white; text-align: center; margin-bottom: 20px;">
-                <h1 style="margin: 0 0 10px 0; font-size: 2.2em;">DouEssay Assessment System v8.0.0</h1>
-                <p style="margin: 0; opacity: 0.9; font-size: 1.1em;">AI Writing Mentor • 99.5%+ Teacher Alignment • Project ScholarMind</p>
-                <p style="margin: 10px 0 0 0; font-size: 0.9em; opacity: 0.7;">Created by changcheng967 • v8.0.0: Argument Logic 3.0, Adaptive Learning, Visual Analytics • Doulet Media</p>
+                <h1 style="margin: 0 0 10px 0; font-size: 2.2em;">DouEssay Assessment System v10.1.0</h1>
+                <p style="margin: 0; opacity: 0.9; font-size: 1.1em;">AI Writing Mentor • 99.5%+ Teacher Alignment • Project Apex Hotfix</p>
+                <p style="margin: 10px 0 0 0; font-size: 0.9em; opacity: 0.7;">Created by changcheng967 • v10.1.0: Schema Validation, Robust Error Handling • Doulet Media</p>
                 <p style="margin: 5px 0 0 0; font-size: 0.8em; opacity: 0.9; background: rgba(255,255,255,0.2); padding: 5px; border-radius: 5px;">{user_info} | Grade: {grade_level}</p>
             </div>
             
@@ -3763,10 +3946,10 @@ def create_douessay_interface():
         .tab-nav button {font-size: 1.1em; font-weight: 500;}
         h1, h2, h3 {color: #2c3e50;}
     """) as demo:
-        gr.Markdown("# 🎓 DouEssay Assessment System v8.0.0 - Project ScholarMind")
+        gr.Markdown("# 🎓 DouEssay Assessment System v10.1.0 - Project Apex Hotfix")
         gr.Markdown("### AI Writing Mentor & Complete Educational Ecosystem")
-        gr.Markdown("*99.5%+ Teacher Alignment • Argument Logic 3.0 • Adaptive Learning • Visual Analytics*")
-        gr.Markdown("**Created by changcheng967 • v8.0.0: Real-Time Feedback, Claim Depth Analysis, Evidence Relevance, Rhetorical Structure Mapping • Doulet Media**")
+        gr.Markdown("*99.5%+ Teacher Alignment • Robust Schema Validation • Enhanced Error Handling*")
+        gr.Markdown("**Created by changcheng967 • v10.1.0: TypeError Fix, Schema Normalization, Defensive Coding • Doulet Media**")
         
         with gr.Row():
             license_input = gr.Textbox(
