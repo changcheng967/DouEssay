@@ -2,7 +2,7 @@
 
 All notable changes to the DouEssay Assessment System will be documented in this file.
 
-## [11.0.0] - 2025-10-31
+## [11.0.0] - 2024-10-31
 
 ### 🧠 Major v11.0.0 Release - Scholar Intelligence
 

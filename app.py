@@ -755,6 +755,11 @@ class DouEssay:
         - Teacher Integration: Manual → Live
         """
         
+        # v11.0.0: Analysis constants
+        self.DEPTH_SCORE_MULTIPLIER = 20  # Scales depth scores to 0-100 range
+        self.MIN_WORD_COUNT_THRESHOLD = 100  # Minimum words for normalization
+        self.CONTEXT_DENSITY_MULTIPLIER = 50  # Scales context indicator density
+        
         # v11.0.0: Enhanced feedback depth system
         self.feedback_depth_categories = {
             'surface': {
@@ -1742,10 +1747,10 @@ class DouEssay:
         # Calculate overall depth score (0-100 scale)
         if total_indicators == 0:
             depth_level = 'surface'
-            depth_score = 20
+            depth_score = self.DEPTH_SCORE_MULTIPLIER
         else:
             weighted_sum = sum(d['weighted_score'] for d in depth_scores.values())
-            depth_score = min(100, (weighted_sum / total_indicators) * 20)
+            depth_score = min(100, (weighted_sum / total_indicators) * self.DEPTH_SCORE_MULTIPLIER)
             
             # Determine depth level
             if depth_score >= 80:
@@ -1791,8 +1796,8 @@ class DouEssay:
             # Calculate dimension score (0-100)
             # Normalize based on text length and indicator density
             words = len(text_lower.split())
-            indicator_density = (indicator_count / max(words, 100)) * 100
-            dimension_score = min(100, indicator_density * 50)
+            indicator_density = (indicator_count / max(words, self.MIN_WORD_COUNT_THRESHOLD)) * 100
+            dimension_score = min(100, indicator_density * self.CONTEXT_DENSITY_MULTIPLIER)
             
             dimension_scores[dimension] = {
                 'score': round(dimension_score, 1),
@@ -1968,7 +1973,8 @@ class DouEssay:
         if 'Grade' in grade_level:
             try:
                 grade_num = int(grade_level.split()[-1])
-            except:
+            except (ValueError, IndexError):
+                # Use default if parsing fails
                 pass
         
         grade_key = f'grade_{grade_num}'

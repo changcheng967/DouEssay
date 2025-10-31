@@ -1,6 +1,6 @@
 # 🧠 DouEssay v11.0.0 "Scholar Intelligence" - Release Notes
 
-**Release Date:** October 31, 2025  
+**Release Date:** October 31, 2024  
 **Version:** 11.0.0  
 **Codename:** Scholar Intelligence  
 **Previous Version:** 10.1.0 (Project Apex Hotfix)
@@ -520,4 +520,4 @@ This release brings us closer to our vision:
 
 **Made with ❤️ for students and teachers striving for excellence**
 
-*Version 11.0.0 • Scholar Intelligence • October 31, 2025*
+*Version 11.0.0 • Scholar Intelligence • October 31, 2024*
