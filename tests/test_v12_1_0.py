@@ -200,8 +200,9 @@ print()
 print("Test 15: Verify feedback clarity (no paragraph numbers)")
 feedback = result['feedback']
 assert isinstance(feedback, list)
-# Check that feedback doesn't contain "Paragraph 1", "Paragraph 2", etc.
-paragraph_refs = [line for line in feedback if 'Paragraph 1' in line or 'Paragraph 2' in line or 'Paragraph 3' in line]
+# Check that feedback doesn't contain "Paragraph X" references using regex
+import re
+paragraph_refs = [line for line in feedback if re.search(r'Paragraph \d+', line)]
 assert len(paragraph_refs) == 0, f"Found paragraph number references: {paragraph_refs}"
 print("✓ Feedback does not contain 'Paragraph X' references")
 print()

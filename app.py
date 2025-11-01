@@ -973,8 +973,18 @@ class DouEssay:
             'curriculum_weighting': '2.0'
         }
         
+        # v12.1.0: Emotion scoring constants
         self.EMOTION_SCORE_SCALE = 100
         self.EMOTION_WORD_COUNT_DIVISOR = 100
+        self.EMOTION_SCORE_FLOOR = 10  # Minimum realistic emotion score
+        
+        # v12.1.0: Personal Reflection scoring constants
+        self.REFLECTION_DEEP_MULTIPLIER = 10
+        self.REFLECTION_DEEP_MAX = 40
+        self.REFLECTION_GROWTH_MULTIPLIER = 7
+        self.REFLECTION_GROWTH_MAX = 35
+        self.REFLECTION_REALWORLD_MULTIPLIER = 5
+        self.REFLECTION_REALWORLD_MAX = 25
         
         # v12.1.0: Argument Logic 3.1 - Enhanced semantic graph indicators
         self.v12_semantic_graph_indicators = {
@@ -2351,7 +2361,7 @@ class DouEssay:
             base_score = (indicator_count / max(word_count / self.EMOTION_WORD_COUNT_DIVISOR, 1)) * self.EMOTION_SCORE_SCALE
             
             # Apply ceiling and floor for realistic scoring
-            score = min(self.EMOTION_SCORE_SCALE, max(10, base_score))
+            score = min(self.EMOTION_SCORE_SCALE, max(self.EMOTION_SCORE_FLOOR, base_score))
             
             dimensions[dimension] = {
                 'score': round(score, 1),
@@ -2390,9 +2400,9 @@ class DouEssay:
         
         # v12.1.0: Enhanced scoring with balanced weighting
         # Deep reflection is most valuable (40%), followed by personal growth (35%) and real-world (25%)
-        deep_score = min(40, deep_reflection_count * 10)
-        growth_score = min(35, personal_growth_count * 7)
-        real_world_score = min(25, real_world_count * 5)
+        deep_score = min(self.REFLECTION_DEEP_MAX, deep_reflection_count * self.REFLECTION_DEEP_MULTIPLIER)
+        growth_score = min(self.REFLECTION_GROWTH_MAX, personal_growth_count * self.REFLECTION_GROWTH_MULTIPLIER)
+        real_world_score = min(self.REFLECTION_REALWORLD_MAX, real_world_count * self.REFLECTION_REALWORLD_MULTIPLIER)
         
         reflection_score = deep_score + growth_score + real_world_score
         
