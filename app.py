@@ -955,6 +955,9 @@ class DouEssay:
         - Processing time: ≤2.5s per essay
         """
         
+        self.EMOTION_SCORE_SCALE = 100
+        self.EMOTION_WORD_COUNT_DIVISOR = 100
+        
         self.v12_semantic_graph_indicators = {
             'claim_relationships': ['supports', 'contradicts', 'qualifies', 'extends', 'challenges'],
             'logical_flow': ['follows from', 'leads to', 'implies', 'necessitates', 'presupposes'],
@@ -2134,7 +2137,7 @@ class DouEssay:
         for absolute in self.v12_absolute_statements['unsupported_absolutes']:
             if absolute in text_lower:
                 absolute_count += 1
-                sentences = text.split('.')
+                sentences = re.split(r'[.!?]+', text)
                 for sentence in sentences:
                     if absolute in sentence.lower():
                         absolute_instances.append({
@@ -2158,14 +2161,15 @@ class DouEssay:
         v12.0.0: Calculate precise ratio of claims to supporting evidence.
         Target ratio: 1 claim per 2-3 pieces of evidence (Level 4).
         """
+        text_lower = text.lower()
         claims = 0
         evidence_count = 0
         
         for indicator in self.argument_strength_indicators:
-            claims += text.lower().count(indicator)
+            claims += text_lower.count(indicator)
         
         for indicator in self.example_indicators:
-            evidence_count += text.lower().count(indicator)
+            evidence_count += text_lower.count(indicator)
         
         ratio = evidence_count / max(claims, 1)
         
@@ -2259,7 +2263,7 @@ class DouEssay:
         dimensions = {}
         for dimension, config in self.v12_emotionflow_v2_dimensions.items():
             indicator_count = sum(1 for indicator in config['indicators'] if indicator in text_lower)
-            score = min(100, (indicator_count / max(word_count / 100, 1)) * 100)
+            score = min(self.EMOTION_SCORE_SCALE, (indicator_count / max(word_count / self.EMOTION_WORD_COUNT_DIVISOR, 1)) * self.EMOTION_SCORE_SCALE)
             dimensions[dimension] = {
                 'score': round(score, 1),
                 'indicators_found': indicator_count,
