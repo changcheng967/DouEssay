@@ -7,14 +7,13 @@ Tests the new feedback depth, context awareness, tone recognition, and teacher c
 import sys
 import os
 
-# Test that we can import the module
 print("Testing DouEssay v11.0.0 Scholar Intelligence...")
 print()
 
-# Mock environment variables for testing
 os.environ['SUPABASE_URL'] = 'http://test.example.com'
 os.environ['SUPABASE_KEY'] = 'test_key'
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from app import DouEssay, VERSION, VERSION_NAME
 
 print(f"✓ Module imported successfully")

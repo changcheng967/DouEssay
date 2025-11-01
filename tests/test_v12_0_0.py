@@ -14,6 +14,7 @@ print()
 os.environ['SUPABASE_URL'] = 'http://test.example.com'
 os.environ['SUPABASE_KEY'] = 'test_key'
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from app import DouEssay, VERSION, VERSION_NAME
 
 print(f"✓ Module imported successfully")
