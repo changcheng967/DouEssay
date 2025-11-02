@@ -2,6 +2,46 @@
 
 All notable changes to the DouEssay Assessment System will be documented in this file.
 
+## [12.5.0] - 2026-01-XX
+
+### 🎯 v12.5.0 Release - Grading Engine & Subsystem Upgrade (98-99% Accuracy Target)
+
+**Mission:** Advance grading accuracy from ~95-96% to 98-99% teacher alignment through enhanced subsystems with improved counter-argument detection, contemporary evidence analysis, multi-paragraph coherence, and tone consistency tracking.
+
+### New Subsystem Branding
+- **ScholarMind Core v4.0** (formerly DouLogic v5.0) - Counter-argument detection, rebuttal analysis, claim hierarchy
+- **DouletFlow v2.0** (formerly DouEvidence v5.0) - Contemporary sources, improved inferential evidence scoring
+- **ScholarStruct v2.0** (formerly DouStruct v5.0) - Multi-paragraph coherence, cross-paragraph references
+- **EmotionFlow v3.0** (formerly DouEmotion v4.0) - Tone consistency tracking across paragraphs
+- **DouReflect v4.1** (formerly DouReflect v4.0) - Minor consistency update
+
+### Enhanced Detection Features
+- Counter-argument detection with 4 categories (markers, rebuttals, concessions, synthesis)
+- Contemporary/recent sources detection (2024-2026)
+- Multi-paragraph coherence and cross-paragraph reference tracking
+- Tone consistency analysis with dominant tone identification
+- Improved evidence relevance scoring to reduce false "Needs Improvement" ratings
+
+### Key Improvements
+- **Target Accuracy:** 98-99% (improved from 95-96%)
+- **Paragraph Structure:** Enhanced multi-paragraph flow detection
+- **Evidence Relevance:** Improved scoring for inferential and indirect evidence
+- **Counter-Arguments:** Sophisticated 4-category analysis
+- **Tone Consistency:** New feature tracking tone across essay sections
+
+### Maintained
+- Subscription tiers unchanged (Free: 3, Basic: 10, Premium: 20, Teacher: Unlimited)
+- Backward compatibility with all v12.4.0 subsystem names
+- All v12.4.0 function signatures and return values
+
+### Documentation
+- Added V12_5_0_RELEASE_NOTES.md
+- Updated README.md with new subsystem information
+- Updated CHANGELOG.md (this file)
+- Added comprehensive test suite (test_v12_5_0.py)
+
+---
+
 ## [12.3.0] - 2025-11-02
 
 ### 🎯 v12.3.0 Release - Enhanced Grading & Affordable Pricing
