@@ -12,8 +12,8 @@ from supabase import create_client
 import json
 import logging
 
-VERSION = "12.3.0"
-VERSION_NAME = "Core grading engine upgrade, subsystem enhancement, 95%+ accuracy"
+VERSION = "12.4.0"
+VERSION_NAME = "Best Plan Implementation, AI Model Upgrades & Subsystem Enhancements"
 
 # v10.1.0: Setup logging for error tracking
 logging.basicConfig(
@@ -191,7 +191,7 @@ class LicenseManager:
                 'multilingual_full': False,  # v10.0.0: Full 4 languages
             },
             'student_basic': {
-                'daily_limit': 7,  # v12.3.0: 7 essays/day (increased)
+                'daily_limit': 10,  # v12.4.0: 10 essays/day (Project DouAccess 2.0)
                 'basic_grading': True,
                 'neural_rubric': True,  # v9.0.0: Logic 4.0, v10.0.0: Logic 5.0
                 'inline_feedback': True,
@@ -221,7 +221,7 @@ class LicenseManager:
                 'multilingual_full': True,  # v10.0.0: Full 4 languages
             },
             'student_premium': {
-                'daily_limit': 12,  # v12.3.0: 12 essays/day (increased)
+                'daily_limit': 20,  # v12.4.0: 20 essays/day (Project DouAccess 2.0)
                 'basic_grading': True,
                 'neural_rubric': True,  # v9.0.0: Logic 4.0, v10.0.0: Logic 5.0
                 'inline_feedback': True,
@@ -398,12 +398,13 @@ class LicenseManager:
                 daily_usage = usage_response.data[0]['usage_count']
             
             # v9.0.0: Updated limits for Project Horizon pricing tiers
-            # v12.3.0: Updated daily limits
+            # v12.4.0: Updated daily limits (Project DouAccess 2.0)
             limits = {
-                'free_trial': 3,  # v12.3.0: 3 essays/day
-                'student_basic': 7,  # v12.3.0: 7 essays/day (increased)
-                'student_premium': 12,  # v12.3.0: 12 essays/day (increased)
-                'teacher_suite': float('inf'),  # unlimited
+                'free_trial': 3,  # v12.4.0: 3 essays/day
+                'student_basic': 10,  # v12.4.0: 10 essays/day
+                'student_premium': 20,  # v12.4.0: 20 essays/day
+                'teacher_suite': float('inf'),  # v12.4.0: Unlimited
+                'institutional': 500  # v12.4.0: 500+ essays/day (custom),  # unlimited
                 # Legacy tier support
                 'free': 3,
                 'plus': 7,
@@ -944,33 +945,37 @@ class DouEssay:
     
     def setup_v12_enhancements(self):
         """
-        v12.2.0: Full Grading System Upgrade to Achieve >99% Accuracy
+        v12.4.0: Best Plan Implementation, AI Model Upgrades & Subsystem Enhancements
         
-        Upgraded subsystem versions:
-        - Argument Logic: 3.2 (multi-level inference chains, conditional/hypothetical/counterfactual claims)
-        - Evidence Analysis: 3.2 (source credibility, evidence types: direct/inferential/contextual)
-        - Logical Fallacies: 2.1 (maintained - subtle and conditional fallacies)
-        - EmotionFlow: 3.0 (six dimensions: empathy, persuasive power, curiosity, authenticity, engagement, assertiveness)
-        - Paragraph Detection: 2.2 (NLP-based topic sentence recognition, enhanced transitions)
-        - Personal Reflection: 2.2 (novelty/relevance evaluation, consistency checking)
-        - Application & Insight: 2.0 (maintained - integrated reflection and evidence analysis)
-        - Rhetorical Structure: 3.2 (enhanced automatic intro/body/conclusion detection, flow indicators)
-        - Curriculum Weighting: 2.0 (maintained - dynamic weighting for Ontario, IB, Common Core)
+        DouEssay / Doulet Media Subsystem Branding (v12.4.0):
+        - DouLogic v5.0: Argument logic evaluation (multi-level inference chains, conditional/hypothetical/counterfactual claims)
+        - DouEvidence v5.0: Evidence coherence analysis (source credibility, evidence types: direct/inferential/contextual)
+        - DouEmotion v4.0: Emotional tone & engagement detection (empathy, persuasive power, curiosity, authenticity, engagement, assertiveness)
+        - DouStruct v5.0: Paragraph and rhetorical structure analysis (NLP-based topic sentence recognition, enhanced transitions, intro/body/conclusion detection)
+        - DouReflect v4.0: Personal reflection & insight scoring (novelty/relevance evaluation, consistency checking, real-world application)
         
-        Target accuracy: >99% grading accuracy (up from 75-80%)
+        Copyright © 2025 Doulet Media. All rights reserved.
+        
+        Target accuracy: ≥95% grading accuracy
         Processing time: ≤2.5s per essay
         """
         
-        # Subsystem version tracking for v12.2.0
+        # v12.4.0: DouEssay / Doulet Media subsystem version tracking with branding
         self.subsystem_versions = {
-            'argument_logic': '3.2',
-            'evidence_analysis': '3.2',
+            'doulogic': '5.0',  # Argument logic evaluation
+            'douevidence': '5.0',  # Evidence coherence analysis
+            'douemotion': '4.0',  # Emotional tone & engagement detection
+            'doustruct': '5.0',  # Paragraph and rhetorical structure analysis
+            'doureflect': '4.0',  # Personal reflection & insight scoring
+            # Legacy mappings for backward compatibility
+            'argument_logic': '5.0',
+            'evidence_analysis': '5.0',
             'logical_fallacies': '2.1',
-            'emotionflow': '3.0',
-            'paragraph_detection': '2.2',
-            'personal_reflection': '2.2',
-            'application_insight': '2.0',
-            'rhetorical_structure': '3.2',
+            'emotionflow': '4.0',
+            'paragraph_detection': '5.0',
+            'personal_reflection': '4.0',
+            'application_insight': '4.0',
+            'rhetorical_structure': '5.0',
             'curriculum_weighting': '2.0'
         }
         
@@ -2827,8 +2832,135 @@ class DouEssay:
             }
         }
         
+        # v12.4.0: Track subsystem metrics to database (if Supabase is enabled)
+        self.track_subsystem_metrics(essay_text, result)
+        
         return result
 
+    def track_subsystem_metrics(self, essay_text: str, result: Dict) -> None:
+        """
+        v12.4.0: Track detailed subsystem metrics to database for analytics.
+        
+        Saves metrics to dedicated tables:
+        - doulogic_metrics: Argument logic scoring
+        - douevidence_metrics: Evidence analysis scoring
+        - douemotion_metrics: Emotional tone scoring
+        - doustruct_metrics: Paragraph structure scoring
+        - doureflect_metrics: Personal reflection scoring
+        
+        Copyright © 2025 Doulet Media. All rights reserved.
+        """
+        if not self.license_manager.client:
+            # No database connection, skip tracking
+            return
+        
+        try:
+            timestamp = datetime.now().isoformat()
+            essay_id = f"essay_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}"
+            
+            # Extract metrics from result
+            neural_rubric = result.get('neural_rubric', {})
+            emotionflow_v2 = result.get('emotionflow_v2', {})
+            paragraph_structure = result.get('paragraph_structure_v12', {})
+            reflection = result.get('reflection_v12', {})
+            inference_chains = result.get('inference_chains_v12_2', {})
+            evidence_types = result.get('evidence_types_v12_2', {})
+            
+            # DouLogic v5.0: Argument logic metrics
+            doulogic_data = {
+                'essay_id': essay_id,
+                'timestamp': timestamp,
+                'version': '5.0',
+                'score': neural_rubric.get('thinking_inquiry', {}).get('score', 0),
+                'inference_chains': inference_chains.get('count', 0),
+                'claim_relationships': len(inference_chains.get('relationships', [])),
+                'counter_arguments': inference_chains.get('counter_argument_count', 0),
+                'logical_flow_score': inference_chains.get('logical_flow_score', 0)
+            }
+            
+            # DouEvidence v5.0: Evidence analysis metrics
+            douevidence_data = {
+                'essay_id': essay_id,
+                'timestamp': timestamp,
+                'version': '5.0',
+                'score': neural_rubric.get('knowledge_understanding', {}).get('score', 0),
+                'evidence_count': evidence_types.get('total_evidence', 0),
+                'direct_evidence': evidence_types.get('direct', 0),
+                'inferential_evidence': evidence_types.get('inferential', 0),
+                'contextual_evidence': evidence_types.get('contextual', 0),
+                'source_credibility': evidence_types.get('credibility_score', 0),
+                'claim_evidence_ratio': result.get('claim_evidence_ratio', {}).get('ratio', 0)
+            }
+            
+            # DouEmotion v4.0: Emotional tone metrics
+            douemotion_data = {
+                'essay_id': essay_id,
+                'timestamp': timestamp,
+                'version': '4.0',
+                'overall_score': emotionflow_v2.get('overall_score', 0),
+                'empathy_score': emotionflow_v2.get('empathy', 0),
+                'persuasive_power': emotionflow_v2.get('persuasive_power', 0),
+                'intellectual_curiosity': emotionflow_v2.get('intellectual_curiosity', 0),
+                'authenticity': emotionflow_v2.get('authenticity', 0),
+                'engagement': emotionflow_v2.get('engagement', 0),
+                'assertiveness': emotionflow_v2.get('assertiveness', 0)
+            }
+            
+            # DouStruct v5.0: Paragraph structure metrics
+            doustruct_data = {
+                'essay_id': essay_id,
+                'timestamp': timestamp,
+                'version': '5.0',
+                'score': neural_rubric.get('communication', {}).get('score', 0),
+                'structure_quality': paragraph_structure.get('structure_quality', 0),
+                'intro_detected': paragraph_structure.get('has_introduction', False),
+                'conclusion_detected': paragraph_structure.get('has_conclusion', False),
+                'paragraph_count': paragraph_structure.get('paragraph_count', 0),
+                'transition_count': paragraph_structure.get('transition_count', 0),
+                'topic_sentences': paragraph_structure.get('topic_sentences_found', 0)
+            }
+            
+            # DouReflect v4.0: Personal reflection metrics
+            doureflect_data = {
+                'essay_id': essay_id,
+                'timestamp': timestamp,
+                'version': '4.0',
+                'score': neural_rubric.get('application', {}).get('score', 0),
+                'reflection_depth': reflection.get('reflection_quality', 0),
+                'deep_reflection_count': reflection.get('deep_reflection_count', 0),
+                'personal_growth_count': reflection.get('personal_growth_count', 0),
+                'realworld_application_count': reflection.get('realworld_count', 0),
+                'novelty_score': reflection.get('novelty_score', 0)
+            }
+            
+            # Insert metrics into respective tables (create tables if they don't exist)
+            # Note: In production, tables should be pre-created with proper schema
+            # This is a lightweight tracking approach
+            metrics_summary = {
+                'essay_id': essay_id,
+                'timestamp': timestamp,
+                'doulogic_v5': doulogic_data,
+                'douevidence_v5': douevidence_data,
+                'douemotion_v4': douemotion_data,
+                'doustruct_v5': doustruct_data,
+                'doureflect_v4': doureflect_data
+            }
+            
+            # Store in a general metrics table (fallback if individual tables don't exist)
+            try:
+                self.license_manager.client.table('subsystem_metrics').insert({
+                    'essay_id': essay_id,
+                    'timestamp': timestamp,
+                    'version': '12.4.0',
+                    'metrics': json.dumps(metrics_summary)
+                }).execute()
+            except Exception as e:
+                logger.warning(f"Could not store subsystem metrics: {e}")
+                # Continue execution even if metrics storage fails
+                
+        except Exception as e:
+            logger.error(f"Error tracking subsystem metrics: {e}")
+            # Don't fail the grading if metrics tracking fails
 
 
     def analyze_essay_themes(self, essay: str) -> Dict:
@@ -5144,9 +5276,9 @@ def create_douessay_interface():
         assessment_html = f"""
         <div style="font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 15px; color: white; text-align: center; margin-bottom: 20px;">
-                <h1 style="margin: 0 0 10px 0; font-size: 2.2em;">DouEssay Assessment System v12.3.0</h1>
-                <p style="margin: 0; opacity: 0.9; font-size: 1.1em;">AI Writing Mentor • 95%+ Teacher Alignment • Project ScholarMind → Apex Continuity</p>
-                <p style="margin: 10px 0 0 0; font-size: 0.9em; opacity: 0.7;">Created by changcheng967 • v12.3.0: Core grading engine upgrade, subsystem enhancement, 95%+ accuracy • Doulet Media</p>
+                <h1 style="margin: 0 0 10px 0; font-size: 2.2em;">DouEssay Assessment System v12.4.0</h1>
+                <p style="margin: 0; opacity: 0.9; font-size: 1.1em;">AI Writing Mentor • ≥95% Teacher Alignment • Project DouAccess 2.0</p>
+                <p style="margin: 10px 0 0 0; font-size: 0.9em; opacity: 0.7;">Created by changcheng967 • v12.4.0: Best Plan Implementation, AI Model Upgrades & Subsystem Enhancements • Doulet Media</p>
                 <p style="margin: 5px 0 0 0; font-size: 0.8em; opacity: 0.9; background: rgba(255,255,255,0.2); padding: 5px; border-radius: 5px;">{user_info} | Grade: {grade_level}</p>
             </div>
             
@@ -5235,10 +5367,10 @@ def create_douessay_interface():
         .tab-nav button {font-size: 1.1em; font-weight: 500;}
         h1, h2, h3 {color: #2c3e50;}
     """) as demo:
-        gr.Markdown("# 🎓 DouEssay Assessment System v12.3.0")
-        gr.Markdown("### AI Writing Mentor • 95%+ Teacher Alignment • Project ScholarMind → Apex Continuity")
+        gr.Markdown("# 🎓 DouEssay Assessment System v12.4.0")
+        gr.Markdown("### AI Writing Mentor • ≥95% Teacher Alignment • Project DouAccess 2.0")
         gr.Markdown("**Created by changcheng967 • Doulet Media**")
-        gr.Markdown("**Version: v12.3.0: Core grading engine upgrade, subsystem enhancement, 95%+ accuracy**")
+        gr.Markdown("**Version: v12.4.0: Best Plan Implementation, AI Model Upgrades & Subsystem Enhancements**")
         gr.Markdown("*Slogan: 'Specs vary. Affordable excellence. Real feedback. Real improvement.'*")
         
         with gr.Row():
@@ -5325,8 +5457,8 @@ def create_douessay_interface():
                 gr.HTML("""
                 <div style="font-family: Arial, sans-serif;">
                     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; color: white; margin-bottom: 20px;">
-                        <h2 style="margin: 0 0 10px 0;">Choose Your Plan - v12.3.0 Features</h2>
-                        <p style="margin: 0; opacity: 0.9;">95%+ Teacher Alignment • Enhanced Grading Engine • Affordable Excellence</p>
+                        <h2 style="margin: 0 0 10px 0;">Choose Your Plan - v12.4.0 Features</h2>
+                        <p style="margin: 0; opacity: 0.9;">≥95% Teacher Alignment • AI Model Upgrades • Project DouAccess 2.0</p>
                     </div>
                     
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0;">
@@ -5352,11 +5484,11 @@ def create_douessay_interface():
                             <div style="background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 5px; display: inline-block; font-size: 0.8em; margin-bottom: 10px;">⭐ POPULAR</div>
                             <h3 style="margin-top: 0;">Student Basic</h3>
                             <div style="font-size: 2em; font-weight: bold; margin: 10px 0;">$4.99<span style="font-size: 0.5em;">/month</span></div>
-                            <p style="margin: 5px 0; opacity: 0.9;">7 essays/day (increased)</p>
+                            <p style="margin: 5px 0; opacity: 0.9;">10 essays/day</p>
                             <hr style="border: 1px solid rgba(255,255,255,0.3); margin: 15px 0;">
                             <ul style="list-style: none; padding: 0;">
                                 <li style="margin: 8px 0;">✅ Full grading + AI feedback</li>
-                                <li style="margin: 8px 0;">✅ Argument Logic 3.0 → 12.3 upgraded</li>
+                                <li style="margin: 8px 0;">✅ DouLogic v5.0 + DouEvidence v5.0</li>
                                 <li style="margin: 8px 0;">✅ Inline feedback</li>
                                 <li style="margin: 8px 0;">✅ Grammar check</li>
                                 <li style="margin: 8px 0;">✅ Vocabulary suggestions</li>
@@ -5371,7 +5503,7 @@ def create_douessay_interface():
                         <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 20px; border-radius: 10px; color: white;">
                             <h3 style="margin-top: 0;">Student Premium</h3>
                             <div style="font-size: 2em; font-weight: bold; margin: 10px 0;">$7.99<span style="font-size: 0.5em;">/month</span></div>
-                            <p style="margin: 5px 0; opacity: 0.9;">12 essays/day (increased)</p>
+                            <p style="margin: 5px 0; opacity: 0.9;">20 essays/day</p>
                             <hr style="border: 1px solid rgba(255,255,255,0.3); margin: 15px 0;">
                             <ul style="list-style: none; padding: 0;">
                                 <li style="margin: 8px 0;">✅ All Basic features</li>
@@ -5380,7 +5512,7 @@ def create_douessay_interface():
                                 <li style="margin: 8px 0;">✅ Adaptive learning profiles</li>
                                 <li style="margin: 8px 0;">✅ Essay heatmaps</li>
                                 <li style="margin: 8px 0;">✅ Progress tracking</li>
-                                <li style="margin: 8px 0;">✅ EmotionFlow v3.0</li>
+                                <li style="margin: 8px 0;">✅ DouEmotion v4.0</li>
                                 <li style="margin: 8px 0;">✅ Claim-Evidence Ratio Scoring</li>
                                 <li style="margin: 8px 0;">✅ Logical Fallacy Detection</li>
                             </ul>
@@ -5389,8 +5521,8 @@ def create_douessay_interface():
                         <!-- Teacher Suite Tier -->
                         <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); padding: 20px; border-radius: 10px; color: #333;">
                             <h3 style="margin-top: 0;">Teacher Suite</h3>
-                            <div style="font-size: 2em; font-weight: bold; margin: 10px 0;">$14.99<span style="font-size: 0.5em;">/month</span></div>
-                            <p style="margin: 5px 0;">unlimited essays/day</p>
+                            <div style="font-size: 2em; font-weight: bold; margin: 10px 0;">$19.99<span style="font-size: 0.5em;">/month</span></div>
+                            <p style="margin: 5px 0;">Unlimited essays/day</p>
                             <hr style="border: 1px solid rgba(0,0,0,0.2); margin: 15px 0;">
                             <ul style="list-style: none; padding: 0;">
                                 <li style="margin: 8px 0;">✅ All Premium features</li>
