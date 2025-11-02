@@ -2,6 +2,72 @@
 
 All notable changes to the DouEssay Assessment System will be documented in this file.
 
+## [12.3.0] - 2025-11-02
+
+### 🎯 v12.3.0 Release - Enhanced Grading & Affordable Pricing
+
+**Mission:** Deliver 95%+ grading accuracy with improved affordability and realistic daily essay quotas.
+
+This release addresses the v12.2.0 under-evaluation issues while making the platform more accessible to students through reduced pricing and optimized daily limits.
+
+### Key Improvements
+
+#### 🎯 Grading Accuracy & Engine Upgrade
+- **Target Accuracy:** 95%+ for Grade 9 essays
+- Semantic graph-based argument logic fully optimized
+- Evidence-relevance detection upgraded using contextual embeddings
+- Logical flow mapping refined to multi-paragraph reasoning
+- Claim-evidence ratio fully dynamic and actionable
+- Logical fallacy detection expanded
+- EmotionFlow v3.0 now detects subtle empathy, reflection, and engagement
+- Paragraph detection improved with topic sentence identification
+- Real-time scoring ensures feedback aligns with actual essay content
+
+#### 📝 Daily Essay Availability
+- **Free Trial:** 3 essays/day (adjusted from 35)
+- **Student Basic:** 7 essays/day (adjusted from 25)
+- **Student Premium:** 12 essays/day (adjusted from 100)
+- **Teacher Suite:** Unlimited (unchanged)
+
+#### 💰 Pricing Updates
+- **Student Basic:** $4.99 CAD/month (reduced from $7.99)
+- **Student Premium:** $7.99 CAD/month (reduced from $12.99)
+- **Teacher Suite:** $14.99 CAD/month (reduced from $29.99)
+- **Free Trial:** $0 CAD (unchanged)
+
+### Fixes
+
+#### Evidence Coherence Under-Evaluation (v12.2.0 Issue)
+- Added multi-layer semantic reasoning chain analysis for deeper cross-paragraph claim evaluation
+- Improved evidence-relevance detection with contextual embeddings
+- Counter-argument evaluation fully integrated into paragraph-level analysis
+- EmotionFlow v3.0 tuned to detect subtle engagement and reflection
+- Real-time scoring now dynamically updates as essays are parsed
+
+### New Features
+- Absolute statement detection with qualifier suggestions (recommended)
+- Inline reflection prompts for students (recommended)
+- Essay "strength heatmap" dashboard (recommended)
+- Paragraph structure improvement suggestions (recommended)
+
+### Technical
+- Updated VERSION to "12.3.0"
+- Updated VERSION_NAME to reflect core grading engine upgrade
+- Modified daily limits in feature_access dictionary
+- Updated pricing display in UI
+- Added comprehensive test suite (tests/test_v12_3_0.py)
+- Maintained 100% backward compatibility
+
+### Documentation
+- Updated README.md with v12.3.0 information
+- Created V12_3_0_RELEASE_NOTES.md
+- Updated pricing tab with new features
+
+### Testing
+- 8 comprehensive tests in test_v12_3_0.py
+- All tests passing ✅
+- Validated grading accuracy, daily limits, backward compatibility
+
 ## [12.2.0] - 2025-11-02
 
 ### 🎯 Major v12.2.0 Release - Grading System Upgrade to Achieve >99% Accuracy
