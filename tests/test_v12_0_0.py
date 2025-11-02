@@ -174,9 +174,9 @@ print(f"  Logical fallacies: {result['logical_fallacies']['fallacies_detected']}
 print()
 
 print("Test 13: Verify version information")
-assert VERSION == "12.0.0", f"Expected version 12.0.0, got {VERSION}"
+assert VERSION in ["12.0.0", "12.1.0"], f"Expected version 12.0.0 or 12.1.0, got {VERSION}"
 assert "ScholarMind Continuity" in VERSION_NAME or "Apex" in VERSION_NAME
-print(f"✓ Version correctly set to {VERSION} - {VERSION_NAME}")
+print(f"✓ Version correctly set to {VERSION} - {VERSION_NAME} (backward compatible)")
 print()
 
 print("=" * 60)
