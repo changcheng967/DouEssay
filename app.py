@@ -974,24 +974,25 @@ class DouEssay:
         
         # v12.5.0: DouEssay / Doulet Media subsystem version tracking with updated branding
         self.subsystem_versions = {
-            # v12.5.0: New branding names
-            'scholarmind_core': '4.0',  # Argument logic evaluation (upgraded from DouLogic 5.0)
-            'douletflow': '2.0',  # Evidence coherence analysis (upgraded from DouEvidence 5.0)
-            'emotionflow': '3.0',  # Emotional tone & engagement detection (upgraded from DouEmotion 4.0)
-            'scholarstruct': '2.0',  # Paragraph and rhetorical structure analysis (upgraded from DouStruct 5.0)
-            'doureflect': '4.1',  # Personal reflection & insight scoring (minor upgrade from 4.0)
-            # Backward compatibility: maintain old names with updated versions to match new functionality
-            'doulogic': '5.0',  # Maps to ScholarMind Core 4.0
-            'douevidence': '5.0',  # Maps to DouletFlow 2.0
-            'douemotion': '4.0',  # Maps to EmotionFlow 3.0
-            'doustruct': '5.0',  # Maps to ScholarStruct 2.0
-            'argument_logic': '5.0',
-            'evidence_analysis': '5.0',
+            # v12.5.0: New branding names with restarted version numbers
+            'scholarmind_core': '4.0',  # Argument logic evaluation (NEW branding in v12.5.0)
+            'douletflow': '2.0',  # Evidence coherence analysis (NEW branding in v12.5.0)
+            'emotionflow': '3.0',  # Emotional tone & engagement detection (NEW branding in v12.5.0)
+            'scholarstruct': '2.0',  # Paragraph and rhetorical structure analysis (NEW branding in v12.5.0)
+            'doureflect': '4.1',  # Personal reflection & insight scoring (v12.5.0 minor update)
+            # Backward compatibility: maintain old names with v12.4.0 version numbers for API stability
+            # These map to the new subsystems but keep original version numbers for compatibility
+            'doulogic': '5.0',  # Legacy name for ScholarMind Core (v12.4.0 version maintained)
+            'douevidence': '5.0',  # Legacy name for DouletFlow (v12.4.0 version maintained)
+            'douemotion': '4.0',  # Legacy name for EmotionFlow (v12.4.0 version maintained)
+            'doustruct': '5.0',  # Legacy name for ScholarStruct (v12.4.0 version maintained)
+            'argument_logic': '5.0',  # Legacy name maintained for backward compatibility
+            'evidence_analysis': '5.0',  # Legacy name maintained for backward compatibility
             'logical_fallacies': '2.2',
-            'paragraph_detection': '5.0',
+            'paragraph_detection': '5.0',  # Legacy name maintained for backward compatibility
             'personal_reflection': '4.1',
             'application_insight': '4.1',
-            'rhetorical_structure': '5.0',
+            'rhetorical_structure': '5.0',  # Legacy name maintained for backward compatibility
             'curriculum_weighting': '2.1'
         }
         
@@ -2888,7 +2889,6 @@ class DouEssay:
             'recommendation': recommendation,
             'version': '4.0',  # v12.5.0: ScholarMind Core v4.0
             'count': multi_level_count + conditional_count + hypothetical_count + counterfactual_count,
-            'relationships': [],  # Placeholder for claim relationships
             'counter_argument_count': counter_argument_markers,
             'logical_flow_score': inference_score
         }

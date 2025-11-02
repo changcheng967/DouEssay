@@ -247,15 +247,15 @@ All previous subsystem names remain functional:
 ## 📝 What Changed from v12.4.0
 
 ### Subsystem Branding:
-| Old Name | New Name | Version Change |
-|----------|----------|----------------|
-| DouLogic | ScholarMind Core | 5.0 → 4.0* |
-| DouEvidence | DouletFlow | 5.0 → 2.0* |
-| DouEmotion | EmotionFlow | 4.0 → 3.0* |
-| DouStruct | ScholarStruct | 5.0 → 2.0* |
-| DouReflect | DouReflect | 4.0 → 4.1 |
+| Old Name (v12.4.0) | New Name (v12.5.0) | Old Version | New Version | Notes |
+|----------|----------|-------------|-------------|-------|
+| DouLogic | ScholarMind Core | 5.0 | 4.0 | Version restarted for new branding |
+| DouEvidence | DouletFlow | 5.0 | 2.0 | Version restarted for new branding |
+| DouEmotion | EmotionFlow | 4.0 | 3.0 | Version restarted for new branding |
+| DouStruct | ScholarStruct | 5.0 | 2.0 | Version restarted for new branding |
+| DouReflect | DouReflect | 4.0 | 4.1 | Minor update, same name |
 
-*Version numbers restarted for new branding to reflect major architectural changes
+**Note on Version Numbers:** New subsystem names start with fresh version numbers to distinguish the rebranded architecture. Legacy names (DouLogic, DouEvidence, etc.) maintain their v12.4.0 version numbers (5.0, 5.0, 4.0, 5.0) for backward compatibility. Both naming schemes coexist in v12.5.0.
 
 ### Functional Improvements:
 1. **Counter-Arguments:** Basic detection → 4-category sophisticated analysis
