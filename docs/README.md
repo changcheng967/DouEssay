@@ -1,39 +1,44 @@
-# 🎓 DouEssay Assessment System v12.3.0
+# 🎓 DouEssay Assessment System v12.4.0
 
-## AI Writing Mentor • 95%+ Teacher Alignment • Project ScholarMind → Apex Continuity
+## AI Writing Mentor • ≥95% Teacher Alignment • Project DouAccess 2.0
 
 **Created by changcheng967 • Doulet Media**
 
-**Version:** v12.3.0: Core grading engine upgrade, subsystem enhancement, 95%+ accuracy
+**Version:** v12.4.0: Best Plan Implementation, AI Model Upgrades & Subsystem Enhancements
 
 **Slogan:** "Specs vary. Affordable excellence. Real feedback. Real improvement."
 
 ---
 
-## 🚀 What's New in v12.3.0 - November 2, 2025
+## 🚀 What's New in v12.4.0 - January 2, 2026
 
-### 🎯 Achievement: 95%+ Teacher Alignment Accuracy
+### 🎯 Achievement: ≥95% Teacher Alignment with DouEssay/Doulet Media Subsystems
 
-**v12.3.0 delivers enhanced grading accuracy with improved affordability and daily essay quotas.**
+**v12.4.0 implements the best plan for students and teachers with upgraded AI models, Project DouAccess 2.0 pricing, and DouEssay/Doulet Media branded subsystems.**
 
-### Key Improvements in v12.3.0
+### Key Improvements in v12.4.0
 
-#### 🎯 Grading Accuracy & Engine Upgrade
-- **Target Accuracy:** 95%+ for Grade 9 essays
-- Semantic graph-based argument logic fully optimized
-- Evidence-relevance detection upgraded using contextual embeddings
-- Logical flow mapping refined to multi-paragraph reasoning
-- Claim-evidence ratio fully dynamic and actionable
-- Logical fallacy detection expanded
-- EmotionFlow v3.0 now detects subtle empathy, reflection, and engagement
-- Paragraph detection improved with topic sentence identification
-- Real-time scoring ensures feedback aligns with actual essay content
+#### 🤖 DouEssay/Doulet Media AI Subsystem Upgrades
+- **DouLogic v5.0**: Argument logic evaluation with multi-level inference chains
+- **DouEvidence v5.0**: Evidence coherence analysis with source credibility scoring
+- **DouEmotion v4.0**: Emotional tone & engagement detection (6 dimensions)
+- **DouStruct v5.0**: Paragraph and rhetorical structure analysis
+- **DouReflect v4.0**: Personal reflection & insight scoring
+- **Target Accuracy:** ≥95% teacher alignment across all subsystems
+- **Copyright © 2025 Doulet Media. All rights reserved.**
 
-#### 📝 Daily Essay Availability
-- **Free Trial:** 3 essays/day
-- **Student Basic:** 7 essays/day (increased)
-- **Student Premium:** 12 essays/day (increased)
-- **Teacher Suite:** Unlimited
+#### 💰 Project DouAccess 2.0 — Best Plan Pricing
+- **Free Trial:** $0/month — 3 essays/day
+- **Student Basic:** $4.99/month — **10 essays/day** (increased from 7)
+- **Student Premium:** $7.99/month — **20 essays/day** (increased from 12)
+- **Teacher Suite:** $19.99/month — **Unlimited essays** (fair pricing for unlimited access)
+- **Institutional:** Custom pricing — 500+ essays/day
+
+#### 📊 Persistent Analytics & Metrics Tracking
+- **Database tracking** for all subsystem metrics
+- **Teacher dashboard** analytics with historical data
+- **Student progress** tracking across dimensions
+- **Tables:** doulogic_metrics, douevidence_metrics, douemotion_metrics, doustruct_metrics, doureflect_metrics
 
 #### 🧠 Enhanced Grading Features
 - **Advanced Claim Relationships**: Supports, contradicts, qualifies, extends, challenges
@@ -84,7 +89,7 @@ Four-dimensional emotional analysis:
 - **Common Core**: US Common Core alignment
 - **Future-Ready**: Expandable for additional systems
 
-[📖 Complete v12.0.0 Release Notes →](V12_RELEASE_NOTES.md) | [📋 Implementation Summary →](V12_IMPLEMENTATION_SUMMARY.md) | [📊 Final Report →](FINAL_REPORT_V12.md) | [📜 Changelog →](CHANGELOG.md)
+[📖 v12.4.0 Release Notes →](V12_4_0_RELEASE_NOTES.md) | [📖 v12.3.0 Release Notes →](V12_3_0_RELEASE_NOTES.md) | [📖 v12.0.0 Release Notes →](V12_RELEASE_NOTES.md) | [📜 Changelog →](CHANGELOG.md)
 
 ---
 
@@ -214,15 +219,15 @@ Full bilingual support with foundations for global expansion.
 - **Argument Logic 3.0**: Claim depth, evidence relevance, rhetorical structure mapping
 - **AI Coach Analysis**: Emotional tone, engagement scoring, evidence coherence, adaptive profiles
 
-### 7. 💰 Student Pricing & Licensing (v12.3.0)
+### 7. 💰 Student Pricing & Licensing — Project DouAccess 2.0 (v12.4.0)
 
 | Tier | Monthly | Daily Limit | Key Features |
 |------|---------|-------------|--------------|
 | **Free Trial** | $0 CAD | 3 essays/day | Basic grading + Score breakdown |
-| **Student Basic** ⭐ | $4.99 CAD | 7 essays/day | All feedback + Argument Logic 3.0 + Evidence Detection |
-| **Student Premium** 🏆 | $7.99 CAD | 12 essays/day | All Basic + EmotionFlow v3.0 + Visual Analytics |
-| **Teacher Suite** 👨‍🏫 | $14.99 CAD | Unlimited | All Premium + Batch grading + Class analytics + LMS integration |
-| **Institutional** 🏫 | Custom | Custom | School-wide plan + Admin dashboard + Dedicated support |
+| **Student Basic** ⭐ | $4.99 CAD | 10 essays/day | All feedback + DouLogic v5.0 + DouEvidence v5.0 |
+| **Student Premium** 🏆 | $7.99 CAD | 20 essays/day | All Basic + DouEmotion v4.0 + Visual Analytics |
+| **Teacher Suite** 👨‍🏫 | $19.99 CAD | Unlimited | All Premium + Batch grading + Class analytics + LMS integration |
+| **Institutional** 🏫 | Custom | 500+ | School-wide plan + Admin dashboard + Dedicated support |
 
 **What's Included in Each Tier:**
 
@@ -235,9 +240,9 @@ Full bilingual support with foundations for global expansion.
 - ❌ Draft history
 - ❌ Visual analytics
 
-**Student Basic** ($4.99 CAD/month — 7 essays/day):
+**Student Basic** ($4.99 CAD/month — 10 essays/day):
 - ✅ Full grading + AI feedback
-- ✅ Argument Logic 3.0 → 12.3 upgraded
+- ✅ DouLogic v5.0 + DouEvidence v5.0
 - ✅ Inline feedback
 - ✅ Grammar check
 - ✅ Vocabulary suggestions
@@ -246,18 +251,18 @@ Full bilingual support with foundations for global expansion.
 - ✅ Logical Flow Mapping
 - ✅ Paragraph & Topic Sentence Recognition
 
-**Student Premium** ($7.99 CAD/month — 12 essays/day):
+**Student Premium** ($7.99 CAD/month — 20 essays/day):
 - ✅ All Basic features
 - ✅ Real-time feedback
 - ✅ Visual Dashboard
 - ✅ Adaptive learning profiles
 - ✅ Essay heatmaps
 - ✅ Progress tracking
-- ✅ EmotionFlow v3.0
+- ✅ DouEmotion v4.0 + DouStruct v5.0 + DouReflect v4.0
 - ✅ Claim-Evidence Ratio Scoring
 - ✅ Logical Fallacy Detection
 
-**Teacher Suite** ($14.99 CAD/month — unlimited):
+**Teacher Suite** ($19.99 CAD/month — unlimited):
 - ✅ All Premium features
 - ✅ Class analytics
 - ✅ Batch grading

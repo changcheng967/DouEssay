@@ -404,7 +404,7 @@ class LicenseManager:
                 'student_basic': 10,  # v12.4.0: 10 essays/day
                 'student_premium': 20,  # v12.4.0: 20 essays/day
                 'teacher_suite': float('inf'),  # v12.4.0: Unlimited
-                'institutional': 500  # v12.4.0: 500+ essays/day (custom),  # unlimited
+                'institutional': 500,  # v12.4.0: 500+ essays/day (custom)
                 # Legacy tier support
                 'free': 3,
                 'plus': 7,
