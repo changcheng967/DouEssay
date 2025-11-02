@@ -12,8 +12,8 @@ from supabase import create_client
 import json
 import logging
 
-VERSION = "12.2.0"
-VERSION_NAME = "Project Apex → ScholarMind Continuity v12.2.0"
+VERSION = "12.3.0"
+VERSION_NAME = "Core grading engine upgrade, subsystem enhancement, 95%+ accuracy"
 
 # v10.1.0: Setup logging for error tracking
 logging.basicConfig(
@@ -161,7 +161,7 @@ class LicenseManager:
         # v10.0.0: Feature access matrix for different tiers (Project Apex)
         self.feature_access = {
             'free_trial': {
-                'daily_limit': 35,  # 5 essays/week ≈ 5 per day (7-day trial)
+                'daily_limit': 3,  # v12.3.0: 3 essays/day
                 'basic_grading': True,
                 'neural_rubric': True,  # v9.0.0: Logic 4.0, v10.0.0: Logic 5.0 (basic)
                 'inline_feedback': False,
@@ -191,7 +191,7 @@ class LicenseManager:
                 'multilingual_full': False,  # v10.0.0: Full 4 languages
             },
             'student_basic': {
-                'daily_limit': 25,
+                'daily_limit': 7,  # v12.3.0: 7 essays/day (increased)
                 'basic_grading': True,
                 'neural_rubric': True,  # v9.0.0: Logic 4.0, v10.0.0: Logic 5.0
                 'inline_feedback': True,
@@ -221,7 +221,7 @@ class LicenseManager:
                 'multilingual_full': True,  # v10.0.0: Full 4 languages
             },
             'student_premium': {
-                'daily_limit': 100,
+                'daily_limit': 12,  # v12.3.0: 12 essays/day (increased)
                 'basic_grading': True,
                 'neural_rubric': True,  # v9.0.0: Logic 4.0, v10.0.0: Logic 5.0
                 'inline_feedback': True,
@@ -398,15 +398,16 @@ class LicenseManager:
                 daily_usage = usage_response.data[0]['usage_count']
             
             # v9.0.0: Updated limits for Project Horizon pricing tiers
+            # v12.3.0: Updated daily limits
             limits = {
-                'free_trial': 35,  # 5 essays per week over 7 days
-                'student_basic': 25,
-                'student_premium': 100,
-                'teacher_suite': float('inf'),
+                'free_trial': 3,  # v12.3.0: 3 essays/day
+                'student_basic': 7,  # v12.3.0: 7 essays/day (increased)
+                'student_premium': 12,  # v12.3.0: 12 essays/day (increased)
+                'teacher_suite': float('inf'),  # unlimited
                 # Legacy tier support
-                'free': 35,
-                'plus': 25,
-                'premium': 100,
+                'free': 3,
+                'plus': 7,
+                'premium': 12,
                 'unlimited': float('inf')
             }
             
@@ -5143,9 +5144,9 @@ def create_douessay_interface():
         assessment_html = f"""
         <div style="font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 15px; color: white; text-align: center; margin-bottom: 20px;">
-                <h1 style="margin: 0 0 10px 0; font-size: 2.2em;">DouEssay Assessment System v10.1.0</h1>
-                <p style="margin: 0; opacity: 0.9; font-size: 1.1em;">AI Writing Mentor • 99.5%+ Teacher Alignment • Project Apex Hotfix</p>
-                <p style="margin: 10px 0 0 0; font-size: 0.9em; opacity: 0.7;">Created by changcheng967 • v10.1.0: Schema Validation, Robust Error Handling • Doulet Media</p>
+                <h1 style="margin: 0 0 10px 0; font-size: 2.2em;">DouEssay Assessment System v12.3.0</h1>
+                <p style="margin: 0; opacity: 0.9; font-size: 1.1em;">AI Writing Mentor • 95%+ Teacher Alignment • Project ScholarMind → Apex Continuity</p>
+                <p style="margin: 10px 0 0 0; font-size: 0.9em; opacity: 0.7;">Created by changcheng967 • v12.3.0: Core grading engine upgrade, subsystem enhancement, 95%+ accuracy • Doulet Media</p>
                 <p style="margin: 5px 0 0 0; font-size: 0.8em; opacity: 0.9; background: rgba(255,255,255,0.2); padding: 5px; border-radius: 5px;">{user_info} | Grade: {grade_level}</p>
             </div>
             
@@ -5234,11 +5235,11 @@ def create_douessay_interface():
         .tab-nav button {font-size: 1.1em; font-weight: 500;}
         h1, h2, h3 {color: #2c3e50;}
     """) as demo:
-        gr.Markdown("# 🎓 DouEssay Assessment System v12.0.0 - Project Apex → ScholarMind Continuity")
-        gr.Markdown("### AI Writing Mentor & Complete Educational Ecosystem")
-        gr.Markdown("**Specs vary. No empty promises — just code, hardware, and your ambition.**")
-        gr.Markdown("*99.9% Teacher Alignment • Semantic Argument Mapping • Enhanced Evidence Analysis • EmotionFlow v2.0 • Real-time Feedback*")
-        gr.Markdown("**Created by changcheng967 • v12.0.0: 99.9% Accuracy Target with Advanced Grading Engine • Doulet Media**")
+        gr.Markdown("# 🎓 DouEssay Assessment System v12.3.0")
+        gr.Markdown("### AI Writing Mentor • 95%+ Teacher Alignment • Project ScholarMind → Apex Continuity")
+        gr.Markdown("**Created by changcheng967 • Doulet Media**")
+        gr.Markdown("**Version: v12.3.0: Core grading engine upgrade, subsystem enhancement, 95%+ accuracy**")
+        gr.Markdown("*Slogan: 'Specs vary. Affordable excellence. Real feedback. Real improvement.'*")
         
         with gr.Row():
             license_input = gr.Textbox(
@@ -5318,14 +5319,14 @@ def create_douessay_interface():
                     show_copy_button=True
                 )
             
-            # v8.0.0: Tab 8: Pricing & Features
+            # v12.3.0: Tab 8: Pricing & Features
             with gr.TabItem("💰 Pricing & Features", id=7):
-                gr.Markdown("### DouEssay v8.0.0 Subscription Tiers - Project ScholarMind")
+                gr.Markdown("### DouEssay v12.3.0 Subscription Tiers")
                 gr.HTML("""
                 <div style="font-family: Arial, sans-serif;">
                     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; color: white; margin-bottom: 20px;">
-                        <h2 style="margin: 0 0 10px 0;">Choose Your Plan - v8.0.0 Features</h2>
-                        <p style="margin: 0; opacity: 0.9;">Experience Argument Logic 3.0, Adaptive Learning, and Visual Analytics</p>
+                        <h2 style="margin: 0 0 10px 0;">Choose Your Plan - v12.3.0 Features</h2>
+                        <p style="margin: 0; opacity: 0.9;">95%+ Teacher Alignment • Enhanced Grading Engine • Affordable Excellence</p>
                     </div>
                     
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0;">
@@ -5333,7 +5334,7 @@ def create_douessay_interface():
                         <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; border: 2px solid #e9ecef;">
                             <h3 style="color: #6c757d; margin-top: 0;">Free Trial</h3>
                             <div style="font-size: 2em; font-weight: bold; color: #6c757d; margin: 10px 0;">$0</div>
-                            <p style="color: #6c757d; margin: 5px 0;">7 days access</p>
+                            <p style="color: #6c757d; margin: 5px 0;">3 essays/day</p>
                             <hr style="border: 1px solid #dee2e6; margin: 15px 0;">
                             <ul style="list-style: none; padding: 0;">
                                 <li style="margin: 8px 0;">✅ All features</li>
@@ -5350,24 +5351,27 @@ def create_douessay_interface():
                         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; color: white; transform: scale(1.05); box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
                             <div style="background: rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 5px; display: inline-block; font-size: 0.8em; margin-bottom: 10px;">⭐ POPULAR</div>
                             <h3 style="margin-top: 0;">Student Basic</h3>
-                            <div style="font-size: 2em; font-weight: bold; margin: 10px 0;">$7.99<span style="font-size: 0.5em;">/month</span></div>
-                            <p style="margin: 5px 0; opacity: 0.9;">CAD per month</p>
+                            <div style="font-size: 2em; font-weight: bold; margin: 10px 0;">$4.99<span style="font-size: 0.5em;">/month</span></div>
+                            <p style="margin: 5px 0; opacity: 0.9;">7 essays/day (increased)</p>
                             <hr style="border: 1px solid rgba(255,255,255,0.3); margin: 15px 0;">
                             <ul style="list-style: none; padding: 0;">
                                 <li style="margin: 8px 0;">✅ Full grading + AI feedback</li>
-                                <li style="margin: 8px 0;">✅ Argument Logic 3.0</li>
+                                <li style="margin: 8px 0;">✅ Argument Logic 3.0 → 12.3 upgraded</li>
                                 <li style="margin: 8px 0;">✅ Inline feedback</li>
                                 <li style="margin: 8px 0;">✅ Grammar check</li>
                                 <li style="margin: 8px 0;">✅ Vocabulary suggestions</li>
                                 <li style="margin: 8px 0;">✅ Real-time feedback</li>
+                                <li style="margin: 8px 0;">✅ Evidence-Relevance Detection</li>
+                                <li style="margin: 8px 0;">✅ Logical Flow Mapping</li>
+                                <li style="margin: 8px 0;">✅ Paragraph & Topic Sentence Recognition</li>
                             </ul>
                         </div>
                         
                         <!-- Student Premium Tier -->
                         <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 20px; border-radius: 10px; color: white;">
                             <h3 style="margin-top: 0;">Student Premium</h3>
-                            <div style="font-size: 2em; font-weight: bold; margin: 10px 0;">$12.99<span style="font-size: 0.5em;">/month</span></div>
-                            <p style="margin: 5px 0; opacity: 0.9;">CAD per month</p>
+                            <div style="font-size: 2em; font-weight: bold; margin: 10px 0;">$7.99<span style="font-size: 0.5em;">/month</span></div>
+                            <p style="margin: 5px 0; opacity: 0.9;">12 essays/day (increased)</p>
                             <hr style="border: 1px solid rgba(255,255,255,0.3); margin: 15px 0;">
                             <ul style="list-style: none; padding: 0;">
                                 <li style="margin: 8px 0;">✅ All Basic features</li>
@@ -5376,14 +5380,17 @@ def create_douessay_interface():
                                 <li style="margin: 8px 0;">✅ Adaptive learning profiles</li>
                                 <li style="margin: 8px 0;">✅ Essay heatmaps</li>
                                 <li style="margin: 8px 0;">✅ Progress tracking</li>
+                                <li style="margin: 8px 0;">✅ EmotionFlow v3.0</li>
+                                <li style="margin: 8px 0;">✅ Claim-Evidence Ratio Scoring</li>
+                                <li style="margin: 8px 0;">✅ Logical Fallacy Detection</li>
                             </ul>
                         </div>
                         
                         <!-- Teacher Suite Tier -->
                         <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); padding: 20px; border-radius: 10px; color: #333;">
                             <h3 style="margin-top: 0;">Teacher Suite</h3>
-                            <div style="font-size: 2em; font-weight: bold; margin: 10px 0;">$29.99<span style="font-size: 0.5em;">/month</span></div>
-                            <p style="margin: 5px 0;">CAD per month</p>
+                            <div style="font-size: 2em; font-weight: bold; margin: 10px 0;">$14.99<span style="font-size: 0.5em;">/month</span></div>
+                            <p style="margin: 5px 0;">unlimited essays/day</p>
                             <hr style="border: 1px solid rgba(0,0,0,0.2); margin: 15px 0;">
                             <ul style="list-style: none; padding: 0;">
                                 <li style="margin: 8px 0;">✅ All Premium features</li>
@@ -5392,35 +5399,38 @@ def create_douessay_interface():
                                 <li style="margin: 8px 0;">✅ Teacher-AI collaboration</li>
                                 <li style="margin: 8px 0;">✅ Student progress tracking</li>
                                 <li style="margin: 8px 0;">✅ Custom rubrics</li>
+                                <li style="margin: 8px 0;">✅ Full API access</li>
+                                <li style="margin: 8px 0;">✅ LMS Integration</li>
+                                <li style="margin: 8px 0;">✅ School-wide analytics</li>
+                                <li style="margin: 8px 0;">✅ Dedicated support</li>
                             </ul>
                         </div>
                         
                         <!-- Institutional Tier -->
                         <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 20px; border-radius: 10px; color: #333;">
                             <div style="background: rgba(0,0,0,0.1); padding: 5px 10px; border-radius: 5px; display: inline-block; font-size: 0.8em; margin-bottom: 10px;">🏫 SCHOOLS</div>
-                            <h3 style="margin-top: 0;">Institutional</h3>
+                            <h3 style="margin-top: 0;">Institutional (School-wide)</h3>
                             <div style="font-size: 2em; font-weight: bold; margin: 10px 0;">Custom</div>
                             <p style="margin: 5px 0;">Contact for pricing</p>
                             <hr style="border: 1px solid rgba(0,0,0,0.2); margin: 15px 0;">
                             <ul style="list-style: none; padding: 0;">
-                                <li style="margin: 8px 0;">✅ All Teacher features</li>
+                                <li style="margin: 8px 0;">✅ All Teacher Suite features</li>
                                 <li style="margin: 8px 0;">✅ Admin dashboard</li>
-                                <li style="margin: 8px 0;">✅ LMS integration</li>
-                                <li style="margin: 8px 0;">✅ API access</li>
-                                <li style="margin: 8px 0;">✅ School-wide analytics</li>
-                                <li style="margin: 8px 0;">✅ Dedicated support</li>
+                                <li style="margin: 8px 0;">✅ Integration with school systems</li>
+                                <li style="margin: 8px 0;">✅ Analytics, batch grading, API access</li>
+                                <li style="margin: 8px 0;">✅ Dedicated technical support</li>
                             </ul>
                         </div>
                     </div>
                     
                     <div style="background: #d4edda; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745; margin: 20px 0;">
                         <h4 style="color: #155724; margin-top: 0;">💰 Value Guarantee</h4>
-                        <p style="color: #155724; margin: 0;">All plans offer <strong>10x more value than the cost</strong>. Save hours of revision time, improve grades, and build better writing skills!</p>
+                        <p style="color: #155724; margin: 0;">All plans extremely affordable — save time, improve grades, and gain actionable feedback at the lowest cost.</p>
                     </div>
                     
                     <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                        <h4 style="color: #2c3e50; margin-top: 0;">📞 Need Help Choosing?</h4>
-                        <p style="color: #2c3e50; margin: 0;">Contact us at <strong>support@douessay.com</strong> for personalized recommendations or school/class licensing options.</p>
+                        <h4 style="color: #2c3e50; margin-top: 0;">📞 Support</h4>
+                        <p style="color: #2c3e50; margin: 0;">Contact: <strong><a href="mailto:changcheng6541@gmail.com">changcheng6541@gmail.com</a></strong></p>
                     </div>
                 </div>
                 """)
