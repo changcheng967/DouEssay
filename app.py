@@ -524,7 +524,10 @@ class DouEssay:
             'for example', 'for instance', 'such as', 'like when', 'as an example',
             'specifically', 'including', 'case in point', 'to illustrate',
             'as evidence', 'demonstrated by', 'shown by', 'evidenced by',
-            'research shows', 'studies indicate', 'according to', 'data reveals'
+            'research shows', 'studies indicate', 'according to', 'data reveals',
+            # v12.7.0: Enhanced with implicit evidence indicators
+            'enable', 'provides', 'facilitate', 'foster', 'promote', 'support',
+            'tools such as', 'platforms', 'systems', 'methods', 'approaches'
         ]
         
         self.analysis_indicators = [
@@ -532,7 +535,10 @@ class DouEssay:
             'which means', 'this demonstrates', 'consequently', 'this indicates',
             'this suggests', 'for this reason', 'due to', 'owing to', 'leads to',
             'results in', 'implies that', 'suggests that', 'indicates that',
-            'reveals that', 'proves that', 'establishes that', 'confirms that'
+            'reveals that', 'proves that', 'establishes that', 'confirms that',
+            # v12.7.0: Enhanced with action-based analysis indicators
+            'enhances', 'improves', 'increases', 'strengthens', 'develops',
+            'prepares', 'facilitates', 'encourages', 'promotes', 'supports'
         ]
         
         # v6.0.0: Enhanced with more nuanced reflection indicators
@@ -2598,9 +2604,16 @@ class DouEssay:
         has_body = any(marker in text_lower for marker in self.v12_2_rhetorical_structure['body_paragraph_markers'])
         has_conclusion = any(marker in text_lower for marker in self.v12_2_rhetorical_structure['conclusion_markers'])
         
-        # v12.2.0: Enhanced topic sentence detection with NLP patterns
+        # v12.7.0: Enhanced topic sentence detection with broader matching
         topic_sentence_count = sum(1 for indicator in self.v12_2_paragraph_structure['topic_sentence_patterns'] 
                                    if indicator in text_lower)
+        
+        # v12.7.0: Also detect implicit topic sentences (first sentence of each paragraph with thesis keywords)
+        for i, para in enumerate(paragraphs):
+            if i > 0 and len(para.split()) > 10:  # Skip intro, check body paragraphs
+                first_sentence = para.split('.')[0].lower()
+                if any(keyword in first_sentence for keyword in self.thesis_keywords[:15]):
+                    topic_sentence_count += 1
         
         # v12.2.0: Multi-category transition detection
         transition_categories = self.v12_2_paragraph_structure['transition_patterns']
@@ -2916,6 +2929,7 @@ class DouEssay:
         """
         text_lower = text.lower()
         
+        # v12.7.0: Enhanced detection with better partial matching
         conditional_count = sum(1 for indicator in self.v12_2_inference_chains['conditional_claims']
                                if indicator in text_lower)
         hypothetical_count = sum(1 for indicator in self.v12_2_inference_chains['hypothetical_claims']
@@ -2924,6 +2938,10 @@ class DouEssay:
                                   if indicator in text_lower)
         multi_level_count = sum(1 for indicator in self.v12_2_inference_chains['multi_level_inference']
                                if indicator in text_lower)
+        
+        # v12.7.0: Also count analysis indicators as logical reasoning
+        analysis_count = sum(1 for indicator in self.analysis_indicators if indicator in text_lower)
+        multi_level_count += analysis_count // 2  # Every 2 analysis indicators = 1 multi-level inference
         
         # v12.5.0: Counter-argument detection (ScholarMind Core v4.0)
         counter_argument_markers = sum(1 for marker in self.v12_5_counter_argument_detection['counter_argument_markers']
@@ -2996,9 +3014,17 @@ class DouEssay:
         """
         text_lower = text.lower()
         
-        # Count evidence types
-        direct_evidence = sum(1 for indicator in self.v12_2_evidence_types['direct_evidence']
-                             if indicator in text_lower)
+        # v12.7.0: Enhanced evidence detection with partial matching
+        direct_evidence = 0
+        for indicator in self.v12_2_evidence_types['direct_evidence']:
+            if indicator in text_lower:
+                direct_evidence += 1
+        
+        # Also count example indicators as evidence
+        for indicator in self.example_indicators:
+            if indicator in text_lower:
+                direct_evidence += 1
+        
         inferential_evidence = sum(1 for indicator in self.v12_2_evidence_types['inferential_evidence']
                                   if indicator in text_lower)
         contextual_evidence = sum(1 for indicator in self.v12_2_evidence_types['contextual_evidence']
