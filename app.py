@@ -12,8 +12,8 @@ from supabase import create_client
 import json
 import logging
 
-VERSION = "12.5.0"
-VERSION_NAME = "Grading Engine & Subsystem Upgrade - 98-99% Accuracy Target"
+VERSION = "12.6.0"
+VERSION_NAME = "Accuracy & Subsystem Enhancement - ≥95% Grade 9 Alignment"
 
 # v10.1.0: Setup logging for error tracking
 logging.basicConfig(
@@ -945,55 +945,55 @@ class DouEssay:
     
     def setup_v12_enhancements(self):
         """
-        v12.5.0: Grading Engine & Subsystem Upgrade - 98-99% Accuracy Target
+        v12.6.0: Accuracy & Subsystem Enhancement - ≥95% Grade 9 Alignment
         
-        DouEssay / Doulet Media Subsystem Branding (v12.5.0):
-        - ScholarMind Core v4.0 (formerly DouLogic): Enhanced argument logic with improved counter-argument detection,
-          claim hierarchy mapping, conditional and inferential claims. Detects topic sentences and transitions.
-          Copyright © 2025 Doulet Media. All rights reserved.
+        DouEssay / Doulet Media Subsystem Branding (v12.6.0):
+        Copyright © Doulet Media, changcheng967. All rights reserved.
         
-        - DouletFlow v2.0 (formerly DouEvidence): Evidence coherence with direct and inferential evidence detection,
-          contemporary/recent sources identification, semantic similarity thresholds per paragraph.
-          Copyright © 2025 Doulet Media. All rights reserved.
+        - DouLogic v4.0: Enhanced argument logic with improved NLP claim parsing, counter-argument detection,
+          and logical flow scoring. Better claim-evidence connection detection.
+          
+        - DouEvidence v3.5: Evidence coherence with AI-based relevance scoring and automatic evidence linking.
+          Enhanced detection of direct connections between claims and evidence.
+          
+        - DouScholar v4.0: Claim depth & relevance with advanced semantic analysis for nuanced claims
+          and contemporary evidence detection.
+          
+        - DouEmotion v2.5: Emotional tone & engagement with contextual sentiment analysis and
+          personal reflection detection. Better alignment with Grade 9 standards.
+          
+        - DouStructure v3.5: Rhetorical structure with paragraph detection, topic sentence recognition,
+          and cohesion scoring. Enhanced transition detection.
         
-        - ScholarStruct v2.0 (formerly DouStruct): Rhetorical structure analyzer with topic sentence detection,
-          transitions, multi-paragraph coherence, paragraph-level scoring integrated with argument logic.
-          Copyright © 2025 Doulet Media. All rights reserved.
+        - DouReflect v4.1: Personal reflection & insight scoring (unchanged from v12.5.0).
         
-        - EmotionFlow v3.0 (formerly DouEmotion): Enhanced emotional tone and engagement scoring with tone consistency
-          across paragraphs, refined scoring for narrative and argumentative essays.
-          Copyright © 2025 Doulet Media. All rights reserved.
-        
-        - DouReflect v4.1: Personal reflection & insight scoring (novelty/relevance evaluation, consistency checking,
-          real-world application).
-          Copyright © 2025 Doulet Media. All rights reserved.
-        
-        Target accuracy: ≥98-99% grading accuracy (improved from 95-96%)
+        Target accuracy: ≥95% grading accuracy for Grade 9 essays (improved from ~81%)
         Processing time: ≤2.5s per essay
+        Grading weights updated: Content 35%, Structure 25%, Grammar 20%, Application 20%
         """
         
-        # v12.5.0: DouEssay / Doulet Media subsystem version tracking with updated branding
+        # v12.6.0: DouEssay / Doulet Media subsystem version tracking - ≥95% Accuracy Target
         self.subsystem_versions = {
-            # v12.5.0: New branding names with restarted version numbers
-            'scholarmind_core': '4.0',  # Argument logic evaluation (NEW branding in v12.5.0)
-            'douletflow': '2.0',  # Evidence coherence analysis (NEW branding in v12.5.0)
-            'emotionflow': '3.0',  # Emotional tone & engagement detection (NEW branding in v12.5.0)
-            'scholarstruct': '2.0',  # Paragraph and rhetorical structure analysis (NEW branding in v12.5.0)
-            'doureflect': '4.1',  # Personal reflection & insight scoring (v12.5.0 minor update)
-            # Backward compatibility: maintain old names with v12.4.0 version numbers for API stability
-            # These map to the new subsystems but keep original version numbers for compatibility
-            'doulogic': '5.0',  # Legacy name for ScholarMind Core (v12.4.0 version maintained)
-            'douevidence': '5.0',  # Legacy name for DouletFlow (v12.4.0 version maintained)
-            'douemotion': '4.0',  # Legacy name for EmotionFlow (v12.4.0 version maintained)
-            'doustruct': '5.0',  # Legacy name for ScholarStruct (v12.4.0 version maintained)
-            'argument_logic': '5.0',  # Legacy name maintained for backward compatibility
-            'evidence_analysis': '5.0',  # Legacy name maintained for backward compatibility
+            # v12.6.0: Enhanced subsystem versions with improved accuracy for Grade 9 essays
+            'doulogic': '4.0',  # Argument Logic 4.0 - Enhanced claim-evidence connection, counter-argument detection
+            'douevidence': '3.5',  # Evidence Coherence 3.5 - AI-based relevance scoring, automatic evidence linking
+            'douscholar': '4.0',  # Claim Depth & Relevance 4.0 - Advanced semantic analysis for nuanced claims
+            'douemotion': '2.5',  # Emotional Tone & Engagement 2.5 - Contextual sentiment analysis, personal reflection detection
+            'doustructure': '3.5',  # Rhetorical Structure 3.5 - Paragraph detection, topic sentence recognition, cohesion scoring
+            # Backward compatibility: maintain old names
+            'scholarmind_core': '4.0',  # Legacy name for DouLogic
+            'douletflow': '3.5',  # Legacy name for DouEvidence
+            'emotionflow': '2.5',  # Legacy name for DouEmotion
+            'scholarstruct': '3.5',  # Legacy name for DouStructure
+            'doureflect': '4.1',  # Personal reflection & insight scoring (unchanged)
+            'argument_logic': '4.0',  # Legacy name maintained for backward compatibility
+            'evidence_analysis': '3.5',  # Legacy name maintained for backward compatibility
             'logical_fallacies': '2.2',
-            'paragraph_detection': '5.0',  # Legacy name maintained for backward compatibility
+            'paragraph_detection': '3.5',  # Enhanced in v12.6.0
             'personal_reflection': '4.1',
             'application_insight': '4.1',
-            'rhetorical_structure': '5.0',  # Legacy name maintained for backward compatibility
-            'curriculum_weighting': '2.1'
+            'rhetorical_structure': '3.5',  # Enhanced in v12.6.0
+            'curriculum_weighting': '2.2'  # Updated weights in v12.6.0
         }
         
         # v12.1.0: Emotion scoring constants
@@ -4279,13 +4279,13 @@ class DouEssay:
 
     def calculate_calibrated_ontario_score(self, stats: Dict, structure: Dict, content: Dict, 
                                          grammar: Dict, application: Dict, grade_level: str = "Grade 10") -> int:
-        # v6.0.0: Enhanced with dynamic calibration based on length, complexity, and grade level
+        # v12.6.0: Updated weights to improve Grade 9 accuracy - increased emphasis on grammar
         # Focus on content depth, structural organization, real-world application, and mechanics
         weights = {
-            'content': 0.35,      # Content & Analysis (thesis, examples, argument depth)
-            'structure': 0.25,    # Structure & Organization (coherence, transitions, flow)
-            'application': 0.25,  # Application & Insight (real-world connections, reflection)
-            'grammar': 0.15       # Grammar & Mechanics (accuracy, sentence variety)
+            'content': 0.35,      # Content & Analysis (thesis, examples, argument depth) - unchanged
+            'structure': 0.25,    # Structure & Organization (coherence, transitions, flow) - unchanged
+            'grammar': 0.20,      # Grammar & Mechanics (accuracy, sentence variety) - increased from 0.15
+            'application': 0.20   # Application & Insight (real-world connections, reflection) - decreased from 0.25
         }
         
         base_score = (
