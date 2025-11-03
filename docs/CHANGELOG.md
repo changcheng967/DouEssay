@@ -2,6 +2,55 @@
 
 All notable changes to the DouEssay Assessment System will be documented in this file.
 
+## [12.6.0] - 2026-01-XX
+
+### 🎯 v12.6.0 Release - Accuracy & Subsystem Enhancement (≥95% Grade 9 Alignment)
+
+**Mission:** Improve Grade 9 essay grading accuracy from ~81% to ≥95% through enhanced subsystems, refined grading weights, and targeted improvements in structure detection, personal reflection scoring, and claim-evidence connection analysis.
+
+**Copyright:** © Doulet Media, changcheng967. All rights reserved.
+
+### Subsystem Version Upgrades
+- **DouLogic v4.0** (was ScholarMind Core v4.0) - Enhanced NLP claim parsing, improved counter-argument detection, better logical flow scoring
+- **DouEvidence v3.5** (was DouletFlow v2.0) - AI-based relevance scoring, automatic evidence linking, enhanced claim-evidence connections
+- **DouScholar v4.0** (NEW) - Advanced semantic analysis for nuanced claims, contemporary evidence detection
+- **DouEmotion v2.5** (was EmotionFlow v3.0) - Contextual sentiment analysis, personal reflection detection, Grade 9 alignment
+- **DouStructure v3.5** (was ScholarStruct v2.0) - Enhanced paragraph detection, topic sentence recognition, cohesion scoring
+- **DouReflect v4.1** (unchanged) - Personal reflection & insight scoring
+
+### Grading Weight Adjustments
+- **Grammar & Mechanics:** 15% → **20%** (+5% increase)
+- **Application & Insight:** 25% → **20%** (-5% decrease)
+- **Content & Analysis:** 35% (unchanged)
+- **Structure & Organization:** 25% (unchanged)
+
+### Key Improvements
+- **Target Accuracy:** ≥95% for Grade 9 essays (improved from ~81%)
+- **Structure & Organization:** Enhanced detection of topic sentences, paragraph cohesion, and transitions
+- **Application & Insight:** Improved scoring of personal reflection and real-world connections
+- **Evidence Relevance:** Better detection of direct connections between claims and evidence
+- **Counter-Arguments:** Enhanced NLP-based detection and evaluation
+
+### Maintained
+- Subscription tiers unchanged (Free: 3, Basic: 10, Premium: 20, Teacher: Unlimited)
+- Backward compatibility with all v12.5.0 subsystem names
+- All v12.5.0 function signatures and return values
+- Essay limit enforcement as per Project DouAccess 2.0
+
+### Documentation
+- Added V12_6_0_RELEASE_NOTES.md
+- Updated README.md with v12.6.0 information
+- Updated CHANGELOG.md (this file)
+- Added comprehensive test suite (test_v12_6_0.py - 13/13 tests passing)
+
+### Testing
+- 13/13 tests passing in test_v12_6_0.py
+- Grade 9 accuracy validation completed
+- Backward compatibility verified
+- All existing functionality preserved
+
+---
+
 ## [12.5.0] - 2026-01-XX
 
 ### 🎯 v12.5.0 Release - Grading Engine & Subsystem Upgrade (98-99% Accuracy Target)

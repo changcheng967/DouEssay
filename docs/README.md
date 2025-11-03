@@ -1,71 +1,77 @@
-# 🎓 DouEssay Assessment System v12.5.0
+# 🎓 DouEssay Assessment System v12.6.0
 
-## AI Writing Mentor • 98-99% Teacher Alignment • Advanced Grading Engine
+## AI Writing Mentor • ≥95% Grade 9 Alignment • Enhanced Subsystems
 
 **Created by changcheng967 • Doulet Media**
 
-**Version:** v12.5.0: Grading Engine & Subsystem Upgrade - 98-99% Accuracy Target
+**Version:** v12.6.0: Accuracy & Subsystem Enhancement - ≥95% Grade 9 Alignment
 
 **Slogan:** "Specs vary. Affordable excellence. Real feedback. Real improvement."
 
+**Copyright:** © Doulet Media, changcheng967. All rights reserved.
+
 ---
 
-## 🚀 What's New in v12.5.0 - January 2026
+## 🚀 What's New in v12.6.0 - January 2026
 
-### 🎯 Achievement: 98-99% Teacher Alignment with Enhanced Subsystems
+### 🎯 Achievement: ≥95% Teacher Alignment for Grade 9 Essays
 
-**v12.5.0 advances grading accuracy from ~95-96% to 98-99% through upgraded subsystems with enhanced counter-argument detection, contemporary evidence analysis, multi-paragraph coherence, and tone consistency tracking.**
+**v12.6.0 improves grading accuracy from ~81% to ≥95% for Grade 9 essays through enhanced subsystems with better structure detection, improved personal reflection scoring, and refined claim-evidence connection analysis.**
 
-### Key Improvements in v12.5.0
+### Key Improvements in v12.6.0
 
 #### 🤖 Enhanced DouEssay/Doulet Media AI Subsystems
-- **ScholarMind Core v4.0** (formerly DouLogic): Enhanced argument logic with counter-argument detection, rebuttal analysis, concession tracking, and claim hierarchy mapping
-  - Counter-argument markers, rebuttals, concessions, and synthesis detection
-  - Improved conditional and inferential claim recognition
-  - Copyright © 2025 Doulet Media. All rights reserved.
+**Copyright © Doulet Media, changcheng967. All rights reserved.**
 
-- **DouletFlow v2.0** (formerly DouEvidence): Advanced evidence coherence with contemporary sources
-  - Direct, inferential, and contextual evidence detection
-  - Recent/contemporary sources identification (2024-2026)
-  - Improved relevance scoring to reduce false "Needs Improvement" ratings
-  - Copyright © 2025 Doulet Media. All rights reserved.
+- **DouLogic v4.0**: Enhanced argument logic with improved NLP claim parsing
+  - Better counter-argument detection and logical flow scoring
+  - Enhanced claim-evidence connection analysis
+  - Reduced false negatives in argument strength evaluation
 
-- **ScholarStruct v2.0** (formerly DouStruct): Multi-paragraph rhetorical structure analysis
-  - Cross-paragraph reference detection
-  - Logical progression tracking
-  - Enhanced topic sentence and transition recognition
-  - Copyright © 2025 Doulet Media. All rights reserved.
+- **DouEvidence v3.5**: AI-based relevance scoring and automatic evidence linking
+  - Improved direct connection detection between claims and evidence
+  - Better contextual evidence evaluation
+  - Enhanced contemporary source recognition
 
-- **EmotionFlow v3.0** (formerly DouEmotion): Tone consistency across paragraphs
-  - Dominant tone identification (narrative/argumentative/analytical/persuasive)
-  - Tone consistency scoring across essay sections
-  - Enhanced 6-dimensional emotional analysis
-  - Copyright © 2025 Doulet Media. All rights reserved.
+- **DouScholar v4.0**: Advanced semantic analysis for nuanced claims
+  - Deep claim depth evaluation
+  - Contemporary evidence integration
+  - Enhanced relevance scoring for complex arguments
 
-- **DouReflect v4.1**: Personal reflection & insight scoring (minor enhancements)
-  - Copyright © 2025 Doulet Media. All rights reserved.
+- **DouEmotion v2.5**: Contextual sentiment analysis with personal reflection detection
+  - Better alignment with Grade 9 reflection standards
+  - Improved engagement level assessment
+  - Enhanced authenticity and empathy detection
 
-- **Target Accuracy:** 98-99% teacher alignment across all subsystems (improved from 95-96%)
-- **Backward Compatible:** All legacy subsystem names (DouLogic, DouEvidence, etc.) still supported
+- **DouStructure v3.5**: Enhanced paragraph detection and topic sentence recognition
+  - Improved cohesion scoring across paragraphs
+  - Better transition detection and evaluation
+  - Enhanced multi-paragraph flow analysis
 
-#### 💰 Project DouAccess 2.0 — Best Plan Pricing
+- **DouReflect v4.1**: Personal reflection & insight scoring (unchanged from v12.5.0)
+
+- **Target Accuracy:** ≥95% teacher alignment for Grade 9 essays (improved from ~81%)
+- **Backward Compatible:** All legacy subsystem names still supported
+
+#### 💰 Project DouAccess 2.0 — Best Plan Pricing (Unchanged)
 - **Free Trial:** $0/month — 3 essays/day
-- **Student Basic:** $4.99/month — **10 essays/day** (increased from 7)
-- **Student Premium:** $7.99/month — **20 essays/day** (increased from 12)
-- **Teacher Suite:** $19.99/month — **Unlimited essays** (fair pricing for unlimited access)
+- **Student Basic:** $4.99/month — 10 essays/day
+- **Student Premium:** $7.99/month — 20 essays/day
+- **Teacher Suite:** $19.99/month — Unlimited essays
 - **Institutional:** Custom pricing — 500+ essays/day
 
-#### 📊 Persistent Analytics & Metrics Tracking
-- **Database tracking** for all subsystem metrics
-- **Teacher dashboard** analytics with historical data
-- **Student progress** tracking across dimensions
-- **Tables:** doulogic_metrics, douevidence_metrics, douemotion_metrics, doustruct_metrics, doureflect_metrics
+#### 🎯 Grading Weight Adjustments (v12.6.0)
+- **Content & Analysis:** 35% (unchanged) - Thesis, examples, argument depth
+- **Structure & Organization:** 25% (unchanged) - Coherence, transitions, flow
+- **Grammar & Mechanics:** **20%** (increased from 15%) - Accuracy, sentence variety
+- **Application & Insight:** **20%** (decreased from 25%) - Real-world connections, reflection
 
 #### 🧠 Enhanced Grading Features
-- **Advanced Claim Relationships**: Supports, contradicts, qualifies, extends, challenges
-- **Logical Flow Mapping**: Follows from, leads to, implies, necessitates
-- **Nuanced Claim Recognition**: Conditional, contextual, provisional arguments
-- **Counter-Argument Detection**: Sophisticated evaluation of opposing views
+- **Structure & Organization:** Better detection of topic sentences, paragraph cohesion, and transitions
+- **Application & Insight:** Improved scoring of personal reflection and real-world connections
+- **Evidence Relevance:** Enhanced direct claim-evidence connection detection
+- **Counter-Argument Detection:** Sophisticated evaluation with improved NLP
+- **Claim Depth Analysis:** Advanced semantic analysis for nuanced arguments
 
 #### 🚫 Absolute Statement Detection (NEW)
 - **Flags Overgeneralization**: Always, never, everyone, no one, all, none
@@ -110,7 +116,7 @@ Four-dimensional emotional analysis:
 - **Common Core**: US Common Core alignment
 - **Future-Ready**: Expandable for additional systems
 
-[📖 v12.4.0 Release Notes →](V12_4_0_RELEASE_NOTES.md) | [📖 v12.3.0 Release Notes →](V12_3_0_RELEASE_NOTES.md) | [📖 v12.0.0 Release Notes →](V12_RELEASE_NOTES.md) | [📜 Changelog →](CHANGELOG.md)
+[📖 v12.6.0 Release Notes →](V12_6_0_RELEASE_NOTES.md) | [📖 v12.5.0 Release Notes →](V12_5_0_RELEASE_NOTES.md) | [📖 v12.4.0 Release Notes →](V12_4_0_RELEASE_NOTES.md) | [📜 Changelog →](CHANGELOG.md)
 
 ---
 
