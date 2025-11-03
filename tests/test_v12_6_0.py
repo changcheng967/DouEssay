@@ -64,22 +64,27 @@ def test_grading_weights_updated():
     """Test that grading weights are updated as per v12.6.0 requirements"""
     grader = DouEssay()
     
-    # Create dummy data for weight testing
+    # Create dummy data for weight testing - high grammar score to test increased weight
     stats = {'word_count': 350}
-    structure = {'score': 8.5, 'has_introduction': True}
+    structure = {'score': 8.0, 'has_introduction': True}
     content = {'score': 8.0, 'has_thesis': True, 'argument_strength': {'has_clear_position': True, 'unsupported_claims': 0}}
-    grammar = {'score': 8.0}
+    grammar_high = {'score': 10.0}  # High grammar score
+    grammar_low = {'score': 6.0}    # Low grammar score
     application = {'score': 7.5}
     
-    # Calculate score
-    score = grader.calculate_calibrated_ontario_score(stats, structure, content, grammar, application, "Grade 9")
+    # Calculate scores with different grammar values
+    score_high_grammar = grader.calculate_calibrated_ontario_score(stats, structure, content, grammar_high, application, "Grade 9")
+    score_low_grammar = grader.calculate_calibrated_ontario_score(stats, structure, content, grammar_low, application, "Grade 9")
     
-    # Verify score is reasonable (should be between 65-98)
-    assert 65 <= score <= 98, f"Score should be between 65-98, got {score}"
+    # Verify scores are reasonable (should be between 65-98)
+    assert 65 <= score_high_grammar <= 98, f"Score should be between 65-98, got {score_high_grammar}"
+    assert 65 <= score_low_grammar <= 98, f"Score should be between 65-98, got {score_low_grammar}"
     
-    # Note: The actual weights verification would require inspecting the calculation,
-    # but we can verify that the function runs without errors with the new weights
-    print(f"✅ Grading weights applied successfully, sample score: {score}/100")
+    # With increased grammar weight (20% vs 15%), high grammar should show measurable impact
+    grammar_impact = score_high_grammar - score_low_grammar
+    assert grammar_impact >= 5, f"Grammar weight increase should show impact ≥5 points, got {grammar_impact}"
+    
+    print(f"✅ Grading weights applied successfully: high grammar={score_high_grammar}, low grammar={score_low_grammar}, impact={grammar_impact} points")
 
 def test_essay_limits_enforcement():
     """Test that essay limits are correctly set for all tiers"""
@@ -246,17 +251,23 @@ def test_grade_9_accuracy_target():
     print(f"✅ Grade 9 accuracy target validated: Score {score}/100, Level {level}")
 
 def test_counter_argument_detection():
-    """Test enhanced counter-argument detection from DouLogic 4.0"""
+    """Test enhanced counter-argument detection from DouLogic 4.0
+    
+    Note: Essay is converted to lowercase for analysis as the analyze_inference_chains_v12_2
+    method is designed to work with normalized text. While capitalization can be important
+    for proper nouns, the counter-argument markers themselves ('however', 'although', etc.)
+    are case-insensitive and detected correctly in lowercase.
+    """
     grader = DouEssay()
     
-    # Essay with counter-arguments
+    # Essay with counter-arguments (will be lowercased for analysis)
     essay = """
     Technology benefits education. However, critics argue that it creates distractions in classrooms.
     Although this concern is valid, the benefits outweigh the drawbacks. Some may say that traditional
     methods are better, but research shows otherwise. Despite these criticisms, evidence supports technology use.
     """
     
-    # Analyze the essay
+    # Analyze the essay (lowercased as expected by the method)
     result = grader.analyze_inference_chains_v12_2(essay.lower())
     
     # Check for counter-argument detection

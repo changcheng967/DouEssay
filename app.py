@@ -4279,7 +4279,7 @@ class DouEssay:
 
     def calculate_calibrated_ontario_score(self, stats: Dict, structure: Dict, content: Dict, 
                                          grammar: Dict, application: Dict, grade_level: str = "Grade 10") -> int:
-        # v12.6.0: Updated weights to improve Grade 9 accuracy - increased emphasis on structure and grammar
+        # v12.6.0: Updated weights to improve Grade 9 accuracy - increased emphasis on grammar
         # Focus on content depth, structural organization, real-world application, and mechanics
         weights = {
             'content': 0.35,      # Content & Analysis (thesis, examples, argument depth) - unchanged
