@@ -1572,7 +1572,6 @@ class DouEssay:
                            text_lower.count('such as') + text_lower.count('specifically')
         
         # v12.9.0: Detect numbers/statistics (implicit evidence)
-        import re
         numbers_found = len(re.findall(r'\d+%|\d+\.\d+%|\d+ percent', text_lower))
         
         # v12.9.0: Ultra-precision scoring for ≥99% accuracy (Doulet DepthCore 3.1)
@@ -1677,9 +1676,12 @@ class DouEssay:
         paragraphs = text.split('\n\n')
         has_good_structure = len(paragraphs) >= 3
         
-        # v12.9.0: Detect implicit logical connections (even without explicit transitions)
-        logical_connections = text_lower.count('.') + text_lower.count('?')  # Sentence boundaries
-        implicit_flow_bonus = min(0.4, logical_connections / 50)  # Reward coherent flow
+        # v12.9.0: Detect implicit logical connections through conjunction usage
+        # More sophisticated than punctuation count - looks for logical connectors
+        conjunction_markers = ['and', 'but', 'or', 'so', 'yet', 'nor', 'while', 'since', 
+                              'because', 'although', 'though', 'unless', 'until', 'whereas']
+        conjunction_count = sum(1 for marker in conjunction_markers if f' {marker} ' in text_lower)
+        implicit_flow_bonus = min(0.4, conjunction_count / 15)  # Reward logical connections
         
         # v12.9.0: Ultra-precision scoring for ≥99% accuracy (Doulet Nexus 4.1)
         # Enhanced weights to fix logical flow false negatives (target ≥85%)
@@ -2772,7 +2774,15 @@ class DouEssay:
         # v12.9.0: Enhanced implicit topic sentence detection in body paragraphs
         for i, para in enumerate(paragraphs):
             if i > 0 and len(para.split()) > 10:  # Skip intro, check body paragraphs
-                first_two_sentences = '.'.join(para.split('.')[:2]).lower()
+                # Safety check: ensure paragraph has sentences
+                sentences_in_para = para.split('.')
+                if len(sentences_in_para) >= 2:
+                    first_two_sentences = '.'.join(sentences_in_para[:2]).lower()
+                elif len(sentences_in_para) == 1:
+                    first_two_sentences = sentences_in_para[0].lower()
+                else:
+                    continue  # Skip empty or malformed paragraphs
+                
                 # Check for thesis keywords OR strong topic indicators
                 has_topic_markers = any(keyword in first_two_sentences for keyword in self.thesis_keywords[:15])
                 has_claim_markers = any(marker in first_two_sentences for marker in 
@@ -2782,8 +2792,14 @@ class DouEssay:
                 if has_topic_markers or has_claim_markers:
                     topic_sentence_count += 1
         
-        # v12.9.0: Detect missing topic sentences (body paragraphs without clear topic sentences)
-        missing_topic_sentences = max(0, (paragraph_count - 2) - topic_sentence_count)  # -2 for intro/conclusion
+        # v12.9.0: Detect missing topic sentences (more accurate calculation)
+        # Estimate body paragraphs: total - intro (if detected) - conclusion (if detected)
+        estimated_body_paragraphs = paragraph_count
+        if has_intro:
+            estimated_body_paragraphs -= 1
+        if has_conclusion:
+            estimated_body_paragraphs -= 1
+        missing_topic_sentences = max(0, estimated_body_paragraphs - topic_sentence_count)
         
         # v12.2.0: Multi-category transition detection
         transition_categories = self.v12_2_paragraph_structure['transition_patterns']
