@@ -1572,7 +1572,9 @@ class DouEssay:
                            text_lower.count('such as') + text_lower.count('specifically')
         
         # v12.9.0: Detect numbers/statistics (implicit evidence)
-        numbers_found = len(re.findall(r'\d+%|\d+\.\d+%|\d+ percent', text_lower))
+        # Pattern is safe: uses non-capturing groups (?:...) and optional quantifiers (?:\.\d+)?
+        # No nested quantifiers, so no catastrophic backtracking possible
+        numbers_found = len(re.findall(r'(?:\d+(?:\.\d+)?%|\d+ percent)', text_lower))
         
         # v12.9.0: Ultra-precision scoring for ≥99% accuracy (Doulet DepthCore 3.1)
         # Enhanced weights for sophisticated claim depth analysis
