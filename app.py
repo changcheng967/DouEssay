@@ -1033,7 +1033,7 @@ class DouEssay:
                 'name': 'Doulet Nexus',
                 'version': '4.1',
                 'full_name': 'Advanced Logical Flow & Topic Sentence Detection 4.1',
-                'description': 'Ultra-precise semantic flow mapping with enhanced topic sentence identification, implicit logical connection detection, and advanced coherence analysis',
+                'description': 'Ultra-precise logical flow mapping with enhanced topic sentence identification, implicit logical connection detection, and advanced coherence analysis',
                 'copyright': '© Doulet Media 2025',
                 'features': ['Enhanced topic sentence detection', 'Implicit logical flow recognition', 'Cross-paragraph coherence', 'Real-time relevance eval', 'Evidence strength weighting', 'Semantic flow analysis']
             },
@@ -1049,7 +1049,7 @@ class DouEssay:
                 'name': 'Doulet Empathica',
                 'version': '2.1',
                 'full_name': 'Enhanced Personal Insight & Reflection Detection 2.1',
-                'description': 'Ultra-precise emotion and engagement AI with enhanced personal reflection detection, real-world connection recognition, and advanced sentiment analysis',
+                'description': 'Ultra-precise emotion and engagement AI with enhanced personal insight and reflection detection, real-world connection recognition, and advanced sentiment analysis',
                 'copyright': '© Doulet Media 2025',
                 'features': ['Enhanced reflection detection', 'Real-world connection scoring', 'Personal insight analysis', 'Multi-dimensional empathy', 'Application & insight scoring', 'Sentiment flow mapping']
             },
@@ -2772,12 +2772,13 @@ class DouEssay:
         # v12.9.0: Enhanced implicit topic sentence detection in body paragraphs
         for i, para in enumerate(paragraphs):
             if i > 0 and len(para.split()) > 10:  # Skip intro, check body paragraphs
-                first_sentence = para.split('.')[0].lower()
+                first_two_sentences = '.'.join(para.split('.')[:2]).lower()
                 # Check for thesis keywords OR strong topic indicators
-                has_topic_markers = any(keyword in first_sentence for keyword in self.thesis_keywords[:15])
-                has_claim_markers = any(marker in first_sentence for marker in 
+                has_topic_markers = any(keyword in first_two_sentences for keyword in self.thesis_keywords[:15])
+                has_claim_markers = any(marker in first_two_sentences for marker in 
                                        ['first', 'second', 'third', 'moreover', 'furthermore',
-                                        'additionally', 'another', 'one', 'primary', 'key'])
+                                        'additionally', 'another', 'one', 'primary', 'key',
+                                        'finally', 'lastly', 'also', 'next', 'main'])
                 if has_topic_markers or has_claim_markers:
                     topic_sentence_count += 1
         
