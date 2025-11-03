@@ -111,10 +111,11 @@ def test_grade_9_level_4_essay():
     assert result['rubric_level']['level'] in ['Level 4', 'Level 4+'], \
         f"Expected Level 4 or 4+, got {result['rubric_level']['level']}"
     
-    # Test claim-evidence ratio (target ≥2.0)
+    # Test claim-evidence ratio (target ≥2.0, but accept ≥1.5 for passing grade)
     ce_ratio = result['claim_evidence_ratio']
+    # Note: Grade 9 essays may achieve Level 4 with ratio ≥1.5, optimal is ≥2.0
     assert ce_ratio['ratio'] >= 1.5, \
-        f"Expected claim-evidence ratio ≥1.5, got {ce_ratio['ratio']}"
+        f"Expected claim-evidence ratio ≥1.5 for passing, got {ce_ratio['ratio']}"
     
     print(f"✅ Grade 9 Level 4+ essay test passed")
     print(f"   Score: {result['score']}/100")

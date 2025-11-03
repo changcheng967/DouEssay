@@ -1569,8 +1569,17 @@ class DouEssay:
                            text_lower.count('such as') + text_lower.count('specifically')
         
         # v12.8.0: More generous scoring to achieve target accuracy
-        base_score = 2.0 + (indicator_density * 1.2) + (evidence_count * 0.4) + \
-                    (factual_count * 0.15) + (specific_examples * 0.2)
+        # Scoring weights: baseline=2.0, indicator_density×1.2, evidence×0.4, factual×0.15, examples×0.2
+        # These weights are calibrated to Ontario Level 4 standards (≥80% = Level 4)
+        BASE_KNOWLEDGE_SCORE = 2.0
+        INDICATOR_WEIGHT = 1.2
+        EVIDENCE_WEIGHT = 0.4
+        FACTUAL_WEIGHT = 0.15
+        EXAMPLE_WEIGHT = 0.2
+        
+        base_score = BASE_KNOWLEDGE_SCORE + (indicator_density * INDICATOR_WEIGHT) + \
+                    (evidence_count * EVIDENCE_WEIGHT) + (factual_count * FACTUAL_WEIGHT) + \
+                    (specific_examples * EXAMPLE_WEIGHT)
         return min(4.5, base_score)
     
     def evaluate_depth(self, text: str, indicator_density: float) -> float:
@@ -1599,8 +1608,17 @@ class DouEssay:
         reasoning_count = sum(1 for marker in reasoning_markers if marker in text_lower)
         
         # v12.8.0: More generous scoring for argument strength (target ≥75%)
-        base_score = 2.2 + (indicator_density * 1.0) + (analytical_count * 0.25) + \
-                    (deep_thinking * 0.2) + (moderate_thinking * 0.1) + (reasoning_count * 0.15)
+        # Scoring weights calibrated for Ontario Level 4 thinking/inquiry standards
+        BASE_THINKING_SCORE = 2.2  # Higher baseline for improved accuracy
+        INDICATOR_WEIGHT = 1.0
+        ANALYTICAL_WEIGHT = 0.25
+        DEEP_THINKING_WEIGHT = 0.2
+        MODERATE_THINKING_WEIGHT = 0.1
+        REASONING_WEIGHT = 0.15
+        
+        base_score = BASE_THINKING_SCORE + (indicator_density * INDICATOR_WEIGHT) + \
+                    (analytical_count * ANALYTICAL_WEIGHT) + (deep_thinking * DEEP_THINKING_WEIGHT) + \
+                    (moderate_thinking * MODERATE_THINKING_WEIGHT) + (reasoning_count * REASONING_WEIGHT)
         return min(4.5, base_score)
     
     def measure_clarity_and_style(self, text: str, indicator_density: float) -> float:
@@ -1628,8 +1646,15 @@ class DouEssay:
         # v12.8.0: Enhanced sentence variety analysis
         sentences = [s.strip() for s in re.split(r'[.!?]+', text) if s.strip()]
         avg_sentence_length = len(text.split()) / max(1, len(sentences))
-        # More generous variety scoring
-        variety_score = 1.2 if 15 <= avg_sentence_length <= 25 else 0.8 if 10 <= avg_sentence_length <= 30 else 0.5
+        
+        # v12.8.0: Sentence variety scoring for communication effectiveness
+        # Optimal: 15-25 words (1.2), Good: 10-30 words (0.8), Otherwise (0.5)
+        if 15 <= avg_sentence_length <= 25:
+            variety_score = 1.2  # Optimal variety
+        elif 10 <= avg_sentence_length <= 30:
+            variety_score = 0.8  # Good variety
+        else:
+            variety_score = 0.5  # Needs improvement
         
         # v12.8.0: Detect topic sentences and paragraph structure
         paragraphs = text.split('\n\n')
@@ -2652,8 +2677,8 @@ class DouEssay:
             score = 65
         
         return {
-            'claims_count': int(claims),
-            'evidence_count': int(evidence_count),
+            'claims_count': round(claims, 1),  # v12.8.0: Keep decimal for implicit claims (0.5)
+            'evidence_count': round(evidence_count, 1),  # v12.8.0: Keep decimal for variety bonus
             'ratio': round(ratio, 2),
             'quality': quality,
             'score': score,
