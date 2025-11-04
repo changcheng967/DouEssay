@@ -1892,7 +1892,9 @@ class DouEssay:
             motivation_impact = 'Low'
         
         # v13.0.1: Authenticity score (measures genuine voice vs. formulaic writing)
-        personal_pronouns = sum(1 for word in ['i', 'my', 'me', 'we', 'our', 'us'] if word in words)
+        # Use word boundary matching to avoid partial word matches
+        personal_pronouns = sum(1 for pronoun in ['i', 'my', 'me', 'we', 'our', 'us'] 
+                               if re.search(rf'\b{pronoun}\b', text_lower))
         personal_anecdotes = sum(1 for phrase in ['my experience', 'i learned', 'i discovered',
                                                   'i realized', 'this taught me'] if phrase in text_lower)
         authenticity_score = min(1.0, (personal_pronouns / max(1, word_count / 50)) + (personal_anecdotes * 0.2))

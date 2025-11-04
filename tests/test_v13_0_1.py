@@ -285,7 +285,8 @@ def test_notification_placement():
 def test_inline_suggestions_enhanced():
     """Test that inline suggestions have enhanced styling"""
     # This is a code inspection test for dark mode improvements
-    with open('app.py', 'r') as f:
+    app_path = os.path.join(os.path.dirname(__file__), '..', 'app.py')
+    with open(app_path, 'r') as f:
         content = f.read()
     
     # Check for enhanced styling attributes
