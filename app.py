@@ -1068,6 +1068,11 @@ class DouEssay:
         self.EMOTION_WORD_COUNT_DIVISOR = 100
         self.EMOTION_SCORE_FLOOR = 10  # Minimum realistic emotion score
         
+        # v13.1.0: Evidence relevance and AI reasoning constants
+        self.WORD_DENSITY_DIVISOR = 200.0  # For evidence relevance scoring
+        self.MAX_AI_REASONING_BONUS = 0.1  # Maximum AI reasoning bonus for counter-arguments
+        self.AI_REASONING_MULTIPLIER = 0.10  # Multiplier for AI reasoning calculation
+        
         # v12.1.0: Personal Reflection scoring constants
         self.REFLECTION_DEEP_MULTIPLIER = 10
         self.REFLECTION_DEEP_MAX = 40
@@ -4324,7 +4329,7 @@ class DouEssay:
         
         # v13.1.0: Fixed multi-factor scoring with improved word density normalization
         # Use a more lenient density factor to avoid over-penalizing longer essays
-        word_density_factor = max(1.0, word_count / 200.0)  # Changed from 100 to 200
+        word_density_factor = max(1.0, word_count / self.WORD_DENSITY_DIVISOR)
         
         # v13.1.0: Calculate weighted relevance with improved density adjustment
         # Each indicator counts toward the score with appropriate weighting
@@ -5648,7 +5653,7 @@ class DouEssay:
         ai_reasoning_bonus = 0.0
         if ai_reasoning_scores:
             avg_reasoning = sum(ai_reasoning_scores) / len(ai_reasoning_scores)
-            ai_reasoning_bonus = min(0.1, avg_reasoning * 0.10)
+            ai_reasoning_bonus = min(self.MAX_AI_REASONING_BONUS, avg_reasoning * self.AI_REASONING_MULTIPLIER)
         
         depth_score = min(1.0, base_score + paragraph_bonus + ai_reasoning_bonus)
         

@@ -141,7 +141,9 @@ def test_enhanced_counter_argument_with_ai_reasoning():
     assert 'ai_reasoning_bonus' in result, "Expected ai_reasoning_bonus in result"
     assert 'ai_insight' in result, "Expected ai_insight in result"
     
-    print(f"✅ Enhanced counter-argument with AI reasoning test passed: {result['counter_arguments_detected']} counter-args, {result['rebuttals_detected']} rebuttals, AI bonus: {result['ai_reasoning_bonus']}")
+    print(f"✅ Enhanced counter-argument with AI reasoning test passed: "
+          f"{result['counter_arguments_detected']} counter-args, "
+          f"{result['rebuttals_detected']} rebuttals, AI bonus: {result['ai_reasoning_bonus']}")
 
 
 def test_improved_logical_flow():
