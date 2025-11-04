@@ -130,7 +130,8 @@ def test_grade_level_consistency():
     
     # Grade 10 should score same or higher than Grade 9 (expectations increase with grade)
     # Allow small variance due to minor differences in rubric application
-    assert score_9 <= score_10 + 2, \
+    GRADE_CONSISTENCY_TOLERANCE = 2  # Maximum acceptable difference in favor of lower grade
+    assert score_9 <= score_10 + GRADE_CONSISTENCY_TOLERANCE, \
         f"Grade 9 score ({score_9}) should not be significantly higher than Grade 10 ({score_10})"
     
     print(f"✅ Grade level consistency test passed")

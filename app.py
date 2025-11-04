@@ -6247,8 +6247,26 @@ def create_douessay_interface():
         )
         
         # v13.0.0: Fixed Clear button to also reset essay input
+        # Define clear values for better maintainability
+        CLEAR_TEXT = ""
+        CLEAR_NUMBER = 0
+        
+        def clear_all_fields():
+            """Clear all input and output fields"""
+            return (
+                CLEAR_TEXT,  # essay_input
+                CLEAR_TEXT,  # assessment_output
+                CLEAR_TEXT,  # annotated_output
+                CLEAR_TEXT,  # score_breakdown_output
+                CLEAR_TEXT,  # vocab_output
+                CLEAR_TEXT,  # draft_history_output
+                CLEAR_TEXT,  # corrected_output
+                CLEAR_NUMBER,  # score_display
+                CLEAR_TEXT,  # level_display
+            )
+        
         clear_btn.click(
-            lambda: ("", "", "", "", "", "", "", 0, ""),
+            clear_all_fields,
             outputs=[
                 essay_input,
                 assessment_output,
