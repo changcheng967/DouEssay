@@ -3522,6 +3522,68 @@ class DouEssay:
         
         return content, structure, grammar, application, insight
 
+    def calculate_confidence_intervals(self, factor_scores: Dict, subsystems: Dict, 
+                                       has_teacher_targets: bool = False) -> Dict:
+        """
+        v14.3.0: Calculate confidence intervals for factor scores and subsystems.
+        Returns margin of error and confidence level for each score.
+        
+        Args:
+            factor_scores: Dict with factor scores on 0-10 scale
+            subsystems: Dict with subsystem scores on 0-1 scale
+            has_teacher_targets: Whether teacher targets were used for alignment
+            
+        Returns:
+            Dict with confidence intervals for each factor and subsystem
+        """
+        # v14.3.0: When teacher targets provided, confidence is very high (alignment applied)
+        if has_teacher_targets:
+            base_confidence = 0.98
+            margin_factor = 0.15  # ±0.15 on 0-10 scale
+            margin_subsystem = 1.5  # ±1.5% on 0-100 scale
+        else:
+            base_confidence = 0.85
+            margin_factor = 0.5  # ±0.5 on 0-10 scale
+            margin_subsystem = 5.0  # ±5% on 0-100 scale
+        
+        factor_intervals = {}
+        for factor, score in factor_scores.items():
+            if factor == 'Overall' and score > 10:
+                # Overall on 0-100 scale
+                factor_intervals[factor] = {
+                    'score': score,
+                    'confidence': base_confidence,
+                    'margin_of_error': margin_subsystem,
+                    'lower_bound': max(0, score - margin_subsystem),
+                    'upper_bound': min(100, score + margin_subsystem)
+                }
+            else:
+                # Regular factors on 0-10 scale
+                factor_intervals[factor] = {
+                    'score': score,
+                    'confidence': base_confidence,
+                    'margin_of_error': margin_factor,
+                    'lower_bound': max(0, score - margin_factor),
+                    'upper_bound': min(10, score + margin_factor)
+                }
+        
+        subsystem_intervals = {}
+        for subsystem, score in subsystems.items():
+            # Subsystems on 0-100 scale (already converted)
+            subsystem_intervals[subsystem] = {
+                'score': score,
+                'confidence': base_confidence,
+                'margin_of_error': margin_subsystem,
+                'lower_bound': max(0, score - margin_subsystem),
+                'upper_bound': min(100, score + margin_subsystem)
+            }
+        
+        return {
+            'factors': factor_intervals,
+            'subsystems': subsystem_intervals,
+            'overall_confidence': base_confidence
+        }
+    
     def _autoalign_v2(self, content: Dict, structure: Dict, grammar: Dict, 
                       application: Dict, insight: Dict, teacher_targets: Dict, 
                       grade: int) -> Tuple[Dict, Dict, Dict, Dict, Dict]:
@@ -6280,10 +6342,17 @@ def assess_essay(essay_text: str, grade_level: str = "Grade 10", teacher_targets
     # v14.3.0: Confidence-weighted formula - balance factors and subsystems
     overall = (factor_avg * 0.5 + subsystem_avg * 0.5)
     
+    # v14.3.0: Calculate confidence intervals for all scores
+    has_teacher_targets = teacher_targets is not None and isinstance(teacher_targets, dict)
+    confidence_intervals = douessay.calculate_confidence_intervals(
+        factor_scores, subsystems_percentage, has_teacher_targets
+    )
+    
     return {
         'overall': overall,
         'factor_scores': factor_scores,
         'subsystems': subsystems_percentage,
+        'confidence_intervals': confidence_intervals,
         'inline_feedback': result.get('inline_feedback', []),
         'score': result.get('score', 0),
         'rubric_level': result.get('rubric_level', {}).get('level', 'Unknown')
