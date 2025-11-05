@@ -6152,7 +6152,14 @@ def assess_essay(essay_text: str, grade_level: str = "Grade 10", teacher_targets
     
     # v14.2.0: Apply AutoAlign v2 if teacher targets provided
     if teacher_targets:
-        grade_num = int(grade_level) if isinstance(grade_level, int) or grade_level.isdigit() else int(grade_level.split()[-1])
+        # Parse grade number safely
+        if isinstance(grade_level, int):
+            grade_num = grade_level
+        elif isinstance(grade_level, str) and grade_level.isdigit():
+            grade_num = int(grade_level)
+        else:
+            grade_num = int(grade_level.split()[-1])
+        
         content_dict, structure_dict, grammar_dict, application_dict, insight_dict = douessay._autoalign_v2(
             content_dict, structure_dict, grammar_dict, application_dict, insight_dict,
             teacher_targets, grade_num
@@ -6209,14 +6216,14 @@ def assess_essay(essay_text: str, grade_level: str = "Grade 10", teacher_targets
         'Structura': structura_score
     }
     
-    # v14.2.0: Build factor_scores dict from calibrated scores
+    # v14.2.0: Build factor_scores dict from calibrated scores (0-10 scale)
     factor_scores = {
         'Content': content_score,
         'Structure': structure_score,
         'Grammar': grammar_score,
         'Application': application_score,
         'Insight': insight_score,
-        'Overall': (content_score + structure_score + grammar_score + application_score + insight_score) / 5 * 10
+        'Overall': (content_score + structure_score + grammar_score + application_score + insight_score) / 5  # Average on 0-10 scale
     }
     
     # v14.2.0: Convert subsystems to percentages (0-100 scale)
@@ -6229,9 +6236,9 @@ def assess_essay(essay_text: str, grade_level: str = "Grade 10", teacher_targets
     }
     
     # v14.2.0: Calculate overall accuracy with ≥99% target
-    # Weighted average of factor scores and subsystems
-    factor_avg = sum([content_score, structure_score, grammar_score, application_score, insight_score]) / 50.0  # normalize to 0-1
-    subsystem_avg = sum(subsystems.values()) / len(subsystems)
+    # Weighted average of factor scores (0-10 scale) and subsystems (0-1 scale)
+    factor_avg = sum([content_score, structure_score, grammar_score, application_score, insight_score]) / 50.0  # normalize to 0-1 (divide by 5 factors * 10 max)
+    subsystem_avg = sum(subsystems.values()) / len(subsystems)  # already 0-1 scale
     # v14.2.0: Perfect-Accuracy formula - favor both factors and subsystems
     overall = min(1.0, (factor_avg * 0.40 + subsystem_avg * 0.60))
     

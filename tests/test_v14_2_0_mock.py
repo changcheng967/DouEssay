@@ -133,7 +133,7 @@ def test_factor_scores_output():
         'Grammar': 9.4,
         'Application': 9.2,
         'Insight': 9.1,
-        'Overall': (9.5 + 9.3 + 9.4 + 9.2 + 9.1) / 5 * 10
+        'Overall': (9.5 + 9.3 + 9.4 + 9.2 + 9.1) / 5  # Average on 0-10 scale
     }
     
     print(f"  Factor scores: {factor_scores}")

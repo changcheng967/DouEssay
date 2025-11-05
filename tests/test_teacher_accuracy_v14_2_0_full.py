@@ -5,9 +5,11 @@ from app import assess_essay
 THRESHOLD = 99.0  # Minimum accuracy target
 
 def accuracy(pred, ref):
+    """Calculate accuracy percentage for predicted vs reference scores"""
     total = 0
     for key in ref:
-        total += 100 - abs(pred[key] - ref[key]) * 10
+        # Clamp to 0-100 range to avoid negative accuracies
+        total += max(0, 100 - abs(pred[key] - ref[key]) * 10)
     return total / len(ref)
 
 with open("tests/teacher_dataset_v14_2_0.json") as f:
