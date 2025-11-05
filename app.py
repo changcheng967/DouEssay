@@ -1,7 +1,7 @@
 import gradio as gr
 import re
 import language_tool_python
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Union
 import random
 import nltk
 import sys
@@ -2570,7 +2570,7 @@ class DouEssay:
         
         return recommendations
     
-    def apply_teacher_network_calibration(self, score: float, grade_level, 
+    def apply_teacher_network_calibration(self, score: float, grade_level: Union[str, int], 
                                          essay_features: Dict) -> Dict:
         """
         v11.0.0: Apply teacher network calibration for enhanced accuracy.
@@ -3336,7 +3336,7 @@ class DouEssay:
             'total_evidence': total_evidence
         }
     
-    def calibrate_factor_scores_v14_1(self, essay_text: str, grade_level, 
+    def calibrate_factor_scores_v14_1(self, essay_text: str, grade_level: Union[str, int], 
                                        content: Dict, structure: Dict, grammar: Dict, 
                                        application: Dict, insight: Dict,
                                        counter_argument_eval: Dict, paragraph_structure_v12: Dict,
@@ -3530,7 +3530,7 @@ class DouEssay:
         
         Args:
             factor_scores: Dict with factor scores on 0-10 scale
-            subsystems: Dict with subsystem scores on 0-1 scale
+            subsystems: Dict with subsystem scores on 0-100 percentage scale
             has_teacher_targets: Whether teacher targets were used for alignment
             
         Returns:
@@ -6299,22 +6299,13 @@ def assess_essay(essay_text: str, grade_level: str = "Grade 10", teacher_targets
     # Calculate Overall as average of factors, matching teacher target scale
     factor_overall_avg = (content_score + structure_score + grammar_score + application_score + insight_score) / 5
     
-    # v14.3.0: If teacher targets provided with 'Overall' on 0-100 scale, align it
+    # v14.3.0: If teacher targets provided with 'Overall', align it directly
     if teacher_targets and 'scores' in teacher_targets and 'Overall' in teacher_targets['scores']:
-        target_overall = teacher_targets['scores']['Overall']
-        # If target is on 0-100 scale (>10), use it directly; otherwise convert
-        if target_overall > 10:
-            factor_overall = target_overall
-        else:
-            factor_overall = target_overall
+        factor_overall = teacher_targets['scores']['Overall']
     elif teacher_targets and 'Overall' in teacher_targets:
-        target_overall = teacher_targets['Overall']
-        if target_overall > 10:
-            factor_overall = target_overall
-        else:
-            factor_overall = target_overall
+        factor_overall = teacher_targets['Overall']
     else:
-        # Default: use 0-10 scale average
+        # Default: use 0-10 scale average when no teacher targets
         factor_overall = factor_overall_avg
     
     factor_scores = {
