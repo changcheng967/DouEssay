@@ -5871,6 +5871,19 @@ def assess_essay(essay_text: str, grade_level: str = "Grade 10") -> Dict:
     douessay = DouEssay()
     result = douessay.grade_essay(essay_text, grade_level)
     
+    # v14.0.0: Scoring boost constants for ≥97% subsystem accuracy
+    ARGUS_BOOST = 0.125  # 12.5% boost for counter-argument detection
+    NEXUS_BOOST = 0.25   # 25% boost for logical flow & evidence
+    DEPTHCORE_BOOST = 0.08  # 8% boost for evidence depth
+    EMPATHICA_BOOST = 0.25  # 25% boost for emotional engagement
+    STRUCTURA_BOOST = 0.15  # 15% boost for paragraph structure
+    
+    # Default values for missing analysis components
+    DEFAULT_ENGAGEMENT_LEVEL = 50  # Mid-range engagement when not detected
+    DEFAULT_EMPATHICA_FALLBACK = 0.3  # Fallback emotional score
+    DEFAULT_PARA_SCORE = 5  # Mid-range paragraph quality
+    DEFAULT_STRUCTURA_FALLBACK = 0.3  # Fallback structure score
+    
     # v14.0.0: Enhanced subsystem scoring to achieve ≥97% accuracy
     # Extract detailed scores from various analysis components
     content_score = result.get('detailed_analysis', {}).get('content', {}).get('score', 0)
@@ -5887,31 +5900,31 @@ def assess_essay(essay_text: str, grade_level: str = "Grade 10") -> Dict:
     # Base: counter-argument detection + sophistication
     argus_base = content_score / 10.0
     counter_bonus = counter_arg.get('depth_score', 0) * 0.25 if counter_arg else 0
-    argus_score = min(1.0, argus_base + counter_bonus + 0.125)  # +12.5% boost for v14.0.0
+    argus_score = min(1.0, argus_base + counter_bonus + ARGUS_BOOST)
     
     # v14.0.0: Nexus (Logical Flow & Evidence) - Significantly boosted scoring
     # Base: structure score + evidence relevance + claim-evidence ratio
     nexus_base = structure_score / 10.0
     evidence_bonus = claim_evidence.get('relevance_score', 0.8) * 0.30 if claim_evidence else 0.20
-    nexus_score = min(1.0, nexus_base + evidence_bonus + 0.25)  # +25% boost for v14.0.0
+    nexus_score = min(1.0, nexus_base + evidence_bonus + NEXUS_BOOST)
     
     # v14.0.0: DepthCore (Evidence Depth & Relevance) - Boosted scoring
     # Base: content score + evidence integration
     depthcore_base = content_score / 10.0
     depth_bonus = claim_evidence.get('evidence_score', 0.7) * 0.20 if claim_evidence else 0.10
-    depthcore_score = min(1.0, depthcore_base + depth_bonus + 0.08)  # +8% boost for v14.0.0
+    depthcore_score = min(1.0, depthcore_base + depth_bonus + DEPTHCORE_BOOST)
     
     # v14.0.0: Empathica (Emotional Tone & Engagement) - Significantly boosted scoring
     # Base: application score + emotional analysis + engagement
     empathica_base = application_score / 10.0
-    emotion_bonus = emotionflow.get('engagement_level', 50) / 100.0 if emotionflow else 0.3  # Normalize from 0-100 to 0-1
-    empathica_score = min(1.0, empathica_base + emotion_bonus + 0.25)  # +25% boost for v14.0.0
+    emotion_bonus = emotionflow.get('engagement_level', DEFAULT_ENGAGEMENT_LEVEL) / 100.0 if emotionflow else DEFAULT_EMPATHICA_FALLBACK
+    empathica_score = min(1.0, empathica_base + emotion_bonus + EMPATHICA_BOOST)
     
     # v14.0.0: Structura (Paragraph & Rhetorical Structure) - Boosted scoring
     # Base: structure score + paragraph quality
     structura_base = structure_score / 10.0
-    para_bonus = paragraph_struct.get('structure_score', 5) / 10.0 if paragraph_struct else 0.3  # Normalize from 0-10 to 0-1
-    structura_score = min(1.0, structura_base + para_bonus + 0.15)  # +15% boost for v14.0.0
+    para_bonus = paragraph_struct.get('structure_score', DEFAULT_PARA_SCORE) / 10.0 if paragraph_struct else DEFAULT_STRUCTURA_FALLBACK
+    structura_score = min(1.0, structura_base + para_bonus + STRUCTURA_BOOST)
     
     subsystems = {
         'Argus': argus_score,
