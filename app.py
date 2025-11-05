@@ -3355,28 +3355,41 @@ class DouEssay:
         analysis_quality = content.get('analysis_quality', 0)
         thesis_quality = content.get('thesis_quality', 0)
         
-        # Boost based on essay quality indicators
+        # More conservative boost to avoid overshooting
         content_boost = 0
-        if example_count >= 2: content_boost += 0.8
-        if analysis_quality >= 0.6: content_boost += 1.0
-        if thesis_quality >= 0.7: content_boost += 0.7
-        if word_count >= 150: content_boost += 0.5  # Comprehensive essays
+        if example_count >= 3: content_boost += 0.8
+        elif example_count >= 2: content_boost += 0.5
+        if analysis_quality >= 0.7: content_boost += 0.8
+        elif analysis_quality >= 0.5: content_boost += 0.5
+        if thesis_quality >= 0.8: content_boost += 0.6
+        elif thesis_quality >= 0.6: content_boost += 0.3
+        if word_count >= 200: content_boost += 0.4
+        elif word_count >= 150: content_boost += 0.2
         
-        content['score'] = min(10, content_base + content_boost)
+        # Cap at 9.8 to avoid overshooting (teachers rarely give perfect 10s)
+        content['score'] = min(9.8, content_base + content_boost)
         
         # Structure calibration: Boost for organization and transitions
         structure_base = structure.get('score', 0)
         has_intro = structure.get('has_introduction', False)
         has_conclusion = structure.get('has_conclusion', False)
         transition_score = structure.get('transition_analysis', {}).get('score', 0)
+        coherence_score = structure.get('coherence_score', 0)
         
+        # More measured boost
         structure_boost = 0
-        if has_intro: structure_boost += 1.0
-        if has_conclusion: structure_boost += 1.0
-        if transition_score >= 0.5: structure_boost += 1.5
-        if len(paragraphs) >= 3: structure_boost += 0.5
+        if has_intro: structure_boost += 0.8
+        if has_conclusion: structure_boost += 0.8
+        if transition_score >= 0.7: structure_boost += 1.2
+        elif transition_score >= 0.5: structure_boost += 0.8
+        elif transition_score >= 0.3: structure_boost += 0.4
+        if coherence_score >= 0.8: structure_boost += 0.6
+        elif coherence_score >= 0.6: structure_boost += 0.3
+        if len(paragraphs) >= 4: structure_boost += 0.4
+        elif len(paragraphs) >= 3: structure_boost += 0.2
         
-        structure['score'] = min(10, structure_base + structure_boost)
+        # Cap at 9.8 to avoid overshooting
+        structure['score'] = min(9.8, structure_base + structure_boost)
         
         # Grammar calibration: Penalize only significant errors
         error_count = grammar.get('error_count', 0)
@@ -3418,9 +3431,11 @@ class DouEssay:
         if realworld_indicators >= 3: app_quality_score += 1.5
         elif realworld_indicators >= 1: app_quality_score += 0.5
         
-        # Set target score (8.0-9.5 for good essays, less for weaker ones)
-        if app_quality_score >= 7: application['score'] = min(9.5, 7.5 + app_quality_score * 0.3)
-        elif app_quality_score >= 4: application['score'] = min(9.0, 7.0 + app_quality_score * 0.4)
+        # Set target score (7.5-9.5 range for most essays)
+        # More conservative to avoid overshooting
+        if app_quality_score >= 8: application['score'] = min(9.5, 7.8 + app_quality_score * 0.25)
+        elif app_quality_score >= 5: application['score'] = min(9.0, 7.2 + app_quality_score * 0.35)
+        elif app_quality_score >= 3: application['score'] = min(8.5, 6.8 + app_quality_score * 0.4)
         else: application['score'] = min(8.0, max(application_base, 6.0 + app_quality_score * 0.5))
         
         # Smart Insight calibration: Target-based scoring
@@ -3458,14 +3473,33 @@ class DouEssay:
         else: insight['score'] = min(8.5, max(insight_base, 6.5 + insight_quality_score * 0.5))
         
         # Grade-level adjustments: Higher expectations for senior grades
-        if grade_num >= 11:
-            # Senior grades need higher sophistication
-            if content['score'] < 8.5 and example_count >= 2: content['score'] += 0.5
-            if insight['score'] < 8.5 and insight_reflection_depth >= 4: insight['score'] += 0.5
+        if grade_num >= 12:
+            # Grade 12: Academic sophistication IS insight - doesn't require personal voice
+            if content['score'] >= 9.5 and word_count >= 180:
+                # Highly sophisticated Grade 12 essays demonstrate insight through analysis
+                insight['score'] = max(insight['score'], 9.3)
+            elif content['score'] >= 9.0:
+                insight['score'] = max(insight['score'], 8.8)
+            if analytical_markers >= 6:
+                # Very analytical essays show deep thinking
+                insight['score'] = max(insight['score'], 9.2)
+            if thinking_markers >= 5:
+                insight['score'] = max(insight['score'], 8.9)
+        elif grade_num >= 11:
+            # Grade 11: Strong analysis counts as insight
+            if content['score'] >= 9.0:
+                if insight['score'] < 8.5: insight['score'] = max(insight['score'], 8.5)
+            if analytical_markers >= 5:
+                insight['score'] = max(insight['score'], 8.8)
+            if example_count >= 3 and analysis_quality >= 0.6:
+                content['score'] = min(9.8, content['score'] + 0.3)
         elif grade_num <= 8:
-            # Junior grades get slight boost for good fundamentals
-            if content['score'] >= 7.5: content['score'] += 0.3
-            if structure['score'] >= 7.5: structure['score'] += 0.3
+            # Junior grades: Lower ceiling on Content, boost Structure more
+            # Cap content at 9.5 for junior grades (teachers rarely give 10/10 to Grade 7-8)
+            if content['score'] > 9.5: content['score'] = 9.5
+            # Boost structure more for organized junior essays
+            if structure['score'] >= 7.0: structure['score'] += 0.8
+            elif structure['score'] >= 6.5: structure['score'] += 0.5
         
         return content, structure, grammar, application, insight
 
