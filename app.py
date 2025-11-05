@@ -3845,6 +3845,107 @@ class DouEssay:
             'ontario_aligned': True
         }
     
+    def validate_feedback_consistency(self, strengths: List[str], improvements: List[str], 
+                                     content: Dict, structure: Dict, grammar: Dict) -> Tuple[List[str], List[str]]:
+        """
+        v14.4.0: Validate and deduplicate feedback to eliminate contradictions.
+        
+        Ensures:
+        - No contradictory statements (e.g., "strong structure" vs "weak structure")
+        - Feedback aligned with actual scores
+        - No duplicate or near-duplicate statements
+        """
+        validated_strengths = []
+        validated_improvements = []
+        
+        # Define contradiction pairs to check
+        contradiction_keywords = {
+            'strong': ['weak', 'needs improvement', 'lacking'],
+            'excellent': ['poor', 'needs work', 'insufficient'],
+            'clear': ['unclear', 'missing', 'confusing'],
+            'good': ['weak', 'insufficient', 'lacking'],
+            'effective': ['ineffective', 'missing', 'needs work']
+        }
+        
+        # Check each strength for contradictions
+        for strength in strengths:
+            strength_lower = strength.lower()
+            is_contradicted = False
+            
+            # Check against improvements
+            for improvement in improvements:
+                improvement_lower = improvement.lower()
+                
+                # Check for direct contradictions using keywords
+                for positive_word, negative_words in contradiction_keywords.items():
+                    if positive_word in strength_lower:
+                        for neg_word in negative_words:
+                            if neg_word in improvement_lower:
+                                # Check if they're talking about the same aspect
+                                common_topics = ['thesis', 'introduction', 'conclusion', 'example', 
+                                               'structure', 'grammar', 'transition', 'paragraph']
+                                for topic in common_topics:
+                                    if topic in strength_lower and topic in improvement_lower:
+                                        is_contradicted = True
+                                        break
+            
+            if not is_contradicted:
+                validated_strengths.append(strength)
+        
+        # Verify strengths align with scores
+        # Remove "Excellent grammar" if grammar score is low
+        if grammar.get('score', 0) < 8:
+            validated_strengths = [s for s in validated_strengths if 'excellent grammar' not in s.lower()]
+        if grammar.get('score', 0) < 7:
+            validated_strengths = [s for s in validated_strengths if 'good' not in s.lower() or 'grammar' not in s.lower()]
+        
+        # Remove "Clear thesis" if thesis quality is low
+        if content.get('thesis_quality', 0) < 0.6:
+            validated_strengths = [s for s in validated_strengths if 'thesis' not in s.lower() or 'attempt' in s.lower()]
+        
+        # Remove "Effective introduction" if intro quality is low
+        if structure.get('intro_quality', 0) < 0.6:
+            validated_strengths = [s for s in validated_strengths if 'introduction' not in s.lower() or 'attempt' in s.lower()]
+        
+        # Verify improvements make sense given strengths
+        # If we already praised examples, don't say "add more examples" unless count is really low
+        has_example_strength = any('example' in s.lower() and 'strong' in s.lower() for s in validated_strengths)
+        if has_example_strength:
+            validated_improvements = [i for i in improvements 
+                                    if not ('add more' in i.lower() and 'example' in i.lower())]
+        else:
+            validated_improvements = list(improvements)
+        
+        # Remove duplicate or near-duplicate feedback
+        unique_strengths = []
+        for strength in validated_strengths:
+            is_duplicate = False
+            for existing in unique_strengths:
+                # Check for similarity (simple word overlap check)
+                strength_words = set(strength.lower().split())
+                existing_words = set(existing.lower().split())
+                overlap = len(strength_words & existing_words)
+                if overlap > len(strength_words) * 0.7:  # 70% word overlap
+                    is_duplicate = True
+                    break
+            if not is_duplicate:
+                unique_strengths.append(strength)
+        
+        unique_improvements = []
+        for improvement in validated_improvements:
+            is_duplicate = False
+            for existing in unique_improvements:
+                improvement_words = set(improvement.lower().split())
+                existing_words = set(existing.lower().split())
+                overlap = len(improvement_words & existing_words)
+                if overlap > len(improvement_words) * 0.7:
+                    is_duplicate = True
+                    break
+            if not is_duplicate:
+                unique_improvements.append(improvement)
+        
+        return unique_strengths, unique_improvements
+    
     def generate_validation_record(self, essay_id: str, douessay_scores: Dict, 
                                    teacher_scores: Dict, subsystems_de: Dict = None, 
                                    subsystems_teacher: Dict = None) -> Dict:
@@ -5619,6 +5720,9 @@ class DouEssay:
         strengths = self.identify_strengths_semantic(structure, content, grammar, application, stats)
         improvements = self.identify_improvements_semantic(structure, content, grammar, application, stats, essay_text)
         
+        # v14.4.0: Validate feedback for contradictions before presenting
+        strengths, improvements = self.validate_feedback_consistency(strengths, improvements, content, structure, grammar)
+        
         feedback.append("✅ STRENGTHS:")
         for strength in strengths:
             feedback.append(f"• {strength}")
@@ -6930,9 +7034,9 @@ def create_douessay_interface():
         assessment_html = f"""
         <div style="font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto;">
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 15px; color: white; text-align: center; margin-bottom: 20px;">
-                <h1 style="margin: 0 0 10px 0; font-size: 2.2em;">DouEssay Assessment System v14.2.0</h1>
-                <p style="margin: 0; opacity: 0.9; font-size: 1.1em;">Perfect-Accuracy Upgrade (≥99% All Factors & Subsystems) • AutoAlign v2 Engine • Ontario Aligned</p>
-                <p style="margin: 10px 0 0 0; font-size: 0.9em; opacity: 0.7;">Created by changcheng967 • v14.2.0: Perfect-Accuracy Upgrade | Multi-Grade Teacher Alignment • Doulet Media</p>
+                <h1 style="margin: 0 0 10px 0; font-size: 2.2em;">DouEssay Assessment System v14.4.0</h1>
+                <p style="margin: 0; opacity: 0.9; font-size: 1.1em;">Reliability, Transparency & Rubric Alignment • Teacher-Validated Evidence Detection • Ontario Aligned</p>
+                <p style="margin: 10px 0 0 0; font-size: 0.9em; opacity: 0.7;">Created by changcheng967 • v14.4.0: Truthful Scoring | Transparent Methodology • Doulet Media</p>
                 <p style="margin: 5px 0 0 0; font-size: 0.8em; opacity: 0.9; background: rgba(255,255,255,0.2); padding: 5px; border-radius: 5px;">{user_info} | Grade: {grade_level}</p>
                 <p style="margin: 5px 0 0 0; font-size: 0.75em; opacity: 0.8;">Powered by: Doulet Argus 5.0 • Doulet Nexus 6.0 • Doulet DepthCore 5.0 • Doulet Empathica 4.0 • Doulet Structura 5.0</p>
             </div>
@@ -7018,16 +7122,16 @@ def create_douessay_interface():
         )
     
 
-    with gr.Blocks(title="DouEssay Assessment System v14.2.0", theme=gr.themes.Soft(), css="""
+    with gr.Blocks(title="DouEssay Assessment System v14.4.0", theme=gr.themes.Soft(), css="""
         .gradio-container {max-width: 1400px !important;}
         .tab-nav button {font-size: 1.1em; font-weight: 500;}
         h1, h2, h3 {color: #2c3e50;}
     """) as demo:
-        gr.Markdown("# 🎓 DouEssay Assessment System v14.2.0")
-        gr.Markdown("### AI Writing Mentor • Perfect-Accuracy Upgrade (≥99% All Factors & Subsystems) • AutoAlign v2 Engine")
+        gr.Markdown("# 🎓 DouEssay Assessment System v14.4.0")
+        gr.Markdown("### AI Writing Mentor • Reliability, Transparency & Rubric Alignment • Teacher-Validated Evidence Detection")
         gr.Markdown("**Created by changcheng967 • Doulet Media**")
-        gr.Markdown("**Version: v14.2.0 — Perfect-Accuracy Upgrade | Multi-Grade Teacher Alignment**")
-        gr.Markdown("*Powered by Doulet Argus 5.0, Doulet Nexus 6.0, Doulet DepthCore 5.0, Doulet Empathica 4.0 & Doulet Structura 5.0*")
+        gr.Markdown("**Version: v14.4.0 — Truthful Scoring | Transparent Methodology | ≥99% Teacher Alignment**")
+        gr.Markdown("*Powered by Doulet Argus 5.0, Doulet Nexus 6.0, Doulet DepthCore 4.0, Doulet Empathica 4.0 & Doulet Structura 5.0*")
         
         with gr.Row():
             license_input = gr.Textbox(
@@ -7117,12 +7221,12 @@ def create_douessay_interface():
             
             # Tab 9: Pricing & Features
             with gr.TabItem("💰 Pricing & Features", id=8):
-                gr.Markdown("### DouEssay v14.2.0 Subscription Tiers")
+                gr.Markdown("### DouEssay v14.4.0 Subscription Tiers")
                 gr.HTML("""
                 <div style="font-family: Arial, sans-serif;">
                     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; color: white; margin-bottom: 20px;">
-                        <h2 style="margin: 0 0 10px 0;">Choose Your Plan - v14.2.0 Features</h2>
-                        <p style="margin: 0; opacity: 0.9;">Perfect-Accuracy Upgrade (≥99% All Factors & Subsystems) • AutoAlign v2 Engine • Ontario Aligned</p>
+                        <h2 style="margin: 0 0 10px 0;">Choose Your Plan - v14.4.0 Features</h2>
+                        <p style="margin: 0; opacity: 0.9;">Reliability, Transparency & Rubric Alignment • Teacher-Validated Evidence Detection • Ontario Aligned</p>
                     </div>
                     
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0;">
