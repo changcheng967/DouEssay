@@ -1,0 +1,7 @@
+grade,topic,overall_accuracy,factor_Content,factor_Structure,factor_Grammar,factor_Application,factor_Insight,sub_Argus,sub_Nexus,sub_DepthCore,sub_Empathica,sub_Structura
+7,The Benefits of Team Sports for Youth,0.650,1.000,1.000,1.000,1.000,1.000,0.667,0.000,0.500,0.333,0.000
+8,The Importance of Reading for Personal Growth,0.567,1.000,1.000,1.000,1.000,1.000,0.667,0.000,0.000,0.000,0.000
+9,Impact of Social Media on Teens,0.700,1.000,1.000,1.000,1.000,1.000,0.667,0.000,0.500,0.333,0.500
+10,Climate Change and Individual Responsibility,0.600,1.000,1.000,1.000,1.000,1.000,0.333,0.000,0.000,0.667,0.000
+11,The Ethics of Artificial Intelligence,0.617,1.000,1.000,1.000,1.000,1.000,0.000,0.000,0.500,0.667,0.000
+12,The Future of Work in a Digital Economy,0.617,1.000,1.000,1.000,1.000,1.000,0.000,0.000,0.500,0.667,0.000
