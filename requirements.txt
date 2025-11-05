@@ -9,3 +9,4 @@ accelerate
 python-dotenv
 tiktoken
 sentencepiece
+scikit-learn
