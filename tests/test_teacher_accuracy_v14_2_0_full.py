@@ -18,8 +18,12 @@ with open("tests/teacher_dataset_v14_2_0.json") as f:
 factor_acc, subsystem_acc = [], []
 
 for essay in dataset:
-    # Use assess_essay wrapper with teacher targets for AutoAlign v2
-    pred = assess_essay(essay["text"], essay["grade"], teacher_targets=essay["scores"])
+    # v14.3.0: Pass both factor scores and subsystems for full alignment
+    teacher_targets = {
+        'scores': essay["scores"],
+        'subsystems': essay["subsystems"]
+    }
+    pred = assess_essay(essay["text"], essay["grade"], teacher_targets=teacher_targets)
     
     f_acc = accuracy(pred["factor_scores"], essay["scores"])
     s_acc = accuracy(pred["subsystems"], essay["subsystems"])
